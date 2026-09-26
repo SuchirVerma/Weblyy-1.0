@@ -8,7 +8,7 @@ const STEPS = [
     n: "01",
     title: "Scan",
     time: "~30 sec",
-    body: "We read your site like a customer would: WhatsApp links, forms, emails, booking widgets, price lists, FAQs and timings.",
+    body: "Search by name, website or @instagram. We read it like a customer would: WhatsApp links, forms, emails, booking widgets, prices, FAQs and timings.",
     out: [
       "wa.me link found",
       "Booking form · 4 fields",
@@ -34,8 +34,8 @@ const STEPS = [
     n: "04",
     title: "Deploy",
     time: "one hold",
-    body: "Hold the button and the agent goes live, with an n8n workflow and a Twilio WhatsApp webhook ready to plug in.",
-    out: ["Agent live", "QR for customers", "n8n JSON exported"],
+    body: "Hold the button and the agent goes live. Anything it can't handle lands in the owner's inbox, and the owner's reply goes straight back to the customer.",
+    out: ["Agent live", "Owner inbox + replies", "QR for customers"],
   },
 ];
 

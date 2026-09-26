@@ -37,7 +37,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.head span {
+.head > div span {
   font-size: 0.78rem;
   color: var(--ch-whatsapp);
 }
@@ -91,6 +91,15 @@
   align-self: flex-start;
   background: var(--bubble-in);
   border-radius: 16px 16px 16px 4px;
+}
+.msg[data-who="owner"] {
+  align-self: flex-start;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 16px 16px 16px 4px;
+}
+.msg[data-who="owner"] small {
+  opacity: 0.85;
 }
 .msg[data-who="system"] {
   align-self: center;

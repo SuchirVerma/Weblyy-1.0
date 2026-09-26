@@ -17,8 +17,8 @@ export default function Home() {
               Your website already knows the answers. <span className="em">Why are you still typing them?</span>
             </h1>
             <p className="lede">
-              Paste your website. FlowScout finds every place customers reach you, spots the replies you type again and again, and switches on a
-              WhatsApp agent that answers from your own site. In Hinglish too.
+              Type your business name, website or Instagram. FlowScout finds every place customers reach you, spots the replies you type again and
+              again, and switches on a WhatsApp agent that answers from your own site, in Hinglish too. Anything tricky comes to your inbox.
             </p>
             <ScanBar />
           </div>

@@ -46,6 +46,7 @@ export interface SiteKnowledge {
   mapUrl: string;
   /** Whether a real browser was used (JavaScript content included) */
   rendered: boolean;
+  instagram?: { handle: string; url: string; followers: string; posts: string; bio: string; link: string };
   services: string[];
   /** Trimmed visible text of the crawled pages, for the agent's context */
   text: string;

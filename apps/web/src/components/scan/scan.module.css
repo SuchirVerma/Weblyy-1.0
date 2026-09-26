@@ -976,6 +976,7 @@
 }
 .alert > div {
   display: grid;
+  flex: 1;
   font-size: 0.85rem;
   min-width: 0;
 }
@@ -1118,4 +1119,17 @@
   border: 1px solid var(--line);
   overflow-wrap: anywhere;
   color: var(--muted);
+}
+
+.ownerSection {
+  display: grid;
+  gap: 14px;
+  scroll-margin-top: 90px;
+}
+.ownerHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
 }

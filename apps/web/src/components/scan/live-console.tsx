@@ -3,12 +3,15 @@ import { AnimatePresence, motion } from "motion/react";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
 import type { AgentReply, ScanResult, Workflow } from "@/lib/types";
+import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
 import styles from "./scan.module.css";
 
 export interface Deployment {
   agentId: string;
   chatPath: string;
+  ownerKey: string;
+  ownerPath: string;
   whatsappWebhook: string;
   n8n: unknown;
   n8nResult: { deployed: boolean; note: string };
@@ -32,6 +35,7 @@ const INTENT_LABEL: Record<string, string> = {
   complaint: "Complaint",
   refund: "Refund request",
   medical: "Medical question",
+  owner: "Waiting for the owner",
   greeting: "Greeting",
   other: "Other",
 };
@@ -181,9 +185,15 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
               >
                 <span aria-hidden="true">🔔</span>
                 <div>
-                  <b>Owner alerted on WhatsApp</b>
+                  <b>Owner alerted</b>
                   <span>&ldquo;{alert.text.slice(0, 80)}&rdquo;</span>
                 </div>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => document.getElementById("owner-inbox")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                >
+                  Reply
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -208,7 +218,9 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
                 </div>
                 <div>
                   <dt>Owner needed?</dt>
-                  <dd style={{ color: last.r.escalate ? "var(--warn)" : "var(--ok)" }}>{last.r.escalate ? "Yes, alert sent" : "No, fully handled"}</dd>
+                  <dd style={{ color: last.r.intent === "owner" || last.r.escalate ? "var(--warn)" : "var(--ok)" }}>
+                    {last.r.intent === "owner" ? "Owner is handling this chat" : last.r.escalate ? "Yes, alert sent" : "No, fully handled"}
+                  </dd>
                 </div>
                 <div>
                   <dt>Reply time</dt>
@@ -266,6 +278,24 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
           </div>
         </div>
       </div>
+
+      <section id="owner-inbox" className={styles.ownerSection} aria-label="Owner inbox">
+        <div className={styles.ownerHead}>
+          <p className="muted" style={{ margin: 0, maxWidth: "62ch" }}>
+            Everything customers send lands here. When the agent flags a chat, the owner answers it personally, and the reply shows up in that
+            customer&apos;s chat right away. Replying pauses the agent for that customer until you hand it back.
+          </p>
+          <div className="chips">
+            <a className="btn btn-ghost btn-sm" href={deployment.ownerPath} target="_blank" rel="noreferrer">
+              Open on the owner&apos;s phone
+            </a>
+            <button className="btn btn-ghost btn-sm" onClick={() => copy("owner", `${chatUrl.replace(deployment.chatPath, "")}${deployment.ownerPath}`)} disabled={!chatUrl}>
+              {copied === "owner" ? "Copied ✓" : "Copy owner link"}
+            </button>
+          </div>
+        </div>
+        <OwnerInbox agentId={deployment.agentId} ownerKey={deployment.ownerKey} />
+      </section>
 
       <section className={styles.integrations} aria-labelledby="int-h">
         <h2 id="int-h" className={styles.h2} style={{ fontSize: "1.5rem" }}>

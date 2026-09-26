@@ -4,6 +4,7 @@ Add newest entries at the top.
 
 | Date | What | Status |
 |---|---|---|
+| 2026-09-26 | Search by business name or @instagram; Instagram profile scanning (bio, followers, link in bio); owner inbox with replies delivered to the customer's chat (and WhatsApp via Twilio), agent pause/hand-back; clean light theme | ✅ Done |
 | 2026-09-26 | Real-site mode: headless Chrome rendering, parked-domain detection, cleaner extraction, full site report (download/print), clinic medical-safety workflow, smarter agent (synonyms, FAQ answers, honest "not listed" replies). Tested on 8 real Delhi businesses | ✅ Done |
 | 2026-09-26 | Working prototype in `apps/web`: crawler, scoring, AI + rules agent, deploy, live console, audience chat, Twilio webhook, n8n export | ✅ Done |
 | 2026-09-26 | Repo created with full project spec in `docs/` | ✅ Done |

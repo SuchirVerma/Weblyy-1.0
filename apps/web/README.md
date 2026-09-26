@@ -21,6 +21,20 @@ The results page includes a **site report**: every contact detail, hours, publis
 
 No API keys are needed. Without `AI_API_KEY` the app uses its rules engine for scoring and replies. Add keys in `.env.local` (see `/.env.example` at the repo root).
 
+## What you can type
+
+- **A business name**, like "North Delhi Dental Clinic Model Town". FlowScout searches the web (Brave, then DuckDuckGo, then DuckDuckGo in a real browser; results cached for 6 hours) and lets you pick the right website or Instagram profile. Set `BRAVE_SEARCH_API_KEY` for the official Brave API.
+- **A website**, like `northdelhidentalclinic.com`.
+- **An Instagram handle or link**, like `@naturalssalon`. It reads the public profile (name, followers, bio, contact numbers in the bio), then follows the link in bio to the website if there is one.
+
+## Owner inbox
+
+Every conversation is saved. When the agent flags one (complaint, refund, medical question, anything not on the website), it shows up as **Needs you** in the owner inbox, both in the live console and on a private page for the owner's phone (`/owner/<id>?key=…`, linked from the console). When the owner replies:
+
+- the reply appears in the customer's chat within a couple of seconds, labelled as the owner;
+- the agent pauses for that customer until the owner taps **Hand back to agent**;
+- WhatsApp customers get the reply on WhatsApp if `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_WHATSAPP_FROM` are set.
+
 ## Try it
 
 1. Open the app, click **Try the demo salon** (a fictional salon bundled in `public/demo/kesar/`), or paste any real website.

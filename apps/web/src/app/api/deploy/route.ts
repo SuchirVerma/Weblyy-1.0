@@ -72,6 +72,8 @@ export async function POST(req: Request) {
   return Response.json({
     agentId: agent.id,
     chatPath: `/chat/${agent.id}`,
+    ownerKey: agent.ownerKey,
+    ownerPath: `/owner/${agent.id}?key=${agent.ownerKey}`,
     whatsappWebhook: `${appUrl}/api/whatsapp?agent=${agent.id}`,
     n8n,
     n8nResult,

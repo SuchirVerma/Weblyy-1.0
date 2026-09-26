@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import * as cheerio from "cheerio";
 import { isPublicHost } from "./net";
+import { instagramHandle, LINK_HUBS, NOT_A_WEBSITE, readInstagram } from "./instagram";
 import { renderPage } from "./render";
 import type { BusinessType, FaqItem, FormInfo, PriceItem, SiteKnowledge } from "./types";
 
@@ -502,7 +503,7 @@ function guessName(home: PageData, host: string): string {
 const MAX_RENDERS = 3;
 const PARKED = /\b(is parked|parked free|domain (?:is|may be) for sale|buy this domain|get this domain|this domain is available|hugedomains|sedo domain parking|dan\.com)\b/i;
 
-export async function crawl(input: string, log: Log): Promise<SiteKnowledge> {
+async function crawlSite(input: string, log: Log): Promise<SiteKnowledge> {
   const start = normalizeUrl(input);
   const isDemo = start.hostname === DEMO_HOST;
   log("info", `Opening ${start.hostname}`);
@@ -684,4 +685,87 @@ function dedupeParts(addr: string) {
 const DAYS: Record<string, string> = { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun" };
 function prettyHours(h: string) {
   return h.replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su)\b/g, (d) => DAYS[d]).replace(/,/g, ", ");
+}
+
+/* ----------------------------------------------------------------- entry */
+
+export async function crawl(input: string, log: Log): Promise<SiteKnowledge> {
+  const handle = instagramHandle(input);
+  return handle ? crawlInstagram(handle, log) : crawlSite(input, log);
+}
+
+async function crawlInstagram(handle: string, log: Log): Promise<SiteKnowledge> {
+  log("info", `Opening Instagram profile @${handle}`);
+  const ig = await readInstagram(handle);
+  if (!ig) {
+    throw new CrawlError(
+      `Couldn't open @${handle} on Instagram. The profile may be private or missing, or Instagram asked for a login. Try the business's name or website instead.`,
+    );
+  }
+  log("ok", `Found ${ig.name} (@${handle})${ig.followers ? ` · ${ig.followers} followers` : ""}${ig.posts ? ` · ${ig.posts} posts` : ""}`);
+  if (ig.bio) log("ok", `Bio: ${ig.bio.replace(/\s+/g, " ").slice(0, 90)}`);
+
+  let k: SiteKnowledge | null = null;
+  if (ig.link && !NOT_A_WEBSITE.test(ig.link)) {
+    const host = (() => {
+      try {
+        return new URL(ig.link).hostname;
+      } catch {
+        return ig.link;
+      }
+    })();
+    log("info", LINK_HUBS.test(ig.link) ? `Opening the link page in bio: ${host}` : `Following the website in bio: ${host}`);
+    try {
+      k = await crawlSite(ig.link, log);
+    } catch (e) {
+      log("warn", `Couldn't read the link in bio${e instanceof CrawlError ? ` (${e.message})` : ""}. Using the Instagram profile only.`);
+    }
+  } else if (!ig.link) {
+    log("warn", "No website in the bio, so the scan uses the Instagram profile only.");
+  }
+
+  const bioText = `${ig.name}\n${ig.bio}`;
+  const bioPhones = (ig.bio.match(PHONE_RE) ?? []).map(digitsOnly);
+  const bioEmails = (ig.bio.match(EMAIL_RE) ?? []).map((e) => e.toLowerCase());
+  const linkWa = ig.link ? whatsappNumber(ig.link) : null;
+  const bioHasWa = /whats\s?app|\bwa\b/i.test(ig.bio);
+
+  k ??= {
+    url: ig.url,
+    name: ig.name,
+    description: ig.bio,
+    businessType: detectBusinessType(bioText),
+    pages: [{ url: ig.url, title: `${ig.name} on Instagram` }],
+    prices: [],
+    faqs: [],
+    hours: [],
+    address: "",
+    phones: [],
+    emails: [],
+    whatsapp: [],
+    forms: [],
+    embeds: [],
+    socials: [],
+    socialLinks: [],
+    mapUrl: "",
+    rendered: true,
+    services: [],
+    text: bioText,
+  };
+
+  const last10 = (n: string) => n.replace(/\D/g, "").slice(-10);
+  const addNum = (list: string[], n: string) => {
+    if (n.replace(/\D/g, "").length >= 10 && !list.some((x) => last10(x) === last10(n))) list.push(n);
+  };
+  for (const p of bioPhones) addNum(k.phones, p);
+  if (linkWa && /\d{8,}/.test(linkWa)) addNum(k.whatsapp, linkWa);
+  else if (bioHasWa) for (const p of bioPhones) addNum(k.whatsapp, p);
+  for (const e of bioEmails) if (!k.emails.includes(e)) k.emails.push(e);
+  if (!k.socials.includes("Instagram")) k.socials.unshift("Instagram");
+  if (!k.socialLinks.some((l) => l.name === "Instagram")) k.socialLinks.unshift({ name: "Instagram", url: ig.url });
+  k.description ||= ig.bio;
+  if (k.businessType === "services") k.businessType = detectBusinessType(`${bioText}\n${k.text}`);
+  k.text = `## Instagram @${handle}\n${bioText}\n\n${k.text}`.slice(0, 24000);
+  k.instagram = { handle, url: ig.url, followers: ig.followers, posts: ig.posts, bio: ig.bio, link: ig.link };
+  return k;
 }

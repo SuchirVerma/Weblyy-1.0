@@ -6,7 +6,7 @@ import styles from "./phone-chat.module.css";
 
 interface Bubble {
   id: number;
-  who: "me" | "agent" | "system";
+  who: "me" | "agent" | "owner" | "system";
   text: string;
   meta?: string;
 }
@@ -47,6 +47,52 @@ export function PhoneChat({
   const [typing, setTyping] = useState(false);
   const idRef = useRef(1);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const fromRef = useRef<string | null>(null);
+  const lastOwnerAt = useRef(0);
+  const seenOwner = useRef(new Set<string>());
+  const noted = useRef(false);
+  const [active, setActive] = useState(false);
+
+  const fromId = () => {
+    fromRef.current ??= typeof from === "function" ? from() : (from ?? null);
+    return fromRef.current;
+  };
+
+  // Once the customer has said something, watch for replies from the owner.
+  useEffect(() => {
+    if (!active) return;
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      const id = fromRef.current;
+      if (id) {
+        try {
+          const res = await fetch(`/api/agent/updates?agentId=${agentId}&from=${encodeURIComponent(id)}&after=${lastOwnerAt.current}`, { cache: "no-store" });
+          const d = (await res.json()) as { messages: { id: string; at: number; text: string }[]; ownerHandling: boolean };
+          if (!alive) return;
+          const fresh = d.messages.filter((m) => !seenOwner.current.has(m.id));
+          if (fresh.length) {
+            for (const m of fresh) seenOwner.current.add(m.id);
+            lastOwnerAt.current = Math.max(lastOwnerAt.current, ...fresh.map((m) => m.at));
+            setMsgs((list) => [
+              ...list,
+              ...(noted.current ? [] : [{ id: idRef.current++, who: "system" as const, text: `The owner of ${name} has joined the chat.` }]),
+              ...fresh.map((m) => ({ id: idRef.current++, who: "owner" as const, text: m.text, meta: `Owner · ${new Date(m.at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}` })),
+            ]);
+            noted.current = true;
+          }
+        } catch {
+          /* keep polling */
+        }
+      }
+      if (alive) timer = setTimeout(poll, 2500);
+    };
+    poll();
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [active, agentId, name]);
 
   useEffect(() => {
     const el = bodyRef.current;
@@ -64,11 +110,23 @@ export function PhoneChat({
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ agentId, message, from: typeof from === "function" ? from() : from }),
+        body: JSON.stringify({ agentId, message, from: fromId() ?? undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "The agent didn't answer.");
-      const r = data as AgentReply;
+      const r = data as AgentReply & { ownerHandling?: boolean };
+      if (!active) {
+        lastOwnerAt.current = Date.now() - 1000;
+        setActive(true);
+      }
+      if (r.ownerHandling) {
+        if (!noted.current) {
+          noted.current = true;
+          setMsgs((m) => [...m, { id: idRef.current++, who: "system", text: `The owner of ${name} is replying personally. Their answer will appear here.` }]);
+        }
+        onReply?.(r, Math.round(performance.now() - started), message);
+        return;
+      }
       const ms = Math.round(performance.now() - started);
       const wait = 650 - ms;
       if (wait > 0) await new Promise((res) => setTimeout(res, wait));

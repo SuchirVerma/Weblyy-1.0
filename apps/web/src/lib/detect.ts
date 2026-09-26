@@ -48,12 +48,24 @@ export function detectTouchpoints(k: SiteKnowledge): Touchpoint[] {
   }
   if (k.faqs.length) add({ channel: "web", label: "FAQ section", detail: `${k.faqs.length} questions answered on the site`, page: "/" });
   if (k.hours.length) add({ channel: "web", label: "Opening hours", detail: k.hours[0].slice(0, 60), page: "/" });
-  if (k.socials.length) add({ channel: "social", label: "Social DMs", detail: k.socials.join(", "), page: "/" });
+  if (k.instagram) {
+    add({
+      channel: "social",
+      label: "Instagram DMs",
+      detail: `@${k.instagram.handle}${k.instagram.followers ? ` · ${k.instagram.followers} followers` : ""}`,
+      page: "instagram",
+    });
+  }
+  const others = k.socials.filter((x) => !(k.instagram && x === "Instagram"));
+  if (others.length) add({ channel: "social", label: "Social DMs", detail: others.join(", "), page: "/" });
   return tps;
 }
 
 export function findGaps(k: SiteKnowledge): string[] {
   const gaps: string[] = [];
+  if (k.instagram && k.pages.every((p) => p.url.includes("instagram.com"))) {
+    gaps.push("No website. Customers can only reach you through Instagram DMs or by calling, and every DM needs a human.");
+  }
   const hasChat = k.embeds.some((e) => /chat|widget/i.test(e));
   const hasBookingTool = k.embeds.some((e) => /booking|appointments/i.test(e));
   if (!hasChat) gaps.push("No chat widget or auto-reply found. Every message waits for a human.");

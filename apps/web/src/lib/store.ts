@@ -14,13 +14,35 @@ export interface LogEntry {
   source: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  at: number;
+  role: "customer" | "agent" | "owner";
+  text: string;
+  intent?: string;
+  escalate?: boolean;
+  delivered?: "chat" | "whatsapp" | "whatsapp-failed";
+}
+
+export interface Conversation {
+  from: string;
+  messages: ChatMessage[];
+  /** An escalated message the owner hasn't answered yet */
+  needsOwner: boolean;
+  /** The owner is handling this customer; the agent stays quiet until handed back */
+  ownerHandling: boolean;
+  lastAt: number;
+}
+
 export interface DeployedAgent {
   id: string;
+  ownerKey: string;
   createdAt: number;
   workflowName: string;
   knowledge: SiteKnowledge;
   stats: { messages: number; escalations: number; customers: string[] };
   log: LogEntry[];
+  conversations: Record<string, Conversation>;
 }
 
 const DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
@@ -33,7 +55,11 @@ const agents: Map<string, DeployedAgent> = (g.__flowscoutAgents ??= new Map<stri
 async function load() {
   try {
     const list = JSON.parse(await readFile(FILE, "utf8")) as DeployedAgent[];
-    for (const a of list) if (!agents.has(a.id)) agents.set(a.id, a);
+    for (const a of list) {
+      a.conversations ??= {};
+      a.ownerKey ??= randomBytes(12).toString("hex");
+      if (!agents.has(a.id)) agents.set(a.id, a);
+    }
   } catch {
     /* first run: nothing saved yet */
   }
@@ -71,7 +97,16 @@ export function getScan(id: string) {
 export async function createAgent(knowledge: SiteKnowledge, workflowName: string): Promise<DeployedAgent> {
   await ready();
   const id = randomBytes(5).toString("hex");
-  const agent: DeployedAgent = { id, createdAt: Date.now(), workflowName, knowledge, stats: { messages: 0, escalations: 0, customers: [] }, log: [] };
+  const agent: DeployedAgent = {
+    id,
+    ownerKey: randomBytes(12).toString("hex"),
+    createdAt: Date.now(),
+    workflowName,
+    knowledge,
+    stats: { messages: 0, escalations: 0, customers: [] },
+    log: [],
+    conversations: {},
+  };
   agents.set(id, agent);
   if (agents.size > MAX_AGENTS) {
     const oldest = [...agents.values()].sort((a, b) => a.createdAt - b.createdAt)[0];
@@ -91,7 +126,62 @@ export async function latestAgent() {
   return [...agents.values()].sort((a, b) => b.createdAt - a.createdAt)[0] ?? null;
 }
 
+const MAX_CONVERSATIONS = 200;
+const MAX_MESSAGES = 80;
+const msgId = () => randomBytes(6).toString("hex");
+
+export function conversationFor(agent: DeployedAgent, from: string): Conversation {
+  let c = agent.conversations[from];
+  if (!c) {
+    c = { from, messages: [], needsOwner: false, ownerHandling: false, lastAt: Date.now() };
+    agent.conversations[from] = c;
+    const keys = Object.keys(agent.conversations);
+    if (keys.length > MAX_CONVERSATIONS) {
+      const oldest = keys.sort((a, b) => agent.conversations[a].lastAt - agent.conversations[b].lastAt)[0];
+      delete agent.conversations[oldest];
+    }
+  }
+  return c;
+}
+
+function push(c: Conversation, m: Omit<ChatMessage, "id">) {
+  const full = { ...m, id: msgId() };
+  c.messages.push(full);
+  if (c.messages.length > MAX_MESSAGES) c.messages.splice(0, c.messages.length - MAX_MESSAGES);
+  c.lastAt = m.at;
+  return full;
+}
+
+/** A customer message that the agent did not answer because the owner is handling the chat. */
+export function recordCustomerOnly(agent: DeployedAgent, from: string, text: string) {
+  const c = conversationFor(agent, from);
+  push(c, { at: Date.now(), role: "customer", text });
+  c.needsOwner = true;
+  if (!agent.stats.customers.includes(from)) agent.stats.customers.push(from);
+  persist();
+}
+
+export function recordOwnerReply(agent: DeployedAgent, to: string, text: string, delivered: ChatMessage["delivered"]) {
+  const c = conversationFor(agent, to);
+  const m = push(c, { at: Date.now(), role: "owner", text, delivered });
+  c.needsOwner = false;
+  c.ownerHandling = true;
+  persist();
+  return m;
+}
+
+export function setOwnerHandling(agent: DeployedAgent, from: string, handling: boolean) {
+  const c = conversationFor(agent, from);
+  c.ownerHandling = handling;
+  if (!handling) c.needsOwner = false;
+  persist();
+}
+
 export function recordMessage(agent: DeployedAgent, entry: LogEntry) {
+  const c = conversationFor(agent, entry.from);
+  push(c, { at: entry.at, role: "customer", text: entry.text });
+  if (entry.reply) push(c, { at: entry.at + 1, role: "agent", text: entry.reply, intent: entry.intent, escalate: entry.escalate });
+  if (entry.escalate) c.needsOwner = true;
   agent.stats.messages += 1;
   if (entry.escalate) agent.stats.escalations += 1;
   if (!agent.stats.customers.includes(entry.from)) agent.stats.customers.push(entry.from);
@@ -101,11 +191,7 @@ export function recordMessage(agent: DeployedAgent, entry: LogEntry) {
 }
 
 export function historyFor(agent: DeployedAgent, from: string): ChatTurn[] {
-  return agent.log
-    .filter((l) => l.from === from)
-    .slice(-5)
-    .flatMap((l) => [
-      { role: "customer" as const, text: l.text },
-      { role: "agent" as const, text: l.reply },
-    ]);
+  const c = agent.conversations[from];
+  if (!c) return [];
+  return c.messages.slice(-10).map((m) => ({ role: m.role === "customer" ? ("customer" as const) : ("agent" as const), text: m.text }));
 }

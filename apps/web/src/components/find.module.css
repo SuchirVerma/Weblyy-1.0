@@ -1,0 +1,117 @@
+.find {
+  display: grid;
+  gap: 28px;
+  padding-top: 40px;
+  padding-bottom: 100px;
+}
+.head {
+  display: grid;
+  gap: 12px;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+@media (max-width: 520px) {
+  .list {
+    grid-template-columns: 1fr;
+  }
+}
+.item {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+.item[data-kind="directory"],
+.item[data-kind="social"] {
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  box-shadow: none;
+}
+.item p {
+  margin: 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+.meta .mono {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kind {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--tone);
+  border: 1px solid color-mix(in oklab, var(--tone) 35%, transparent);
+  background: color-mix(in oklab, var(--tone) 8%, transparent);
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.12rem;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.note {
+  color: var(--warn) !important;
+  font-size: 0.8rem !important;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+.visit {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.skeleton {
+  height: 170px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: linear-gradient(100deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+.item[data-best] {
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
+  box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow);
+}
+.best {
+  margin-left: auto;
+  flex: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+}
