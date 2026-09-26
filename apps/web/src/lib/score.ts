@@ -54,7 +54,8 @@ const PRICE_ASK: Record<BusinessType, string> = {
 
 function templates(t: BusinessType, k: SiteKnowledge): Template[] {
   const n = noun[t];
-  const priceAsk = k.prices[0] ? `${k.prices[0].name} kitne ka hai?` : PRICE_ASK[t];
+  const shortest = [...k.prices.slice(0, 8)].sort((a, b) => a.name.length - b.name.length)[0];
+  const priceAsk = shortest ? `${shortest.name.replace(/\s*\(.*?\)\s*/g, " ").trim()} kitne ka hai?` : PRICE_ASK[t];
   return [
     {
       key: "price",
@@ -135,6 +136,20 @@ function templates(t: BusinessType, k: SiteKnowledge): Template[] {
       data: (k) => (k.embeds.includes("Google Maps") ? 0.8 : 0.6),
       agentSteps: ["Wait until the visit is done", "Ask how it went", "If happy, share the review link. If not, alert the owner."],
       guardrails: ["Never ask an unhappy customer for a review", "Owner approves the message wording"],
+    },
+    {
+      key: "medical",
+      name: "Symptoms & treatment advice",
+      channel: "whatsapp",
+      trigger: "Daant mein bahut dard hai, kya karu?",
+      description: "Patients describe symptoms and ask what to do. Only a doctor should answer; the agent books a consultation and alerts the clinic.",
+      share: 0.08,
+      repetitiveness: 0.4,
+      risk: 0.85,
+      data: () => 0.3,
+      agentSteps: ["Recognise a symptom or medical question", "Never give medical advice", "Offer the earliest consultation slot", "Alert the clinic immediately if it sounds urgent"],
+      guardrails: ["No diagnosis, no medicine names, no dosage", "Urgent symptoms always go to a doctor"],
+      when: (_k, type) => type === "clinic",
     },
     {
       key: "complaints",

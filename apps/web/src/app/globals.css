@@ -479,3 +479,26 @@ body.paused *::after {
     transform: none;
   }
 }
+
+@media print {
+  :root {
+    --bg: #fff;
+    --bg-2: #fff;
+    --surface: #fff;
+    --surface-2: #f1f1f4;
+    --line: #d9dbe3;
+    --line-strong: #b9bccb;
+    --text: #12141c;
+    --muted: #444857;
+    --faint: #6a6f80;
+  }
+  .nav,
+  .env,
+  .skip {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #12141c;
+  }
+}

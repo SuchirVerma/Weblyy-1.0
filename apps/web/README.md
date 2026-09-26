@@ -15,6 +15,10 @@ For a faster run, use the production build (faster, and phones on the same Wi-Fi
 npm run build && npm start
 ```
 
+**Real websites:** the scanner reads the site's HTML, then opens it in the Chrome installed on this machine (headless) to catch JavaScript-built pages, injected WhatsApp buttons and chat widgets, and sites that block simple bots. No Chrome? It still works on plain HTML. Set `CHROME_PATH` to use a different Chrome/Chromium, or `DISABLE_BROWSER=1` to turn this off.
+
+The results page includes a **site report**: every contact detail, hours, published prices, FAQs, tools and forms found, what's missing, and the pages read. Download it as Markdown or print it to PDF.
+
 No API keys are needed. Without `AI_API_KEY` the app uses its rules engine for scoring and replies. Add keys in `.env.local` (see `/.env.example` at the repo root).
 
 ## Try it

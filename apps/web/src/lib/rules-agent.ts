@@ -12,17 +12,50 @@ const PATTERNS: [AgentReply["intent"], RegExp][] = [
   ["greeting", /^(hi+|hello|hey|namaste|namaskar|good (morning|evening|afternoon)|hlo|helo)\b[\s!.]*$/i],
 ];
 
+const MEDICAL = /pain|dard|swell|sujan|bleed|khoon|fever|bukhar|symptom|ache|infection|dawai|dawa|medicine|tablet|dose|prescri|emergency|urgent|broken tooth|toot gaya|allerg/i;
+
 const STOP = new Set(
   "the a an is are for of to in on and or me my you your i we what how much price cost rate kitna kitne kitni ka ki ke hai hain kya do does can please pls plz bhai ji aap mujhe batao bata ye yeh wo is it charge charges".split(" "),
 );
 
-const tokens = (s: string) =>
-  s
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length > 1 && !STOP.has(w))
-    .map((w) => w.replace(/(ing|es|s)$/, ""));
+const SYNONYMS: Record<string, string[]> = {
+  rct: ["root", "canal", "treatment"],
+  dard: ["pain"],
+  daant: ["tooth", "teeth", "dental"],
+  teeth: ["tooth"],
+  baal: ["hair"],
+  chehra: ["face", "facial"],
+  fee: ["cost", "price"],
+  fees: ["cost", "price"],
+  charges: ["cost", "price"],
+  rate: ["cost", "price"],
+  kitna: ["cost", "price"],
+  kitne: ["cost", "price"],
+  timing: ["hour", "open"],
+  timings: ["hour", "open"],
+  parking: ["park"],
+  ac: ["air", "condition"],
+  appointment: ["book", "booking"],
+  hurt: ["pain"],
+  painful: ["pain"],
+  bridal: ["bride"],
+  shaadi: ["bride", "wedding"],
+  ghar: ["home"],
+};
+
+const GENERIC = new Set(["cost", "price", "much", "kya", "service", "treatment", "list", "all", "your", "rate", "charge"]);
+
+const stem = (w: string) => w.replace(/(ful|ing)$/, "").replace(/([^s])s$/, "$1");
+
+export const tokens = (s: string) => {
+  const out: string[] = [];
+  for (const w of s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/)) {
+    if (w.length < 2) continue;
+    for (const syn of SYNONYMS[w] ?? []) out.push(stem(syn));
+    if (!STOP.has(w)) out.push(stem(w));
+  }
+  return [...new Set(out)];
+};
 
 function matchPrices(msg: string, prices: PriceItem[]): PriceItem[] {
   const q = new Set(tokens(msg));
@@ -40,13 +73,13 @@ function matchPrices(msg: string, prices: PriceItem[]): PriceItem[] {
     .map((x) => x.p);
 }
 
-function matchFaq(msg: string, k: SiteKnowledge) {
+function matchFaq(msg: string, k: SiteKnowledge, min = 0.34) {
   const q = new Set(tokens(msg));
   let best: { a: string; s: number } | null = null;
   for (const f of k.faqs) {
     const t = tokens(f.q);
     const s = t.filter((w) => q.has(w)).length / Math.max(1, t.length);
-    if (s >= 0.34 && (!best || s > best.s)) best = { a: f.a, s };
+    if (s >= min && (!best || s > best.s)) best = { a: f.a, s };
   }
   return best?.a ?? null;
 }
@@ -59,9 +92,17 @@ function when(msg: string): string {
 
 export function rulesReply(k: SiteKnowledge, message: string): AgentReply {
   const hi = HINGLISH.test(message);
-  const intent = PATTERNS.find(([, re]) => re.test(message))?.[0] ?? "other";
+  const medical = k.businessType === "clinic" && MEDICAL.test(message);
+  const hoursQ = /\b(open|opening|close|closed|khul|khula|khule|band|timing|timings|kab tak|kab se|holiday|chutti)\b/i.test(message) && !/\bbook|appointment|slot\b/i.test(message);
+  const intent = medical ? "medical" : hoursQ ? "hours" : (PATTERNS.find(([, re]) => re.test(message))?.[0] ?? "other");
   const T = (en: string, hin: string) => (hi ? hin : en);
   const base = { intent, engine: "rules" as const };
+
+  // The business's own FAQ answer beats any generic rule, even for health questions it has answered itself.
+  if (intent !== "refund" && intent !== "complaint" && intent !== "price" && intent !== "booking") {
+    const strong = matchFaq(message, k, 0.6);
+    if (strong) return { ...base, intent: "service_info", reply: strong, escalate: false, source: "FAQ" };
+  }
 
   if (intent === "hours" || intent === "location" || intent === "other") {
     const faq = matchFaq(message, k);
@@ -69,6 +110,16 @@ export function rulesReply(k: SiteKnowledge, message: string): AgentReply {
   }
 
   switch (intent) {
+    case "medical":
+      return {
+        ...base,
+        reply: T(
+          `I'm sorry you're going through this. I can't give medical advice, but I've alerted the doctor's team and they'll call you shortly. Would you like the earliest appointment?`,
+          `Sorry aapko takleef ho rahi hai. Main medical advice nahi de sakta, par maine doctor ki team ko alert kar diya hai, wo jaldi call karenge. Sabse pehla appointment book kar du?`,
+        ),
+        escalate: true,
+        source: "Medical safety rule",
+      };
     case "refund":
     case "complaint":
       return {
@@ -99,6 +150,20 @@ export function rulesReply(k: SiteKnowledge, message: string): AgentReply {
           reply: T(`${list}. Want me to book a slot for you?`, `${list}. Aapke liye slot book kar du?`),
           escalate: false,
           source: "Price list",
+        };
+      }
+      const costFaq = matchFaq(message, { ...k, faqs: k.faqs.filter((f) => /cost|price|fee|charge|₹|rs\.?\s?\d/i.test(`${f.q} ${f.a}`)) }, 0.3);
+      if (costFaq) return { ...base, reply: costFaq, escalate: false, source: "FAQ" };
+      const specific = tokens(message).filter((w) => !GENERIC.has(w));
+      if (specific.length && k.prices.length) {
+        return {
+          ...base,
+          reply: T(
+            `I don't see that exact price on our website, so I've asked the team to confirm it for you. They'll reply shortly.`,
+            `Iska exact price website pe nahi hai, maine team se confirm karne ko bol diya hai. Thodi der mein reply aayega.`,
+          ),
+          escalate: true,
+          source: "none",
         };
       }
       if (k.prices.length) {
@@ -148,7 +213,7 @@ export function rulesReply(k: SiteKnowledge, message: string): AgentReply {
 
   const faq = matchFaq(message, k);
   if (faq) return { ...base, intent: "service_info", reply: faq, escalate: false, source: "FAQ" };
-  const found = matchPrices(message, k.prices);
+  const found = /do you|d'you|kya aap|hota hai|hoti hai|karte ho|karte hai|available|offer|provide|milta|milegi/i.test(message) ? matchPrices(message, k.prices) : [];
   if (found.length)
     return {
       ...base,

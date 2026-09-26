@@ -1,9 +1,10 @@
 import "server-only";
 import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import * as cheerio from "cheerio";
+import { isPublicHost } from "./net";
+import { renderPage } from "./render";
 import type { BusinessType, FaqItem, FormInfo, PriceItem, SiteKnowledge } from "./types";
 
 const MAX_BYTES = 2_500_000;
@@ -15,7 +16,12 @@ const UA =
 export const DEMO_URL = "https://kesar-beauty.demo/";
 const DEMO_HOST = "kesar-beauty.demo";
 
-export class CrawlError extends Error {}
+export class CrawlError extends Error {
+  /** True when a real browser might get through (bot blocking, timeouts, server errors). */
+  constructor(message: string, readonly retryable = false) {
+    super(message);
+  }
+}
 
 type Log = (level: "info" | "ok" | "warn", text: string) => void;
 
@@ -40,36 +46,14 @@ export function normalizeUrl(input: string): URL {
   return url;
 }
 
-function isPrivateIp(ip: string): boolean {
-  if (isIP(ip) === 4) {
-    const [a, b] = ip.split(".").map(Number);
-    return (
-      a === 0 || a === 10 || a === 127 ||
-      (a === 100 && b >= 64 && b <= 127) ||
-      (a === 169 && b === 254) ||
-      (a === 172 && b >= 16 && b <= 31) ||
-      (a === 192 && b === 168) ||
-      (a === 198 && (b === 18 || b === 19)) ||
-      a >= 224
-    );
-  }
-  const v6 = ip.toLowerCase();
-  if (v6.startsWith("::ffff:")) return isPrivateIp(v6.slice(7));
-  return v6 === "::" || v6 === "::1" || v6.startsWith("fc") || v6.startsWith("fd") || v6.startsWith("fe80");
-}
-
 async function assertPublicHost(hostname: string) {
   const host = hostname.replace(/^\[|\]$/g, "");
-  if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal")) {
-    throw new CrawlError("Local and private addresses can't be scanned.");
-  }
-  let addrs: { address: string }[];
-  try {
-    addrs = isIP(host) ? [{ address: host }] : await lookup(host, { all: true });
-  } catch {
-    throw new CrawlError(`Couldn't find ${host}. Check the spelling?`);
-  }
-  if (addrs.length === 0 || addrs.some((a) => isPrivateIp(a.address))) {
+  if (!(await isPublicHost(host))) {
+    try {
+      await lookup(host);
+    } catch {
+      throw new CrawlError(`Couldn't find ${host}. Check the spelling?`);
+    }
     throw new CrawlError("Local and private addresses can't be scanned.");
   }
 }
@@ -118,7 +102,7 @@ async function fetchPage(start: URL): Promise<{ url: URL; html: string }> {
       });
     } catch (e) {
       const timedOut = e instanceof Error && e.name === "TimeoutError";
-      throw new CrawlError(timedOut ? `${url.hostname} took too long to respond.` : `Couldn't reach ${url.hostname}.`);
+      throw new CrawlError(timedOut ? `${url.hostname} took too long to respond.` : `Couldn't reach ${url.hostname}.`, true);
     }
     if (res.status >= 300 && res.status < 400) {
       const loc = res.headers.get("location");
@@ -130,7 +114,7 @@ async function fetchPage(start: URL): Promise<{ url: URL; html: string }> {
     }
     if (!res.ok) {
       await res.body?.cancel();
-      throw new CrawlError(`${url.hostname} answered with error ${res.status}.`);
+      throw new CrawlError(`${url.hostname} answered with error ${res.status}.`, res.status === 403 || res.status === 429 || res.status >= 500);
     }
     const type = res.headers.get("content-type") ?? "";
     if (type && !type.includes("html")) {
@@ -182,11 +166,14 @@ const SOCIALS: [RegExp, string][] = [
 const PRICE_RE = /(?:₹|rs\.?|inr|\$|£|€)\s?\d[\d,]*(?:\.\d{1,2})?(?:\s?(?:-|–|to)\s?(?:₹|rs\.?)?\s?\d[\d,]*)?\s?\+?|\d[\d,]{1,7}\s?(?:\/-|rs\b|inr\b)/i;
 const JUNK_PRICE_NAME =
   /^(?:the\s+)?(?:regular|sale|unit|original|final|special|offer|discounted|highest|lowest|total|sub-?total|starting|mrp|price|from|to|save|you save|was|now|only|per|each|incl\.?|excl\.?|tax|gst|shipping|delivery|off|\s|is|\d|%|:)+$/i;
+const GENERIC_PRICE_NAME = /^(course|courses|team|package|packages|plan|plans|fees?|amount|cost|rate|rates|charges?|product|item|service|services|book now|buy now|enrol+ now|pay now|details|view|price list)$/i;
+const JUNK_PRICE_WORDS = /\bworth\b|rating|review|starting at|cost starting|\bsave\b|discount|% off|\bemi\b|cashback|\bcoupon|\bvoucher|\bfree\b|\bwallet\b|\bshipping\b|\bcart\b|\bsubtotal\b/i;
 const PHONE_RE = /(?:\+91[\s-]?)?\b[6-9]\d{4}[\s-]?\d{5}\b/g;
 const EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
 const HOURS_RE =
   /\b(?:mon|tue|wed|thu|fri|sat|sun|daily|everyday|all days|open)[a-z]*\b[^\n]{0,70}?\d{1,2}(?::\d{2})?\s?(?:am|pm)[^\n]{0,30}?\d{1,2}(?::\d{2})?\s?(?:am|pm)/gi;
 
+const HOURS_RE2 = /\b(?:timings?|hours|open(?:ing)?(?: hours)?|we are open)\b[:\s-]+[^\n]{0,24}?\d{1,2}(?::\d{2})?\s?(?:am|pm)\s?(?:-|–|to)\s?\d{1,2}(?::\d{2})?\s?(?:am|pm)/gi;
 const clean = (s: string) => s.replace(/\s+/g, " ").trim();
 
 function digitsOnly(s: string) {
@@ -215,6 +202,8 @@ interface PageData {
   forms: FormInfo[];
   embeds: string[];
   socials: string[];
+  socialLinks: { name: string; url: string }[];
+  mapUrl: string;
   prices: PriceItem[];
   faqs: FaqItem[];
   hours: string[];
@@ -265,6 +254,8 @@ function extractPage(url: URL, html: string): PageData {
   const emails = new Set<string>();
   const phones = new Set<string>();
   const socials = new Set<string>();
+  const socialLinks: { name: string; url: string }[] = [];
+  let mapUrl = "";
   const links: string[] = [];
   const internal: { href: string; text: string }[] = [];
 
@@ -275,9 +266,18 @@ function extractPage(url: URL, html: string): PageData {
     links.push(href);
     const wa = whatsappNumber(href);
     if (wa) return void whatsapp.add(wa);
-    if (href.startsWith("mailto:")) return void emails.add(href.slice(7).split("?")[0].toLowerCase());
+    if (href.startsWith("mailto:")) {
+      const e = decodeURIComponent(href.slice(7).split("?")[0]).replace(/\s+/g, "").toLowerCase();
+      if (/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(e)) emails.add(e);
+      return;
+    }
     if (href.startsWith("tel:")) return void phones.add(digitsOnly(href.slice(4)));
-    for (const [re, name] of SOCIALS) if (re.test(href)) socials.add(name);
+    for (const [re, name] of SOCIALS)
+      if (re.test(href) && !/sharer|share\?|intent\/tweet|\/share/i.test(href)) {
+        if (!socials.has(name)) socialLinks.push({ name, url: href });
+        socials.add(name);
+      }
+    if (!mapUrl && /google\.[a-z.]+\/maps|maps\.google|goo\.gl\/maps|maps\.app\.goo\.gl/i.test(href)) mapUrl = href;
     try {
       const abs = new URL(href, url);
       if (abs.hostname === url.hostname && (abs.protocol === "http:" || abs.protocol === "https:")) {
@@ -301,7 +301,7 @@ function extractPage(url: URL, html: string): PageData {
       const type = (inp.attr("type") ?? "").toLowerCase();
       if (["hidden", "submit", "button", "image", "reset"].includes(type)) return;
       const label = clean(fieldLabel($, inp)).slice(0, 40);
-      if (label) fields.push(label);
+      if (label && !/captcha|honeypot|^_|nonce|token|referrer|utm_|^hp$|leave this empty/i.test(label)) fields.push(label);
     });
     const ctx = clean(`${f.text()} ${f.attr("action") ?? ""} ${f.attr("id") ?? ""} ${f.attr("class") ?? ""}`);
     if (fields.length === 0) return;
@@ -329,7 +329,7 @@ function extractPage(url: URL, html: string): PageData {
     const cells = $(tr).find("td, th").map((_, c) => clean($(c).text())).get();
     const priceCell = cells.find((c) => PRICE_RE.test(c));
     const nameCell = cells.find((c) => c && !PRICE_RE.test(c));
-    if (priceCell && nameCell && !JUNK_PRICE_NAME.test(nameCell)) {
+    if (priceCell && nameCell && !JUNK_PRICE_NAME.test(nameCell) && !JUNK_PRICE_WORDS.test(nameCell)) {
       const key = `${nameCell}|${priceCell}`.toLowerCase();
       if (!seenPrice.has(key)) {
         seenPrice.add(key);
@@ -344,11 +344,19 @@ function extractPage(url: URL, html: string): PageData {
     if (text.length < 4 || text.length > 110) return;
     const m = text.match(PRICE_RE);
     if (!m) return;
-    let name = clean(text.replace(m[0], "").replace(/[:\-–|•·.]+\s*$/g, "").replace(/^[:\-–|•·]+/g, ""));
+    let name = clean(
+      text
+        .replace(m[0], "")
+        .replace(/[:\-–|•·.!]+\s*$/g, "")
+        .replace(/^[:\-–|•·]+/g, "")
+        .replace(/\b(from|starts?|starting|only|just|@|at)\s*$/i, "")
+        .replace(/\s*(cost|price|charges?)\s+in\s+[a-z ]+$/i, ""),
+    ).replace(/[:\-–|•·(]+$/g, "").trim();
     if (name.length < 3) {
       name = clean(node.prev().text() || node.parent().children().first().text()).slice(0, 60);
     }
-    if (name.length < 3 || name.length > 60 || PRICE_RE.test(name) || JUNK_PRICE_NAME.test(name)) return;
+    if (name.length < 3 || name.length > 60 || PRICE_RE.test(name) || JUNK_PRICE_NAME.test(name) || JUNK_PRICE_WORDS.test(name) || GENERIC_PRICE_NAME.test(name)) return;
+    if (!/[a-z]{3}/i.test(name) || /^\(|\(\s*\)/.test(name)) return;
     const key = `${name}|${m[0]}`.toLowerCase();
     if (seenPrice.has(key)) return;
     seenPrice.add(key);
@@ -371,7 +379,13 @@ function extractPage(url: URL, html: string): PageData {
 
   $("br, p, div, li, td, th, h1, h2, h3, h4, h5, h6, a, span, section, header, footer, nav, label, option, summary, dt, dd, address, button").after(" ");
   const bodyText = clean($("body").text());
-  const hours = [...new Set((bodyText.match(HOURS_RE) ?? []).map(clean))].slice(0, 6);
+  const hours = [
+    ...new Set(
+      [...(bodyText.match(HOURS_RE) ?? []), ...(bodyText.match(HOURS_RE2) ?? [])]
+        .map((h) => clean(h).replace(/^(?:we are open|opening hours|business hours|timings?|hours|open)\b[:\s-]*/i, ""))
+        .filter((h) => h.length > 6),
+    ),
+  ].slice(0, 6);
   for (const m of bodyText.match(EMAIL_RE) ?? []) if (!/\.(png|jpe?g|gif|webp|svg)$/i.test(m)) emails.add(m.toLowerCase());
   for (const m of bodyText.match(PHONE_RE) ?? []) phones.add(digitsOnly(m));
 
@@ -398,6 +412,8 @@ function extractPage(url: URL, html: string): PageData {
     forms,
     embeds: [...embeds],
     socials: [...socials],
+    socialLinks,
+    mapUrl,
     prices: prices.slice(0, 40),
     faqs: faqs.slice(0, 20),
     hours,
@@ -415,9 +431,10 @@ function extractPage(url: URL, html: string): PageData {
 const PRIORITY =
   /contact|price|pricing|rate|menu|service|treatment|book|appointment|about|faq|fees|admission|course|package|reach|location|visit|shop|order/i;
 
-function pickPages(home: PageData, base: URL): string[] {
-  const seen = new Set([home.url, base.toString()]);
-  const scored = home.internal
+function pickPages(homes: PageData[], base: URL): string[] {
+  const seen = new Set([...homes.map((h) => h.url), base.toString()]);
+  const scored = homes
+    .flatMap((h) => h.internal)
     .filter((l) => !/\.(pdf|jpe?g|png|gif|webp|zip|mp4|docx?)$/i.test(l.href))
     .filter((l) => !/login|signin|cart|checkout|account|wp-admin|privacy|terms|cookie/i.test(l.href))
     .map((l) => ({ href: l.href, score: PRIORITY.test(`${l.href} ${l.text}`) ? 2 : 0 }))
@@ -454,8 +471,12 @@ function detectBusinessType(text: string): BusinessType {
 
 function fromJsonLd(items: Record<string, unknown>[]) {
   const out = { name: "", address: "", phone: "", hours: [] as string[] };
+  // Prefer the entity that describes the business itself (has an address or phone), not the web page.
+  const biz = items.find((j) => typeof j.name === "string" && (j.address || j.telephone));
+  if (biz) out.name = biz.name as string;
   for (const j of items) {
-    if (!out.name && typeof j.name === "string") out.name = j.name;
+    const type = String(j["@type"] ?? "");
+    if (!out.name && typeof j.name === "string" && !/WebPage|WebSite|Article|BreadcrumbList|ImageObject|FAQPage/i.test(type)) out.name = j.name;
     const addr = j.address as Record<string, string> | string | undefined;
     if (!out.address && addr) {
       out.address =
@@ -473,30 +494,78 @@ function fromJsonLd(items: Record<string, unknown>[]) {
 
 function guessName(home: PageData, host: string): string {
   if (home.siteName) return home.siteName;
-  const fromTitle = home.title.split(/\s[|\-–—:]\s/)[0]?.trim();
+  const fromTitle = home.title.split(/\s[|\-–—]\s|\s?[|:]\s/)[0]?.trim();
   if (fromTitle && fromTitle.length <= 50) return fromTitle;
   return host.replace(/^www\./, "").split(".")[0].replace(/^\w/, (c) => c.toUpperCase());
 }
 
+const MAX_RENDERS = 3;
+const PARKED = /\b(is parked|parked free|domain (?:is|may be) for sale|buy this domain|get this domain|this domain is available|hugedomains|sedo domain parking|dan\.com)\b/i;
+
 export async function crawl(input: string, log: Log): Promise<SiteKnowledge> {
   const start = normalizeUrl(input);
+  const isDemo = start.hostname === DEMO_HOST;
   log("info", `Opening ${start.hostname}`);
-  const home = await fetchPage(start);
-  const base = home.url;
-  const pages: PageData[] = [extractPage(base, home.html)];
-  log("ok", `Loaded homepage: "${pages[0].title || base.hostname}"`);
 
-  const extra = pickPages(pages[0], base);
+  const pages: PageData[] = [];
+  let renders = 0;
+  let staticError: CrawlError | null = null;
+  let base = start;
+
+  try {
+    const home = await fetchPage(start);
+    base = home.url;
+    pages.push(extractPage(home.url, home.html));
+    log("ok", `Loaded homepage: "${pages[0].title || base.hostname}"`);
+  } catch (e) {
+    if (!(e instanceof CrawlError) || !e.retryable || isDemo) throw e;
+    staticError = e;
+    log("warn", `${e.message} Trying a real browser instead.`);
+  }
+
+  // A real browser sees what plain HTML can't: JavaScript-built pages and injected WhatsApp/chat widgets.
+  if (!isDemo) {
+    if (!staticError) log("info", "Opening it in a real browser to catch JavaScript-loaded buttons and widgets");
+    const r = await renderPage(base.toString(), 15_000, staticError ? 2 : 1);
+    if (r) {
+      renders++;
+      const rp = extractPage(new URL(r.url), r.html);
+      pages.push(rp);
+      if (staticError) base = new URL(r.url);
+      log("ok", staticError ? `Loaded in the browser: "${rp.title || base.hostname}"` : "Browser view captured");
+    } else if (staticError) {
+      throw staticError;
+    }
+  }
+  if (!pages.length) throw staticError ?? new CrawlError("Couldn't load that site.");
+  const homeText = pages.map((p) => p.text).join(" ");
+  if (PARKED.test(homeText) && homeText.length < 3000) {
+    throw new CrawlError(`${base.hostname} is a parked domain with no business website on it yet. Try the business's current site.`);
+  }
+  if (/\b(coming soon|under construction|site is under maintenance)\b/i.test(homeText) && homeText.length < 600) {
+    throw new CrawlError(`${base.hostname} only shows a "coming soon" page right now, so there's nothing to scan yet.`);
+  }
+
+  const extra = pickPages(pages, base);
   if (extra.length) log("info", `Following ${extra.length} key page${extra.length > 1 ? "s" : ""}: ${extra.map((u) => new URL(u).pathname).join(", ")}`);
   const results = await Promise.allSettled(extra.map((u) => fetchPage(new URL(u))));
-  results.forEach((r, i) => {
-    if (r.status === "fulfilled") {
-      pages.push(extractPage(r.value.url, r.value.html));
-      log("ok", `Read ${new URL(extra[i]).pathname}`);
-    } else {
-      log("warn", `Skipped ${new URL(extra[i]).pathname} (couldn't load)`);
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    const path = new URL(extra[i]).pathname;
+    const staticPage = r.status === "fulfilled" ? extractPage(r.value.url, r.value.html) : null;
+    const thin = !staticPage || staticPage.text.length < 400;
+    if (staticPage) pages.push(staticPage);
+    if (thin && !isDemo && renders < MAX_RENDERS) {
+      const rr = await renderPage(extra[i], 12_000);
+      if (rr) {
+        renders++;
+        pages.push(extractPage(new URL(rr.url), rr.html));
+        log("ok", `Read ${path} in the browser`);
+        continue;
+      }
     }
-  });
+    log(staticPage ? "ok" : "warn", staticPage ? `Read ${path}` : `Skipped ${path} (couldn't load)`);
+  }
 
   const uniq = <T,>(xs: T[]) => [...new Set(xs)];
   const all = <K extends keyof PageData>(k: K) => pages.flatMap((p) => p[k] as unknown as unknown[]);
@@ -513,32 +582,95 @@ export async function crawl(input: string, log: Log): Promise<SiteKnowledge> {
   }
 
   const faqs: FaqItem[] = [];
-  for (const f of all("faqs") as FaqItem[]) if (!faqs.some((x) => x.q === f.q)) faqs.push(f);
+  for (const f of all("faqs") as FaqItem[]) if (!faqs.some((x) => x.q.toLowerCase() === f.q.toLowerCase())) faqs.push(f);
 
-  const fullText = pages.map((p) => `## ${p.title || p.url}\n${p.text}`).join("\n\n");
-  const phones = uniq([...(ld.phone ? [ld.phone] : []), ...(all("phones") as string[])]).filter((p) => p.replace(/\D/g, "").length >= 10);
+  // The static and browser copies of a page overlap; keep the richer one per URL.
+  const byUrl = new Map<string, PageData>();
+  for (const p of pages) {
+    const prev = byUrl.get(p.url);
+    if (!prev || p.text.length > prev.text.length) byUrl.set(p.url, p);
+  }
+  const unique = [...byUrl.values()];
+  const fullText = unique.map((p) => `## ${p.title || p.url}\n${p.text}`).join("\n\n");
 
-  const services = uniq(pages.flatMap((p) => p.headings))
-    .filter((h) => !/contact|about|faq|question|price|welcome|home|follow|hours|visit|menu|©/i.test(h))
+  const last10 = (n: string) => n.replace(/\D/g, "").slice(-10);
+  const dedupeNumbers = (xs: string[]) => {
+    const out = new Map<string, string>();
+    for (const x of xs) {
+      const d = x.replace(/\D/g, "");
+      if (d.length < 10) continue;
+      const key = last10(x);
+      const prev = out.get(key);
+      if (!prev || x.replace(/\D/g, "").length > prev.replace(/\D/g, "").length) out.set(key, x);
+    }
+    return [...out.values()];
+  };
+  const whatsapp = dedupeNumbers(all("whatsapp") as string[]);
+  const hasGenericWa = (all("whatsapp") as string[]).some((w) => !/\d{8,}/.test(w));
+  const phones = dedupeNumbers([...(ld.phone ? [ld.phone] : []), ...(all("phones") as string[])]);
+
+  const formSeen = new Set<string>();
+  const forms = (all("forms") as FormInfo[]).filter((f) => {
+    const key = f.fields.join("|").toLowerCase();
+    if (formSeen.has(key)) return false;
+    formSeen.add(key);
+    return true;
+  });
+
+  const hoursSeen = new Set<string>();
+  // Same schedule written differently ("Mon – Sat" vs "Mon, Tue, …") still counts once if the times match.
+  const hours = [...ld.hours.map(prettyHours), ...(all("hours") as string[])].filter((h) => {
+    const key = h.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (hoursSeen.has(key)) return false;
+    hoursSeen.add(key);
+    return true;
+  });
+
+  const socialLinks: { name: string; url: string }[] = [];
+  for (const l of pages.flatMap((p) => p.socialLinks)) if (!socialLinks.some((x) => x.name === l.name)) socialLinks.push(l);
+
+  const services = uniq(unique.flatMap((p) => p.headings))
+    .filter((h) => !/contact|about|faq|question|price|welcome|home|follow|hours|visit|menu|©|testimonial|review|blog|gallery|team/i.test(h))
     .slice(0, 16);
 
   return {
     url: base.toString(),
     name: ld.name || guessName(pages[0], base.hostname),
-    description: pages[0].description,
+    description: pages.map((p) => p.description).find(Boolean) ?? "",
     businessType: detectBusinessType(fullText),
-    pages: pages.map((p) => ({ url: p.url, title: p.title })),
+    pages: unique.map((p) => ({ url: p.url, title: p.title })),
     prices: prices.slice(0, 40),
     faqs: faqs.slice(0, 20),
-    hours: uniq([...ld.hours, ...(all("hours") as string[])]).slice(0, 6),
-    address: ld.address || pages.map((p) => p.address).find(Boolean) || "",
+    hours: hours.slice(0, 6),
+    address: dedupeParts(ld.address || pages.map((p) => p.address).find(Boolean) || ""),
     phones: phones.slice(0, 4),
     emails: uniq(all("emails") as string[]).slice(0, 4),
-    whatsapp: uniq(all("whatsapp") as string[]).slice(0, 3),
-    forms: (all("forms") as FormInfo[]).slice(0, 6),
+    whatsapp: whatsapp.length ? whatsapp.slice(0, 3) : hasGenericWa ? ["WhatsApp link"] : [],
+    forms: forms.slice(0, 6),
     embeds: uniq(all("embeds") as string[]),
     socials: uniq(all("socials") as string[]),
+    socialLinks,
+    mapUrl: pages.map((p) => p.mapUrl).find(Boolean) ?? "",
+    rendered: renders > 0,
     services,
     text: fullText.slice(0, 24000),
   };
+}
+
+function dedupeParts(addr: string) {
+  const seen = new Set<string>();
+  return addr
+    .split(/\s*,\s*/)
+    .filter((part) => {
+      const key = part.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .join(", ");
+}
+
+const DAYS: Record<string, string> = { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun" };
+function prettyHours(h: string) {
+  return h.replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su)\b/g, (d) => DAYS[d]).replace(/,/g, ", ");
 }

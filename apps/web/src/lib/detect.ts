@@ -12,6 +12,7 @@ function fmtPhone(p: string) {
   const d = p.replace(/\D/g, "");
   if (d.length === 12 && d.startsWith("91")) return `+91 ${d.slice(2, 7)} ${d.slice(7)}`;
   if (d.length === 10) return `${d.slice(0, 5)} ${d.slice(5)}`;
+  if (d.length === 11 && d.startsWith("0")) return `${d.slice(0, 3)} ${d.slice(3, 7)} ${d.slice(7)}`;
   return p;
 }
 

@@ -42,6 +42,10 @@ export interface SiteKnowledge {
   forms: FormInfo[];
   embeds: string[];
   socials: string[];
+  socialLinks: { name: string; url: string }[];
+  mapUrl: string;
+  /** Whether a real browser was used (JavaScript content included) */
+  rendered: boolean;
   services: string[];
   /** Trimmed visible text of the crawled pages, for the agent's context */
   text: string;

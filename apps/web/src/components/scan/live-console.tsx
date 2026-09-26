@@ -31,6 +31,7 @@ const INTENT_LABEL: Record<string, string> = {
   service_info: "Service question",
   complaint: "Complaint",
   refund: "Refund request",
+  medical: "Medical question",
   greeting: "Greeting",
   other: "Other",
 };

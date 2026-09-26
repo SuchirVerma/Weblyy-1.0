@@ -5,6 +5,7 @@ import type { Analysis, ScanResult, Workflow } from "@/lib/types";
 import { CHANNEL_NAME } from "../radar";
 import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
+import { SiteReport } from "./site-report";
 import type { Deployment } from "./live-console";
 import { useReducedSafe } from "../use-reduced";
 import styles from "./scan.module.css";
@@ -206,6 +207,8 @@ export function Results({
           )}
         </AnimatePresence>
       </section>
+
+      <SiteReport scan={scan} analysis={analysis} />
 
       <section aria-labelledby="board-h" className={styles.boardWrap}>
         <div className={styles.findHead}>

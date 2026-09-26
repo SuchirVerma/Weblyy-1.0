@@ -20,7 +20,7 @@ export const viewport: Viewport = { themeColor: "#0f1320" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
         <a href="#main" className="skip">
           Skip to content
