@@ -15,6 +15,8 @@ const DEMO_BLIPS: Blip[] = [
   { id: "g", channel: "social", label: "Instagram" },
 ];
 
+const REPLIES = ["Hair Spa ₹1,200 hai. Slot book kar du?", "Haan ji! Kaunsi service? Team confirm karegi.", "Tue–Sun, 10am se 8:30pm tak.", "Haan, free parking bahar hi hai.", "Fruit Facial ₹900, Gold ₹1,500.", "Bridal HD ₹18,000 se start."];
+
 const BUBBLES = ["Hair spa kitne ka hai?", "Saturday 4pm free hai?", "Kab tak khule ho?", "Parking hai?", "Facial ka rate?", "Bridal makeup price?"];
 
 export function HeroVisual() {
@@ -38,30 +40,33 @@ export function HeroVisual() {
     <div className={styles.heroVisual}>
       <Radar blips={DEMO_BLIPS.slice(0, Math.min(n, DEMO_BLIPS.length))} scanning centerLabel="your business" />
       <div className={styles.bubbleLane} aria-hidden="true">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait">
           <motion.div
             key={bubble}
-            className={styles.bubble}
-            initial={{ opacity: 0, y: 16, scale: 0.94 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className={styles.bubblePair}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className={styles.bubbleWho}>customer · 21:4{bubble}</span>
-            {BUBBLES[bubble]}
-          </motion.div>
-        </AnimatePresence>
-        <AnimatePresence mode="popLayout">
-          <motion.div
-            key={`r${bubble}`}
-            className={`${styles.bubble} ${styles.bubbleAgent}`}
-            initial={{ opacity: 0, y: 16, scale: 0.94 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            transition={{ duration: 0.5, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span className={styles.bubbleWho}>agent · replied in 3s</span>
-            {["Hair Spa ₹1,200 hai. Slot book kar du?", "Haan ji! Kaunsi service? Team confirm karegi.", "Tue–Sun, 10am se 8:30pm tak.", "Haan, free parking bahar hi hai.", "Fruit Facial ₹900, Gold ₹1,500.", "Bridal HD ₹18,000 se start."][bubble]}
+            <motion.div
+              className={styles.bubble}
+              initial={{ opacity: 0, y: 16, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className={styles.bubbleWho}>customer · 21:4{bubble}</span>
+              {BUBBLES[bubble]}
+            </motion.div>
+            <motion.div
+              className={`${styles.bubble} ${styles.bubbleAgent}`}
+              initial={{ opacity: 0, y: 16, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className={styles.bubbleWho}>agent · replied in 3s</span>
+              {REPLIES[bubble]}
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>

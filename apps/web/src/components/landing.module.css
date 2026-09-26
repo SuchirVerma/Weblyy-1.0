@@ -32,6 +32,10 @@
   gap: 8px;
   pointer-events: none;
 }
+.bubblePair {
+  display: grid;
+  gap: 8px;
+}
 .bubble {
   justify-self: start;
   max-width: 78%;
@@ -628,4 +632,39 @@
   padding-bottom: 40px;
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------ plug */
+.plug {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 48px;
+  align-items: start;
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: 28px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.plug > :global(.chips) {
+  grid-column: 1 / -1;
+}
+.plugList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.plugList li {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--bg-2);
+}
+@media (max-width: 860px) {
+  .plug {
+    grid-template-columns: 1fr;
+  }
 }

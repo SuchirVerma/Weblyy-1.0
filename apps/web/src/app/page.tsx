@@ -1,8 +1,10 @@
 import { FormulaPlayground } from "@/components/formula";
 import { HeroVisual } from "@/components/hero-visual";
+import { OwnerDemo } from "@/components/owner-demo";
 import { SaturdayReplay } from "@/components/saturday-replay";
 import { Steps } from "@/components/steps";
-import { CountUp, Nav, Reveal, ScanBar } from "@/components/ui";
+import { Arrow, CountUp, Nav, Reveal, ScanBar } from "@/components/ui";
+import Link from "next/link";
 import styles from "@/components/landing.module.css";
 
 export default function Home() {
@@ -67,6 +69,57 @@ export default function Home() {
             </h2>
           </Reveal>
           <Steps />
+        </section>
+
+        <section id="owner" className={`wrap ${styles.section}`} aria-labelledby="owner-h">
+          <div className={styles.theoryHead}>
+            <Reveal>
+              <p className="kicker">The owner&apos;s side</p>
+              <h2 id="owner-h" className="h-section">
+                Your phone only rings <span className="em">when it matters.</span>
+              </h2>
+            </Reveal>
+            <Reveal delay={100}>
+              <p className="lede">
+                Price questions never reach you. Bookings need one tap. Complaints arrive as an urgent alert, and your reply goes straight to the customer.
+                Watch one evening play out.
+              </p>
+            </Reveal>
+          </div>
+          <OwnerDemo />
+        </section>
+
+        <section className={`wrap ${styles.section}`} aria-labelledby="plug-h">
+          <Reveal className={styles.plug}>
+            <div>
+              <p className="kicker">Plug it into your business</p>
+              <h2 id="plug-h" className="h-section" style={{ marginBottom: 8 }}>
+                Website, WhatsApp, QR code, <span className="em">Instagram bio.</span>
+              </h2>
+              <p className="lede">One agent, every channel, one inbox. The website chat bubble is a single line of code, and the rest takes minutes.</p>
+            </div>
+            <ul className={styles.plugList}>
+              {[
+                ["Website chat bubble", "One line of code on WordPress, Wix, Shopify or any site"],
+                ["WhatsApp number", "Through Twilio: test in 10 minutes, go live after Meta verification"],
+                ["QR at the counter", "Customers scan and chat, nothing to install"],
+                ["Instagram & Google", "Chat link in your bio and on your Google profile"],
+              ].map(([t, d]) => (
+                <li key={t}>
+                  <b>{t}</b>
+                  <span className="muted">{d}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="chips">
+              <Link className="btn btn-primary" href="/integrate">
+                See the setup guide <Arrow />
+              </Link>
+              <a className="btn btn-ghost" href="/api/demo-agent" target="_blank" rel="noreferrer">
+                Try the chat bubble on a live site
+              </a>
+            </div>
+          </Reveal>
         </section>
 
         <section id="theory" className={`wrap ${styles.section}`} aria-labelledby="theory-h">

@@ -786,7 +786,7 @@
   margin: 0;
   font-size: 0.9rem;
 }
-.bpCard .btn {
+.bpCard :global(.btn) {
   justify-self: start;
 }
 .calc {
@@ -908,7 +908,7 @@
   align-items: flex-end;
   gap: 16px;
 }
-.liveHead p.kicker {
+.liveHead p:global(.kicker) {
   display: flex;
   align-items: center;
   color: var(--ok);

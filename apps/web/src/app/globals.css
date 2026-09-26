@@ -520,3 +520,42 @@ body.paused *::after {
     color: #12141c;
   }
 }
+
+/* ------------------------------------------------------------- code blocks */
+.codeblock {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #1e293b;
+  background: var(--term);
+  color: #e2e8f0;
+  min-width: 0;
+}
+.codeblock-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+.codeblock-head button {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #e2e8f0;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.codeblock pre {
+  margin: 0;
+  padding: 14px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
 import type { AgentReply, ScanResult, Workflow } from "@/lib/types";
+import { CodeBlock } from "../code-block";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
 import styles from "./scan.module.css";
@@ -301,6 +302,19 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
         <h2 id="int-h" className={styles.h2} style={{ fontSize: "1.5rem" }}>
           Plug it into real channels
         </h2>
+        <div className={styles.bpCard}>
+          <h3>Website chat bubble</h3>
+          <p className="muted">Paste this one line before &lt;/body&gt; on the business&apos;s website. A chat button appears in the corner, connected to this agent and inbox.</p>
+          <CodeBlock code={`<script src="{ORIGIN}/widget.js" data-agent="${deployment.agentId}" async></script>`} label="Website snippet" />
+          <div className="chips">
+            <a className="btn btn-ghost btn-sm" href={`/demo/kesar/index.html?agent=${deployment.agentId}`} target="_blank" rel="noreferrer">
+              Preview on a sample website
+            </a>
+            <a className="btn btn-ghost btn-sm" href="/integrate" target="_blank" rel="noreferrer">
+              Setup guide for WordPress, Wix, Shopify
+            </a>
+          </div>
+        </div>
         <div className={styles.intGrid}>
           <div className={styles.bpCard}>
             <h3>n8n workflow</h3>

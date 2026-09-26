@@ -50,7 +50,7 @@
   min-width: 0;
   font-size: 0.8rem;
 }
-.meta .mono {
+.meta :global(.mono) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

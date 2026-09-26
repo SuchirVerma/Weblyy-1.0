@@ -44,8 +44,11 @@ export function Nav({ right }: { right?: ReactNode }) {
           <Link href="/#how" className="hide-sm">
             How it works
           </Link>
-          <Link href="/#theory" className="hide-sm">
-            The math
+          <Link href="/owner-demo" className="hide-sm">
+            Owner demo
+          </Link>
+          <Link href="/integrate" className="hide-sm">
+            Integrate
           </Link>
           {right ?? <StatusPill />}
         </nav>

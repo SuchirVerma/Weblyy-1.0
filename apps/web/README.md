@@ -27,6 +27,20 @@ No API keys are needed. Without `AI_API_KEY` the app uses its rules engine for s
 - **A website**, like `northdelhidentalclinic.com`.
 - **An Instagram handle or link**, like `@naturalssalon`. It reads the public profile (name, followers, bio, contact numbers in the bio), then follows the link in bio to the website if there is one.
 
+## Showing it to a business owner
+
+- **/owner-demo** (also on the home page): a guided, auto-playing evening at a salon from the owner's phone. Price questions are handled silently, a booking needs one tap, a complaint arrives as an urgent alert and the owner replies personally, then hands back to the agent.
+- **/integrate**: the setup guide for owners. Website chat bubble (one line, with WordPress/Wix/Shopify steps), WhatsApp via Twilio, QR at the counter, chat link for Instagram bio and Google profile, and the HTTP API.
+- **/api/demo-agent**: switches on an agent for the demo salon and opens the salon's website with the chat bubble on it.
+
+## Website chat bubble
+
+```html
+<script src="https://YOUR-FLOWSCOUT-URL/widget.js" data-agent="AGENT_ID" async></script>
+```
+
+Optional `data-color` and `data-label`. The live console shows the snippet with the real agent ID.
+
 ## Owner inbox
 
 Every conversation is saved. When the agent flags one (complaint, refund, medical question, anything not on the website), it shows up as **Needs you** in the owner inbox, both in the live console and on a private page for the owner's phone (`/owner/<id>?key=…`, linked from the console). When the owner replies:
