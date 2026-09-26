@@ -4,18 +4,24 @@ Add newest entries at the top.
 
 | Date | What | Status |
 |---|---|---|
+| 2026-09-26 | Working prototype in `apps/web`: crawler, scoring, AI + rules agent, deploy, live console, audience chat, Twilio webhook, n8n export | ✅ Done |
 | 2026-09-26 | Repo created with full project spec in `docs/` | ✅ Done |
 
 ## Checklist
 - [x] Project spec
-- [ ] Crawler + detector
-- [ ] Scan UI (SSE log + graph)
-- [ ] Classifier + scoring
-- [ ] Workflow board
-- [ ] WhatsApp agent (Twilio)
-- [ ] n8n deploy
-- [ ] Audience QR + live counters
-- [ ] Roast mode
-- [ ] Before/after time-lapse
-- [ ] Shareable report
-- [ ] Demo cache + backup video
+- [x] Crawler + detector
+- [x] Scan UI (streamed log + radar)
+- [x] Classifier + scoring (rules engine, AI refinement when a key is set)
+- [x] Workflow board + blueprint
+- [x] Agent with Hinglish + owner escalation
+- [x] Twilio WhatsApp webhook (needs a public URL to test)
+- [x] n8n workflow export (auto-create needs an n8n instance)
+- [x] Audience QR + live counters
+- [x] Roast mode
+- [x] Before/after "Saturday replay"
+- [x] Built-in demo salon (works offline)
+- [ ] Test AI path with a real API key
+- [ ] Test Twilio sandbox end to end
+- [ ] Deploy publicly (Vercel/Railway) and set APP_URL
+- [ ] Shareable report card
+- [ ] Backup demo video

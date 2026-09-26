@@ -1,0 +1,12 @@
+*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;background:#fbf6f1;color:#3a2a22;line-height:1.6}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 6vw;background:#fff;border-bottom:1px solid #eadfd5;flex-wrap:wrap;gap:12px}
+header a{color:#7a4a2e;text-decoration:none;margin-left:18px}.logo{font-size:1.4rem;font-weight:bold;color:#b5542a;margin:0}
+.hero{padding:70px 6vw;background:linear-gradient(120deg,#f4e3d3,#fbf6f1)}.hero h1{font-size:2.6rem;margin:0 0 10px}
+.btn{display:inline-block;background:#25a55a;color:#fff;padding:12px 20px;border-radius:30px;text-decoration:none;margin-top:14px}
+section{padding:40px 6vw}h2{color:#b5542a}ul.prices{list-style:none;padding:0;max-width:560px}ul.prices li{display:flex;justify-content:space-between;border-bottom:1px dashed #d9c7b8;padding:8px 0}
+table{border-collapse:collapse;max-width:560px;width:100%}td{padding:8px;border-bottom:1px dashed #d9c7b8}
+form{display:grid;gap:10px;max-width:420px}input,select,textarea{padding:10px;border:1px solid #d9c7b8;border-radius:6px;font:inherit}
+button{padding:12px;background:#b5542a;color:#fff;border:0;border-radius:6px;font:inherit}
+details{max-width:640px;background:#fff;border:1px solid #eadfd5;border-radius:8px;padding:12px 16px;margin-bottom:10px}summary{cursor:pointer;font-weight:bold}
+footer{padding:30px 6vw;background:#3a2a22;color:#f4e3d3;font-size:.9rem}footer a{color:#f4e3d3}
+.note{background:#fff3cd;color:#6b5100;padding:8px 6vw;font-family:system-ui,sans-serif;font-size:.85rem}

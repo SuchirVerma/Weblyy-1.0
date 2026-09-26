@@ -1,32 +1,28 @@
 # Tech stack & architecture
 
+> **As built:** one Next.js app does both the frontend and the backend. The original plan split the backend into FastAPI + Playwright; a single app is simpler to run and deploy, and a fetch + Cheerio crawler covers server-rendered small-business sites. Playwright remains the upgrade path for JavaScript-only sites.
+
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | Next.js 15 + Tailwind + shadcn/ui | Fast to build, polished by default |
-| Graph visuals | React Flow | Touchpoint map and blueprint diagrams |
-| Animation | Framer Motion | Node pop-ins, gauge sweep, counters |
-| Charts | Recharts | Hours saved, message volume |
-| Backend | FastAPI (Python) | Better crawling and data ecosystem |
-| Crawling | Playwright (Firecrawl fallback) | Renders JS-heavy sites, catches embeds |
-| Realtime | Server-Sent Events | Streams scan log to the UI |
-| LLM | AI Sonnet 5 (classify, score, agent replies) + Haiku 4.5 (page extraction) | Strong reasoning plus cheap, fast extraction |
-| Agent knowledge | Site content in the prompt, with prompt caching | Small sites fit in context; no vector DB needed |
-| Database | Supabase (Postgres + auth + realtime) | Scans, workflows, messages; realtime counters |
-| Automation engine | n8n (self-hosted, Docker) | Import generated workflows via REST API |
-| WhatsApp | Twilio WhatsApp Sandbox | Works in minutes; Meta Cloud API needs business verification |
-| Email | Resend | Automated replies and reports |
-| Hosting | Vercel (web) + Railway/Render (API + n8n) | Playwright doesn't run well on serverless |
+| App | Next.js 16 (App Router) + React 19 + TypeScript | Frontend and API routes in one deployable app |
+| Styling | Tailwind 4 + CSS modules, design tokens in `globals.css` | Full control over the custom look |
+| Animation | Motion (Framer Motion) + CSS | Radar blips, gauge sweep, counters, hold-to-deploy |
+| Crawling | `fetch` + Cheerio, SSRF-safe (private IPs blocked, manual redirects, size and time caps) | Fast, no headless browser needed |
+| Realtime scan | NDJSON stream from `/api/scan` | Streams the scan log and touchpoints to the UI |
+| AI fallback | Rules engine + keyword agent with Hinglish | Works with no API key, a customer always gets a reply |
+| Storage | In-memory, agents persisted to `.data/agents.json` | Zero setup to run locally |
+| Automation | Generated n8n workflow JSON; auto-created if `N8N_URL` + `N8N_API_KEY` are set | Real, importable output |
+| WhatsApp | Twilio sandbox webhook at `/api/whatsapp` | Works in minutes without Meta verification |
+| Audience demo | QR code → `/chat/[id]` mobile chat, live counters on the console | Lets the room talk to the agent |
 
 ## Architecture
 ```
- Next.js UI ──SSE──► FastAPI
-                      ├─ Crawler (Playwright) ──► page text, links, forms, widgets
-                      ├─ Detector (rules)     ──► wa.me, mailto, tel, <form>, Calendly/Fresha/Tawk embeds
-                      ├─ Classifier (AI)  ──► workflows + risk
-                      ├─ Scorer               ──► automation score, hours & ₹ saved
-                      ├─ Blueprint generator  ──► n8n JSON + agent system prompt
-                      └─ Deployer ──► n8n API ──► Twilio WhatsApp webhook ──► live agent
- Supabase: scans · touchpoints · workflows · messages (realtime → UI counters)
+ Browser ──NDJSON──► /api/scan ──► crawl.ts (fetch + Cheerio) ──► detect.ts (touchpoints, gaps)
+         ──JSON────► /api/analyze ──► score.ts (rules) ──► ai.ts (optional refine)
+         ──JSON────► /api/deploy ──► store.ts (agent) + n8n.ts (workflow JSON) ──► n8n API (optional)
+ Customer phones ──► /chat/[id] ──► /api/agent ──► respond.ts ──► ai.ts or rules-agent.ts
+ WhatsApp (Twilio) ─► /api/whatsapp ─┘
+ Console polls /api/agents/[id] every 2s for live counters and the audience feed
 ```
 
 ## Scoring formula
@@ -46,12 +42,10 @@ Hours saved/wk   = msgs/day × 7 × avg handling time × automatable %
 - Instagram / Facebook DM links
 - "Call us to book"-style text patterns
 
-## Data model (draft)
-- `scans`: id, url, status, score, created_at
-- `touchpoints`: id, scan_id, channel, kind, details (json)
-- `workflows`: id, scan_id, name, channel, score, hours_saved, verdict, blueprint (json)
-- `agents`: id, workflow_id, system_prompt, twilio_number, status
-- `messages`: id, agent_id, direction, body, intent, escalated, created_at
+## Verdict rules
+- Risk ≥ 0.6 → **Human only**, whatever the score
+- Score ≥ 40 → **Automate**
+- Otherwise → **Assist** (agent drafts, a person approves)
 
 ## Environment variables
 See [`.env.example`](../.env.example).

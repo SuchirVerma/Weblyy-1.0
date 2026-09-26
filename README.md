@@ -4,29 +4,32 @@
 
 Paste a business URL. FlowScout finds the customer conversations the team handles by hand (WhatsApp, email, forms, bookings), scores which ones are safe to automate, and deploys a working AI agent in minutes.
 
-**Status:** 🚧 Build in progress. See [docs/progress.md](docs/progress.md).
+**Status:** working prototype. See [docs/progress.md](docs/progress.md).
+
+## Run it
+
+```bash
+cd apps/web
+npm install
+npm run dev        # http://localhost:3000
+```
+
+No keys needed to try it: click **Try the demo salon**. Details in [apps/web/README.md](apps/web/README.md).
 
 ## What it does
-1. **Scan:** crawls the website and maps every customer touchpoint (WhatsApp links, forms, emails, booking widgets, FAQs, price lists).
-2. **Ask:** 5 one-tap questions (plus an optional WhatsApp chat export) reveal the manual work behind those touchpoints.
-3. **Score:** each workflow gets an automation score, hours saved per week and ₹ saved per month. Sensitive work is flagged as *human only*.
-4. **Deploy:** top workflows become importable n8n blueprints, and one agent goes live on WhatsApp, trained on the site's own content.
+1. **Scan:** crawls the website and maps every customer touchpoint (WhatsApp links, forms, emails, booking widgets, FAQs, price lists), streamed live onto a radar.
+2. **Ask:** 4 one-tap questions fill in what a website can't show.
+3. **Score:** each workflow gets an automation score (Volume × Repetitiveness × Data × (1 − Risk)), hours saved per week and ₹ saved per month. Sensitive work is flagged as *human only*. Optional **Roast my website** mode.
+4. **Deploy:** hold the button and an agent goes live: a chat link, a QR code for the audience, a Twilio WhatsApp webhook, and an importable n8n workflow.
 
 ## Docs
 | Doc | Contents |
 |---|---|
 | [Overview & pitch](docs/01-overview.md) | Problem, solution, pitch summary, taglines |
-| [UI screens](docs/02-ui-screens.md) | All 8 screens in detail |
+| [UI screens](docs/02-ui-screens.md) | All screens in detail |
 | [Tech stack & architecture](docs/03-tech-stack.md) | Stack, architecture, scoring formula, detector rules |
 | [Add-ons](docs/04-add-ons.md) | Features that make the demo interactive and fun |
 | [Progress log](docs/progress.md) | Running log of what's done |
 
-## Repo layout
-```
-apps/web   → Next.js 15 frontend
-apps/api   → FastAPI backend (crawler, classifier, scorer, deployer)
-docs/      → project spec and progress log
-```
-
 ## Tech
-Next.js · Tailwind · shadcn/ui · React Flow · Framer Motion · FastAPI · Playwright · AI API (Sonnet 5 + Haiku 4.5) · Supabase · n8n · Twilio WhatsApp
+Next.js 16 · React 19 · Tailwind 4 · Motion · Cheerio · AI API (optional) · Twilio WhatsApp · n8n
