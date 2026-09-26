@@ -37,7 +37,7 @@
   max-width: 78%;
   padding: 10px 14px 10px;
   border-radius: 16px 16px 16px 4px;
-  background: #202a47;
+  background: var(--bubble-in);
   border: 1px solid var(--line);
   font-size: 0.92rem;
   box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.8);
@@ -45,8 +45,8 @@
 .bubbleAgent {
   justify-self: end;
   border-radius: 16px 16px 4px 16px;
-  background: #123325;
-  border-color: #1f5a3f;
+  background: var(--bubble-good);
+  border-color: rgba(156, 203, 142, 0.25);
 }
 .bubbleWho {
   display: block;
@@ -89,8 +89,10 @@
   gap: 6px;
 }
 .stat b {
-  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.4vw, 3.6rem);
+  font-weight: 300;
+  line-height: 1;
   color: var(--text);
   letter-spacing: -0.03em;
 }
@@ -158,7 +160,7 @@
 .phone {
   border-radius: 24px;
   border: 1px solid var(--line);
-  background: #0c1120;
+  background: var(--well);
   overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -225,16 +227,16 @@
 }
 .msgIn {
   justify-self: start;
-  background: #1d2640;
+  background: var(--bubble-in);
   border-radius: 14px 14px 14px 4px;
 }
 .msgOut {
   justify-self: end;
-  background: #134230;
+  background: var(--bubble-good);
   border-radius: 14px 14px 4px 14px;
 }
 .phone[data-tone="bad"] .msgOut {
-  background: #2a2438;
+  background: var(--bubble-out);
 }
 .typing {
   justify-self: end;
@@ -242,7 +244,7 @@
   gap: 4px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: color-mix(in oklab, var(--bad) 10%, #1a1f33);
+  background: color-mix(in oklab, var(--bad) 10%, var(--surface));
 }
 .typing span {
   width: 6px;
@@ -277,8 +279,10 @@
   background: color-mix(in oklab, var(--surface) 55%, transparent);
 }
 .replayStats b {
-  font-size: 1.7rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 300;
+  line-height: 1.1;
 }
 .replayStats span {
   color: var(--muted);
@@ -314,7 +318,7 @@
 }
 .stepsLineDraw {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), #ffb08f);
+  background: linear-gradient(90deg, var(--accent), var(--milk));
   transform-origin: left;
 }
 .step h3 span {
@@ -345,7 +349,7 @@
   background: var(--bg-2);
   border: 1px solid var(--line-strong);
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.3rem;
   color: var(--accent);
 }
@@ -366,7 +370,7 @@
   display: grid;
   gap: 6px;
   border-radius: 12px;
-  background: #0c1120;
+  background: var(--well);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
   font-size: 0.74rem;
@@ -557,7 +561,7 @@
 .verdict {
   font-family: var(--font-display);
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* ----------------------------------------------------------------- never */
@@ -608,7 +612,7 @@
   padding: clamp(40px, 7vw, 80px) clamp(20px, 5vw, 60px);
   border-radius: 28px;
   border: 1px solid var(--line);
-  background: radial-gradient(ellipse at 50% 0%, rgba(255, 106, 61, 0.16), transparent 60%), color-mix(in oklab, var(--bg-2) 90%, transparent);
+  background: radial-gradient(ellipse at 50% 0%, rgba(200, 113, 58, 0.16), transparent 60%), color-mix(in oklab, var(--bg-2) 90%, transparent);
 }
 .finalCard h2 {
   max-width: 16ch;

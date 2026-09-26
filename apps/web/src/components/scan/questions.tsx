@@ -94,7 +94,7 @@ export function Questions({
       <div className={styles.askHead}>
         <p className="kicker">Step 2 · what the website can&apos;t tell us</p>
         <h1 id="ask-h" className="h-display" style={{ fontSize: "clamp(2rem, 4.4vw, 3.2rem)" }}>
-          Four taps about {scan.knowledge.name}.
+          Four taps about <span className="em">{scan.knowledge.name}.</span>
         </h1>
         <p className="lede">We&apos;ve picked typical answers for a {scan.knowledge.businessType}. Change anything that&apos;s off.</p>
       </div>

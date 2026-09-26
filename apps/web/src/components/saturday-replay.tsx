@@ -108,15 +108,15 @@ export function SaturdayReplay() {
 
       <div className={styles.replayStats} aria-live="polite">
         <div>
-          <b className="mono" style={{ color: "var(--bad)" }}>{lost}</b>
+          <b style={{ color: "var(--bad)" }}>{lost}</b>
           <span>customers likely lost to slow replies</span>
         </div>
         <div>
-          <b className="mono" style={{ color: "var(--ok)" }}>{arrived.length}</b>
+          <b style={{ color: "var(--ok)" }}>{arrived.length}</b>
           <span>answered in seconds, even after closing</span>
         </div>
         <div>
-          <b className="mono">{Math.round(arrived.length * 2)} min</b>
+          <b>{Math.round(arrived.length * 2)} min</b>
           <span>of typing the owner never has to do</span>
         </div>
       </div>

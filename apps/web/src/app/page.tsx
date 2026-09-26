@@ -14,8 +14,7 @@ export default function Home() {
           <div className={styles.heroCopy}>
             <p className="kicker">For salons, clinics, coaching centres and every shop that runs on WhatsApp</p>
             <h1 className={`h-display ${styles.heroTitle}`}>
-              Your website already knows the answers.
-              <span className={styles.heroTitleSoft}> Why are you still typing them?</span>
+              Your website already knows the answers. <span className="em">Why are you still typing them?</span>
             </h1>
             <p className="lede">
               Paste your website. FlowScout finds every place customers reach you, spots the replies you type again and again, and switches on a
@@ -28,19 +27,19 @@ export default function Home() {
 
         <section className={`wrap ${styles.strip}`} aria-label="A typical salon">
           <Reveal className={styles.stat}>
-            <b className="mono">
+            <b>
               ~<CountUp to={40} />
             </b>
             <span>WhatsApp messages a day at a typical neighbourhood salon</span>
           </Reveal>
           <Reveal className={styles.stat} delay={90}>
-            <b className="mono">
+            <b>
               <CountUp to={70} suffix="%" />
             </b>
             <span>are the same four questions: price, slot, timing, location</span>
           </Reveal>
           <Reveal className={styles.stat} delay={180}>
-            <b className="mono">
+            <b>
               <CountUp to={6.5} decimals={1} /> hrs
             </b>
             <span>of typing every week, usually by the owner, usually late</span>
@@ -51,7 +50,7 @@ export default function Home() {
           <Reveal>
             <p className="kicker">One Saturday, replayed</p>
             <h2 id="replay-h" className="h-section">
-              Same salon. Same ten messages. Two very different evenings.
+              Same salon. Same ten messages. <span className="em">Two very different evenings.</span>
             </h2>
             <p className="lede">Watch the day play out. On the left, the owner answers between haircuts. On the right, the agent answers from the website in seconds.</p>
           </Reveal>
@@ -64,7 +63,7 @@ export default function Home() {
           <Reveal>
             <p className="kicker">How it works</p>
             <h2 id="how-h" className="h-section">
-              From a URL to a working agent in four steps.
+              From a URL to a working agent <span className="em">in four steps.</span>
             </h2>
           </Reveal>
           <Steps />
@@ -75,7 +74,7 @@ export default function Home() {
             <Reveal>
               <p className="kicker">The math, out in the open</p>
               <h2 id="theory-h" className="h-section">
-                Every workflow gets a score you can argue with.
+                Every workflow gets a score <span className="em">you can argue with.</span>
               </h2>
             </Reveal>
             <Reveal delay={100}>
@@ -94,7 +93,7 @@ export default function Home() {
           <Reveal className={styles.neverStatement}>
             <p className="kicker">What we refuse to automate</p>
             <h2 id="never-h" className="h-section">
-              A good assistant knows when to call the owner.
+              A good assistant knows <span className="em">when to call the owner.</span>
             </h2>
             <p className="lede">Anything that could cost a customer&apos;s trust goes straight to a human, with an alert on the owner&apos;s phone.</p>
           </Reveal>
@@ -116,7 +115,7 @@ export default function Home() {
         <section className={`wrap ${styles.final}`} aria-labelledby="final-h">
           <Reveal className={styles.finalCard}>
             <h2 id="final-h" className="h-display" style={{ fontSize: "clamp(2rem, 5vw, 3.6rem)" }}>
-              See what your website is hiding.
+              See what your website <span className="em">is hiding.</span>
             </h2>
             <p className="lede" style={{ margin: "14px auto 28px", textAlign: "center" }}>
               One scan, about a minute. No sign-up.

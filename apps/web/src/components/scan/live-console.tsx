@@ -39,7 +39,7 @@ const INTENT_LABEL: Record<string, string> = {
 function Stat({ label, value, tone }: { label: string; value: number | string; tone?: string }) {
   return (
     <div className={styles.liveStat}>
-      <motion.b key={String(value)} initial={{ y: -8, opacity: 0.3 }} animate={{ y: 0, opacity: 1 }} style={{ color: tone }} className="mono">
+      <motion.b key={String(value)} initial={{ y: -8, opacity: 0.3 }} animate={{ y: 0, opacity: 1 }} style={{ color: tone }}>
         {value}
       </motion.b>
       <span className="muted">{label}</span>
@@ -66,7 +66,7 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
       .then(async (s: { publicOrigin?: string | null }) => {
         const origin = s.publicOrigin || window.location.origin;
         const url = `${origin}${deployment.chatPath}`;
-        const data = await QRCode.toDataURL(url, { margin: 1, width: 420, color: { dark: "#0f1320", light: "#ffffff" } });
+        const data = await QRCode.toDataURL(url, { margin: 1, width: 420, color: { dark: "#17110f", light: "#f3ebe1" } });
         if (!alive) return;
         setChatUrl(url);
         setQr(data);
@@ -142,7 +142,7 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
             Agent live
           </p>
           <h1 className="h-display" style={{ fontSize: "clamp(1.9rem, 4vw, 3rem)" }}>
-            {k.name}&apos;s assistant is answering.
+            <span className="em">{k.name}&apos;s assistant</span> is answering.
           </h1>
           <p className="muted" style={{ margin: "8px 0 0" }}>
             Started from the &ldquo;{deployment.workflow.name}&rdquo; blueprint. It handles every question, and hands the risky ones to the owner.

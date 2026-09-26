@@ -4,7 +4,7 @@
 }
 .h2 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.025em;
   font-size: clamp(1.5rem, 2.6vw, 2rem);
   margin: 0;
@@ -115,7 +115,7 @@
   overflow-y: auto;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: #0a0e19;
+  background: var(--well);
   padding: 0 16px 14px;
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -131,7 +131,7 @@
   gap: 6px;
   padding: 12px 0 10px;
   margin-bottom: 6px;
-  background: #0a0e19;
+  background: var(--well);
   border-bottom: 1px solid var(--line);
   color: var(--faint);
   font-size: 0.72rem;
@@ -159,7 +159,7 @@
   color: var(--ok);
 }
 .terminal p[data-level="warn"] {
-  color: #ffe1a1;
+  color: #f0d4a4;
 }
 .terminal p[data-level="warn"] > span {
   color: var(--warn);
@@ -367,6 +367,7 @@
 }
 .gaugeText b {
   font-family: var(--font-display);
+  font-weight: 300;
   font-size: clamp(4rem, 10vw, 6rem);
   line-height: 1;
   letter-spacing: -0.05em;
@@ -402,6 +403,7 @@
 }
 .money b {
   font-family: var(--font-display);
+  font-weight: 300;
   font-size: clamp(1.8rem, 3.6vw, 2.6rem);
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -669,7 +671,7 @@
   padding: clamp(20px, 3.5vw, 36px);
   border-radius: 24px;
   border: 1px solid var(--line-strong);
-  background: radial-gradient(ellipse at 100% 0%, rgba(255, 106, 61, 0.1), transparent 55%), color-mix(in oklab, var(--bg-2) 92%, transparent);
+  background: radial-gradient(ellipse at 100% 0%, rgba(200, 113, 58, 0.1), transparent 55%), color-mix(in oklab, var(--bg-2) 92%, transparent);
 }
 .bpHead {
   display: flex;
@@ -844,7 +846,7 @@
   border: 1px solid var(--accent);
   background: var(--accent-soft);
   color: var(--text);
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -854,7 +856,7 @@
 }
 .hold[data-holding] {
   transform: scale(0.98);
-  box-shadow: 0 0 0 6px rgba(255, 106, 61, 0.15), 0 20px 60px -10px rgba(255, 106, 61, 0.5);
+  box-shadow: 0 0 0 6px rgba(200, 113, 58, 0.15), 0 20px 60px -10px rgba(200, 113, 58, 0.5);
 }
 .hold:disabled {
   cursor: progress;
@@ -923,8 +925,9 @@
   background: var(--bg-2);
 }
 .liveStat b {
-  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  font-weight: 300;
   line-height: 1.1;
 }
 .liveStat span {
@@ -955,7 +958,7 @@
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(30, 36, 60, 0.92);
+  background: rgba(34, 26, 22, 0.94);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid color-mix(in oklab, var(--warn) 50%, var(--line));
@@ -1101,7 +1104,7 @@
   font-size: 0.74rem;
   padding: 8px 10px;
   border-radius: 8px;
-  background: #0a0e19;
+  background: var(--well);
   border: 1px solid var(--line);
   overflow-wrap: anywhere;
   color: var(--muted);

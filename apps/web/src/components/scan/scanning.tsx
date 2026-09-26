@@ -104,7 +104,20 @@ export function Scanning({
       <div className={styles.scanCopy}>
         <p className="kicker">{error ? "Scan failed" : STAGE_LABEL[stage]}</p>
         <h1 id="scan-h" className="h-display" style={{ fontSize: "clamp(2rem, 4.4vw, 3.4rem)" }}>
-          {error ? "We couldn't read that site." : complete ? `${tps.length} places customers reach you.` : <>Reading {host}<span className={styles.ellipsis} /></>}
+          {error ? (
+            <>
+              We couldn&apos;t <span className="em">read that site.</span>
+            </>
+          ) : complete ? (
+            <>
+              <span className="em">{tps.length} places</span> customers reach you.
+            </>
+          ) : (
+            <>
+              Reading <span className="em">{host}</span>
+              <span className={styles.ellipsis} />
+            </>
+          )}
         </h1>
 
         <div className={styles.terminal} ref={logRef} aria-live="polite" aria-label="Scan log">
