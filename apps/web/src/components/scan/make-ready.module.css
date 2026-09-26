@@ -15,8 +15,8 @@
 .copy h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 300;
-  font-variation-settings: "opsz" 96;
+  font-weight: 600;
+  font-variation-settings: "opsz" 72;
   font-size: clamp(2rem, 4.4vw, 3.2rem);
   letter-spacing: -0.035em;
   line-height: 1.05;

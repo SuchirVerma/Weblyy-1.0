@@ -1,5 +1,4 @@
 "use client";
-import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Logo } from "../ui";
@@ -24,8 +23,8 @@ function subscribeHash(cb: () => void) {
   return () => window.removeEventListener("hashchange", cb);
 }
 
-export function CommandCenter({ id, ownerKey }: { id: string; ownerKey: string }) {
-  const [data, setData] = useState<CCData | null>(null);
+export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey: string; initial: CCData }) {
+  const [data, setData] = useState<CCData | null>(initial);
   const [error, setError] = useState("");
   const hash = useSyncExternalStore(subscribeHash, () => window.location.hash.slice(1), () => "");
   const tab: TabKey = TABS.some((t) => t.key === hash) ? (hash as TabKey) : "overview";
@@ -52,10 +51,10 @@ export function CommandCenter({ id, ownerKey }: { id: string; ownerKey: string }
     let alive = true;
     let timer: ReturnType<typeof setTimeout>;
     const loop = async () => {
-      await load();
-      if (alive) timer = setTimeout(loop, 3000);
+      if (!document.hidden) await load();
+      if (alive) timer = setTimeout(loop, 4000);
     };
-    loop();
+    timer = setTimeout(loop, 4000);
     return () => {
       alive = false;
       clearTimeout(timer);
@@ -115,8 +114,7 @@ export function CommandCenter({ id, ownerKey }: { id: string; ownerKey: string }
         )}
         {!data && !error && <div className={styles.loading}>Loading your Command Center…</div>}
         {data && (
-          <AnimatePresence mode="wait">
-            <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+          <div key={tab} className={styles.tabIn}>
               {tab === "overview" && <OverviewTab data={data} go={go} />}
               {tab === "website" && <WebsiteTab data={data} />}
               {tab === "agent" && <AgentTab data={data} ownerKey={ownerKey} />}
@@ -125,8 +123,7 @@ export function CommandCenter({ id, ownerKey }: { id: string; ownerKey: string }
               {tab === "automations" && <AutomationsTab data={data} act={act} />}
               {tab === "analytics" && <AnalyticsTab data={data} />}
               {tab === "settings" && <SettingsTab data={data} ownerKey={ownerKey} />}
-            </motion.div>
-          </AnimatePresence>
+          </div>
         )}
       </main>
     </div>

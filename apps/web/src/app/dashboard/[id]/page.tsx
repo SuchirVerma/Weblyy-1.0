@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CommandCenter } from "@/components/cc/command-center";
 import { getAgent } from "@/lib/store";
+import { workspaceView } from "@/lib/workspace-view";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "AI Business Command Center | FlowScout", robots: { index: false } };
@@ -26,5 +27,5 @@ export default async function DashboardPage({ params, searchParams }: PageProps<
       </main>
     );
   }
-  return <CommandCenter id={agent.id} ownerKey={key} />;
+  return <CommandCenter id={agent.id} ownerKey={key} initial={JSON.parse(JSON.stringify(workspaceView(agent)))} />;
 }

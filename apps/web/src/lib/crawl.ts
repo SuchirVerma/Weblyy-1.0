@@ -548,18 +548,15 @@ async function crawlSite(input: string, log: Log): Promise<SiteKnowledge> {
   }
 
   // A real browser sees what plain HTML can't: JavaScript-built pages and injected WhatsApp/chat widgets.
-  if (!isDemo) {
-    if (!staticError) log("info", "Opening it in a real browser to catch JavaScript-loaded buttons and widgets");
-    const r = await renderPage(base.toString(), 15_000, staticError ? 2 : 1);
-    if (r) {
-      renders++;
-      const rp = extractPage(new URL(r.url), r.html);
-      pages.push(rp);
-      if (staticError) base = new URL(r.url);
-      log("ok", staticError ? `Loaded in the browser: "${rp.title || base.hostname}"` : "Browser view captured");
-    } else if (staticError) {
-      throw staticError;
-    }
+  // It runs alongside the other page fetches instead of before them.
+  if (staticError) {
+    const r = await renderPage(base.toString(), 15_000, 2);
+    if (!r) throw staticError;
+    renders++;
+    const rp = extractPage(new URL(r.url), r.html);
+    pages.push(rp);
+    base = new URL(r.url);
+    log("ok", `Loaded in the browser: "${rp.title || base.hostname}"`);
   }
   if (!pages.length) throw staticError ?? new CrawlError("Couldn't load that site.");
   const homeText = pages.map((p) => p.text).join(" ");
@@ -570,25 +567,48 @@ async function crawlSite(input: string, log: Log): Promise<SiteKnowledge> {
     throw new CrawlError(`${base.hostname} only shows a "coming soon" page right now, so there's nothing to scan yet.`);
   }
 
-  const extra = pickPages(pages, base);
-  if (extra.length) log("info", `Following ${extra.length} key page${extra.length > 1 ? "s" : ""}: ${extra.map((u) => new URL(u).pathname).join(", ")}`);
-  const results = await Promise.allSettled(extra.map((u) => fetchPage(new URL(u))));
-  for (let i = 0; i < results.length; i++) {
-    const r = results[i];
-    const path = new URL(extra[i]).pathname;
-    const staticPage = r.status === "fulfilled" ? extractPage(r.value.url, r.value.html) : null;
-    const thin = !staticPage || staticPage.text.length < 400;
-    if (staticPage) pages.push(staticPage);
-    if (thin && !isDemo && renders < MAX_RENDERS) {
-      const rr = await renderPage(extra[i], 12_000);
+  const homeRender =
+    !isDemo && !staticError
+      ? (log("info", "Checking it in a real browser for JavaScript-loaded buttons and widgets"), renderPage(base.toString()))
+      : Promise.resolve(null);
+
+  const readExtra = async (list: string[]) => {
+    if (!list.length) return;
+    log("info", `Reading ${list.length} key page${list.length > 1 ? "s" : ""}: ${list.map((u) => new URL(u).pathname).join(", ")}`);
+    const results = await Promise.allSettled(list.map((u) => fetchPage(new URL(u))));
+    const thin: string[] = [];
+    results.forEach((r, i) => {
+      const path = new URL(list[i]).pathname;
+      const page = r.status === "fulfilled" ? extractPage(r.value.url, r.value.html) : null;
+      if (page) pages.push(page);
+      if (!page || page.text.length < 400) thin.push(list[i]);
+      else log("ok", `Read ${path}`);
+    });
+    if (isDemo) return;
+    const rendered = await Promise.all(thin.slice(0, MAX_RENDERS).map((u) => renderPage(u, 12_000)));
+    rendered.forEach((rr, i) => {
+      const path = new URL(thin[i]).pathname;
       if (rr) {
         renders++;
         pages.push(extractPage(new URL(rr.url), rr.html));
         log("ok", `Read ${path} in the browser`);
-        continue;
-      }
+      } else if (!pages.some((p) => p.url === thin[i])) log("warn", `Skipped ${path} (couldn't load)`);
+    });
+  };
+
+  const first = pickPages(pages, base);
+  const [rendered] = await Promise.all([homeRender, readExtra(first)]);
+  if (rendered) {
+    renders++;
+    const rp = extractPage(new URL(rendered.url), rendered.html);
+    pages.push(rp);
+    if (PARKED.test(rp.text) && rp.text.length < 3000) {
+      throw new CrawlError(`${base.hostname} is a parked domain with no business website on it yet. Try the business's current site.`);
     }
-    log(staticPage ? "ok" : "warn", staticPage ? `Read ${path}` : `Skipped ${path} (couldn't load)`);
+    log("ok", "Browser view captured");
+    // JavaScript-built sites only reveal their menu links in the browser.
+    const more = pickPages(pages, base).filter((u) => !first.includes(u)).slice(0, Math.max(0, MAX_EXTRA_PAGES - first.length));
+    await readExtra(more);
   }
 
   const uniq = <T,>(xs: T[]) => [...new Set(xs)];

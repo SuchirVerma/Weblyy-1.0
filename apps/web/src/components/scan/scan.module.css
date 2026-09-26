@@ -377,7 +377,7 @@
 }
 .gaugeText b {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(4rem, 10vw, 6rem);
   line-height: 1;
   letter-spacing: -0.05em;
@@ -413,7 +413,7 @@
 }
 .money b {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(1.8rem, 3.6vw, 2.6rem);
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -937,7 +937,7 @@
 .liveStat b {
   font-family: var(--font-display);
   font-size: clamp(2rem, 3.6vw, 2.8rem);
-  font-weight: 300;
+  font-weight: 600;
   line-height: 1.1;
 }
 .liveStat span {
@@ -1194,7 +1194,7 @@
 .catScore {
   font-family: var(--font-display);
   font-size: 1.4rem;
-  font-weight: 300;
+  font-weight: 600;
 }
 .catChecks {
   list-style: none;

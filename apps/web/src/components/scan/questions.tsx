@@ -80,7 +80,7 @@ export function Questions({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Scoring failed.");
-      const wait = 1100 - (Date.now() - started);
+      const wait = 400 - (Date.now() - started);
       if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       onDone(a, data as Analysis);
     } catch (e) {

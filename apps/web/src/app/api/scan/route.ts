@@ -1,4 +1,5 @@
 import { crawl, CrawlError } from "@/lib/crawl";
+
 import { detectTouchpoints, findGaps } from "@/lib/detect";
 import { allow, clientIp } from "@/lib/ratelimit";
 import { saveScan } from "@/lib/store";
@@ -36,7 +37,20 @@ export async function POST(req: Request) {
       };
       try {
         send({ type: "stage", stage: "crawl" });
-        const knowledge = await crawl(url, (level, text) => send({ type: "log", level, text }));
+        // Keep the log moving during the slower browser step so it never looks stuck.
+        let lastLog = Date.now();
+        const HEARTBEATS = ["Still reading the page like a customer would…", "Looking for chat buttons, booking widgets and forms…", "Collecting prices, timings and FAQs…", "Almost there…"];
+        let beat = 0;
+        const hb = setInterval(() => {
+          if (Date.now() - lastLog > 2500 && beat < HEARTBEATS.length) {
+            send({ type: "log", level: "info", text: HEARTBEATS[beat++] });
+            lastLog = Date.now();
+          }
+        }, 1000);
+        const knowledge = await crawl(url, (level, text) => {
+          lastLog = Date.now();
+          send({ type: "log", level, text });
+        }).finally(() => clearInterval(hb));
 
         send({ type: "stage", stage: "extract" });
         await pause(250);
@@ -52,12 +66,12 @@ export async function POST(req: Request) {
         for (const t of touchpoints) {
           send({ type: "touchpoint", touchpoint: t });
           send({ type: "log", level: "ok", text: `${t.label}: ${t.detail}` });
-          await pause(260);
+          await pause(130);
         }
         const gaps = findGaps(knowledge);
         for (const g of gaps.slice(0, 3)) {
           send({ type: "log", level: "warn", text: g });
-          await pause(160);
+          await pause(100);
         }
         if (touchpoints.length === 0) send({ type: "log", level: "warn", text: "No customer touchpoints found. The site may load its content with JavaScript." });
 

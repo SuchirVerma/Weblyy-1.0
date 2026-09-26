@@ -40,11 +40,17 @@ function getBrowser() {
   return g.__fsBrowser;
 }
 
+/** Start Chrome ahead of the first scan so it is ready when needed. */
+export function warmBrowser() {
+  void getBrowser();
+}
+
 export async function browserAvailable() {
   return (await getBrowser()) !== null;
 }
 
-const BLOCKED_TYPES = new Set(["image", "media", "font"]);
+const BLOCKED_TYPES = new Set(["image", "media", "font", "stylesheet"]);
+const TRACKERS = /google-analytics|googletagmanager|doubleclick|facebook\.net|connect\.facebook|hotjar|clarity\.ms|analytics|pixel|adservice|googlesyndication|youtube\.com\/embed|player\.vimeo/i;
 
 export async function renderPage(url: string, timeoutMs = 15_000, attempts = 1): Promise<{ url: string; html: string } | null> {
   for (let i = 0; i < attempts; i++) {
@@ -68,7 +74,7 @@ async function renderOnce(url: string, timeoutMs: number): Promise<{ url: string
     const page = await ctx.newPage();
     await page.route("**/*", async (route) => {
       const req = route.request();
-      if (BLOCKED_TYPES.has(req.resourceType())) return route.abort();
+      if (BLOCKED_TYPES.has(req.resourceType()) || TRACKERS.test(req.url())) return route.abort();
       let host = "";
       try {
         const u = new URL(req.url());
@@ -82,9 +88,9 @@ async function renderOnce(url: string, timeoutMs: number): Promise<{ url: string
     });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
     // Give late widgets (chat bubbles, WhatsApp buttons) a moment to inject themselves.
-    await page.waitForLoadState("networkidle", { timeout: 4000 }).catch(() => {});
+    await page.waitForLoadState("networkidle", { timeout: 2500 }).catch(() => {});
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)).catch(() => {});
-    await page.waitForTimeout(700);
+    await page.waitForTimeout(350);
     const html = await page.content();
     return { url: page.url(), html };
   } catch {

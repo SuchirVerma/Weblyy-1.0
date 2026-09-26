@@ -26,7 +26,7 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
     setPhase("working");
     setError("");
     setStep(0);
-    const tick = setInterval(() => setStep((s) => Math.min(STEPS.length - 1, s + 1)), 750);
+    const tick = setInterval(() => setStep((s) => Math.min(STEPS.length - 1, s + 1)), 420);
     const started = Date.now();
     try {
       const res = await fetch("/api/workspace", {
@@ -36,13 +36,13 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d?.error || "Something went wrong.");
-      const wait = STEPS.length * 750 + 300 - (Date.now() - started);
+      const wait = STEPS.length * 420 + 200 - (Date.now() - started);
       if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       clearInterval(tick);
       setStep(STEPS.length);
       setResult({ before: d.before, after: d.after });
       setPhase("done");
-      setTimeout(() => router.push(d.dashboardPath), 1600);
+      setTimeout(() => router.push(d.dashboardPath), 1000);
     } catch (e) {
       clearInterval(tick);
       setError(e instanceof Error ? e.message : "Something went wrong.");

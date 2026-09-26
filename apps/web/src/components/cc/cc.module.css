@@ -167,11 +167,11 @@
 .head h1 {
   margin: 6px 0 0;
   font-family: var(--font-display);
-  font-weight: 300;
-  font-variation-settings: "opsz" 96;
-  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  font-weight: 600;
+  font-variation-settings: "opsz" 72;
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 .headActions {
   display: flex;
@@ -277,7 +277,7 @@
 }
 .ring b {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: 2.3rem;
   letter-spacing: -0.04em;
 }
@@ -986,4 +986,13 @@ button.tr:hover {
   text-align: right;
   font-family: var(--font-mono);
   font-weight: 500;
+}
+
+.tabIn {
+  animation: tabIn 0.2s var(--ease-out);
+}
+@keyframes tabIn {
+  from {
+    transform: translateY(6px);
+  }
 }

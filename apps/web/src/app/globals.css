@@ -13,8 +13,8 @@
   --line-strong: rgba(17, 24, 39, 0.22);
   --text: #111827;
   --milk: #93c5fd;
-  --muted: #4b5563;
-  --faint: #6b7280;
+  --muted: #374151;
+  --faint: #5b6473;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --accent-ink: #ffffff;
@@ -69,12 +69,7 @@ body {
   font-size: 17px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  animation: page-in 0.6s var(--ease-out) both;
-}
-@keyframes page-in {
-  from {
-    opacity: 0;
-  }
+  text-rendering: optimizeLegibility;
 }
 ::selection {
   background: var(--accent);
@@ -132,23 +127,16 @@ button {
   width: 70vmax;
   height: 70vmax;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 1;
-  will-change: transform;
 }
 .env-glow-a {
   background: radial-gradient(circle, rgba(37, 99, 235, 0.08), transparent 60%);
   top: -30vmax;
   right: -20vmax;
-  animation: drift-a 70s var(--ease-in-out) infinite alternate;
-  animation-delay: -12s;
 }
 .env-glow-b {
   background: radial-gradient(circle, rgba(124, 58, 237, 0.06), transparent 60%);
   bottom: -35vmax;
   left: -25vmax;
-  animation: drift-b 90s var(--ease-in-out) infinite alternate;
-  animation-delay: -30s;
 }
 @keyframes drift-a {
   to {
@@ -161,13 +149,10 @@ button {
   }
 }
 .env-grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(17, 24, 39, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse at 50% 15%, #000 15%, transparent 70%);
+  display: none;
 }
 .env-grain {
+  display: none;
   position: absolute;
   inset: -50%;
   opacity: 0.025;
@@ -189,9 +174,7 @@ body.paused *::after {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: var(--bg);
+  background: var(--surface);
   border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
 }
 .nav-inner {
@@ -239,8 +222,9 @@ body.paused *::after {
   border-radius: 999px;
   border: 1px solid var(--line);
   background: color-mix(in oklab, var(--surface) 70%, transparent);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -266,38 +250,43 @@ body.paused *::after {
 }
 
 .kicker {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent);
 }
 .h-display {
   font-family: var(--font-display);
-  font-weight: 300;
-  font-variation-settings: "opsz" 96;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
+  font-weight: 700;
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
   margin: 0;
+  color: var(--text);
 }
 .h-display .em,
 .h-section .em {
-  font-weight: 600;
+  font-weight: inherit;
+  color: var(--accent);
 }
 .h-section {
   font-family: var(--font-display);
-  font-weight: 300;
-  font-variation-settings: "opsz" 96;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
-  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 700;
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
   margin: 10px 0 14px;
   max-width: 22ch;
 }
 .lede {
   color: var(--muted);
-  font-size: clamp(1rem, 1.4vw, 1.15rem);
-  max-width: 56ch;
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  line-height: 1.65;
+  max-width: 60ch;
   margin: 0;
 }
 .mono {
@@ -406,8 +395,8 @@ body.paused *::after {
   border: 0;
   outline: none;
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 0.98rem;
+  font-family: var(--font-body);
+  font-size: 1.02rem;
 }
 .scanbar input::placeholder {
   color: var(--faint);
@@ -473,9 +462,9 @@ body.paused *::after {
 
 /* ---------------------------------------------------------- reveal helper */
 .reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  opacity: 0.001;
+  transform: translateY(14px);
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
 }
 .reveal.in {
   opacity: 1;

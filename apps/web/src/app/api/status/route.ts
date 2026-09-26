@@ -1,5 +1,6 @@
 import { networkInterfaces } from "node:os";
 import { aiEnabled } from "@/lib/ai";
+import { warmBrowser } from "@/lib/render";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,8 @@ function lanOrigin(req: Request): string | null {
 }
 
 export function GET(req: Request) {
+  // Every page calls this on load, so Chrome is ready by the time someone presses Analyze.
+  warmBrowser();
   return Response.json({
     ai: aiEnabled() ? "ai" : "rules",
     n8n: Boolean(process.env.N8N_URL && process.env.N8N_API_KEY),
