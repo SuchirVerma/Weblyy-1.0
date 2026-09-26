@@ -1,39 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  /* Brewora-inspired: espresso canvas, copper accent, milk text */
-  --bg: #17110f;
-  --bg-2: #1c1512;
-  --surface: #221a16;
-  --surface-2: #2b211c;
-  --well: #120d0b;
-  --line: rgba(243, 235, 225, 0.12);
-  --line-strong: rgba(243, 235, 225, 0.3);
-  --text: #f3ebe1;
-  --milk: #efe6da;
-  --muted: #b9a79a;
-  --faint: #8a7a6e;
-  --accent: #c8713a;
-  --accent-hover: #d98549;
-  --accent-ink: #17110f;
-  --accent-soft: rgba(200, 113, 58, 0.16);
+  color-scheme: light;
+  /* Clean light theme: soft white canvas, near-black ink, electric blue accent */
+  --bg: #f7f8fa;
+  --bg-2: #f1f3f7;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --term: #0f172a;
+  --chat-bg: #f1f4f9;
+  --line: rgba(17, 24, 39, 0.1);
+  --line-strong: rgba(17, 24, 39, 0.22);
+  --text: #111827;
+  --milk: #93c5fd;
+  --muted: #4b5563;
+  --faint: #6b7280;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --shadow: 0 1px 2px rgba(17, 24, 39, 0.04), 0 12px 32px -12px rgba(17, 24, 39, 0.12);
 
-  --bubble-in: #2b211c;
-  --bubble-out: #3b2719;
-  --bubble-good: #28301f;
+  --bubble-in: #ffffff;
+  --bubble-out: #dbeafe;
+  --bubble-good: #dcfce7;
 
-  --ch-whatsapp: #9ccb8e;
-  --ch-email: #a3b8cc;
-  --ch-phone: #8cc7b8;
-  --ch-form: #e3b35f;
-  --ch-booking: #c9a2c0;
-  --ch-chat: #e39a6a;
-  --ch-social: #dd98a6;
-  --ch-web: #c4b3a3;
+  --ch-whatsapp: #16a34a;
+  --ch-email: #0ea5e9;
+  --ch-phone: #0d9488;
+  --ch-form: #d97706;
+  --ch-booking: #7c3aed;
+  --ch-chat: #ea580c;
+  --ch-social: #db2777;
+  --ch-web: #64748b;
 
-  --ok: #9ccb8e;
-  --warn: #e6b964;
-  --bad: #e07a5f;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --bad: #dc2626;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
@@ -130,18 +133,18 @@ button {
   height: 70vmax;
   border-radius: 50%;
   filter: blur(80px);
-  opacity: 0.55;
+  opacity: 1;
   will-change: transform;
 }
 .env-glow-a {
-  background: radial-gradient(circle, rgba(200, 113, 58, 0.14), transparent 60%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08), transparent 60%);
   top: -30vmax;
   right: -20vmax;
   animation: drift-a 70s var(--ease-in-out) infinite alternate;
   animation-delay: -12s;
 }
 .env-glow-b {
-  background: radial-gradient(circle, rgba(90, 60, 40, 0.28), transparent 60%);
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.06), transparent 60%);
   bottom: -35vmax;
   left: -25vmax;
   animation: drift-b 90s var(--ease-in-out) infinite alternate;
@@ -160,13 +163,14 @@ button {
 .env-grid {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 50% 60% at 80% 70%, rgba(160, 190, 210, 0.04), transparent 60%);
+  background-image: radial-gradient(rgba(17, 24, 39, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse at 50% 15%, #000 15%, transparent 70%);
 }
 .env-grain {
   position: absolute;
   inset: -50%;
-  opacity: 0.07;
-  mix-blend-mode: overlay;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 body.paused *,
@@ -187,7 +191,7 @@ body.paused *::after {
   z-index: 40;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  background: color-mix(in oklab, var(--bg) 88%, transparent);
+  background: var(--bg);
   border-bottom: 1px solid color-mix(in oklab, var(--line) 60%, transparent);
 }
 .nav-inner {
@@ -245,7 +249,7 @@ body.paused *::after {
   height: 7px;
   border-radius: 50%;
   background: var(--ok);
-  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
   animation: ping 2.4s var(--ease-out) infinite;
 }
 .dot.warn {
@@ -254,10 +258,10 @@ body.paused *::after {
 }
 @keyframes ping {
   0% {
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55);
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45);
   }
   100% {
-    box-shadow: 0 0 0 9px rgba(74, 222, 128, 0);
+    box-shadow: 0 0 0 9px rgba(22, 163, 74, 0);
   }
 }
 
@@ -340,7 +344,7 @@ body.paused *::after {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  box-shadow: 0 10px 40px -8px rgba(200, 113, 58, 0.6);
+  box-shadow: 0 10px 30px -8px rgba(37, 99, 235, 0.55);
   opacity: 0;
   transition: opacity 0.3s var(--ease-out);
 }
@@ -356,7 +360,7 @@ body.paused *::after {
   border-color: var(--line-strong);
 }
 .btn-ghost:hover {
-  background: rgba(243, 235, 225, 0.08);
+  background: rgba(17, 24, 39, 0.05);
 }
 .btn-sm {
   height: 40px;
@@ -376,15 +380,15 @@ body.paused *::after {
   gap: 8px;
   padding: 8px;
   border-radius: 999px;
-  background: color-mix(in oklab, var(--surface) 85%, transparent);
+  background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow);
   transition: border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
   max-width: 580px;
 }
 .scanbar:focus-within {
   border-color: color-mix(in oklab, var(--accent) 60%, var(--line));
-  box-shadow: 0 30px 80px -30px rgba(200, 113, 58, 0.35);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), var(--shadow);
 }
 .scanbar label {
   flex: 1;
@@ -454,14 +458,15 @@ body.paused *::after {
 
 /* ------------------------------------------------------------------- cards */
 .card {
-  background: linear-gradient(180deg, color-mix(in oklab, var(--surface) 92%, transparent), color-mix(in oklab, var(--bg-2) 92%, transparent));
+  background: var(--surface);
+  box-shadow: var(--shadow);
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
 .err {
-  border: 1px solid color-mix(in oklab, var(--bad) 50%, var(--line));
-  background: color-mix(in oklab, var(--bad) 10%, var(--surface));
-  color: #ffd9d3;
+  border: 1px solid color-mix(in oklab, var(--bad) 35%, var(--line));
+  background: color-mix(in oklab, var(--bad) 7%, var(--surface));
+  color: #991b1b;
   padding: 14px 16px;
   border-radius: 14px;
 }

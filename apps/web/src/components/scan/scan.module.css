@@ -114,8 +114,18 @@
   height: 340px;
   overflow-y: auto;
   border-radius: 16px;
-  border: 1px solid var(--line);
-  background: var(--well);
+  /* The scan log stays a dark terminal on the light page. */
+  --muted: #94a3b8;
+  --faint: #64748b;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.25);
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --accent: #60a5fa;
+  border: 1px solid #1e293b;
+  background: var(--term);
+  color: #cbd5e1;
+  box-shadow: var(--shadow);
   padding: 0 16px 14px;
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -131,7 +141,7 @@
   gap: 6px;
   padding: 12px 0 10px;
   margin-bottom: 6px;
-  background: var(--well);
+  background: var(--term);
   border-bottom: 1px solid var(--line);
   color: var(--faint);
   font-size: 0.72rem;
@@ -159,7 +169,7 @@
   color: var(--ok);
 }
 .terminal p[data-level="warn"] {
-  color: #f0d4a4;
+  color: #fde68a;
 }
 .terminal p[data-level="warn"] > span {
   color: var(--warn);
@@ -355,7 +365,7 @@
   stroke: var(--line);
 }
 .gaugeFill {
-  filter: drop-shadow(0 0 12px currentColor);
+  filter: none;
 }
 .gaugeText {
   position: absolute;
@@ -671,7 +681,7 @@
   padding: clamp(20px, 3.5vw, 36px);
   border-radius: 24px;
   border: 1px solid var(--line-strong);
-  background: radial-gradient(ellipse at 100% 0%, rgba(200, 113, 58, 0.1), transparent 55%), color-mix(in oklab, var(--bg-2) 92%, transparent);
+  background: radial-gradient(ellipse at 100% 0%, rgba(37, 99, 235, 0.1), transparent 55%), color-mix(in oklab, var(--bg-2) 92%, transparent);
 }
 .bpHead {
   display: flex;
@@ -856,7 +866,7 @@
 }
 .hold[data-holding] {
   transform: scale(0.98);
-  box-shadow: 0 0 0 6px rgba(200, 113, 58, 0.15), 0 20px 60px -10px rgba(200, 113, 58, 0.5);
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15), 0 20px 50px -12px rgba(37, 99, 235, 0.45);
 }
 .hold:disabled {
   cursor: progress;
@@ -958,11 +968,11 @@
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(34, 26, 22, 0.94);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid color-mix(in oklab, var(--warn) 50%, var(--line));
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 20px 50px -14px rgba(17, 24, 39, 0.35);
 }
 .alert > div {
   display: grid;
@@ -1104,7 +1114,7 @@
   font-size: 0.74rem;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--well);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   overflow-wrap: anywhere;
   color: var(--muted);

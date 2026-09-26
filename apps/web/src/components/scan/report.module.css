@@ -156,7 +156,7 @@
 .gaps li {
   padding-left: 18px;
   position: relative;
-  color: #f0d4a4;
+  color: #92400e;
 }
 .gaps li::before {
   content: "!";

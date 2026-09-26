@@ -7,11 +7,11 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 export function Logo({ size = 26 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="9" fill="#2b211c" />
-      <circle cx="16" cy="16" r="10" fill="none" stroke="#c8713a" strokeWidth="1.6" opacity=".45" />
-      <circle cx="16" cy="16" r="5" fill="none" stroke="#c8713a" strokeWidth="1.8" />
-      <path d="M16 16 L25 9" stroke="#c8713a" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="22" cy="20.5" r="2.1" fill="#efe6da" />
+      <rect width="32" height="32" rx="9" fill="#111827" />
+      <circle cx="16" cy="16" r="10" fill="none" stroke="#60a5fa" strokeWidth="1.6" opacity=".45" />
+      <circle cx="16" cy="16" r="5" fill="none" stroke="#60a5fa" strokeWidth="1.8" />
+      <path d="M16 16 L25 9" stroke="#60a5fa" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="22" cy="20.5" r="2.1" fill="#4ade80" />
     </svg>
   );
 }

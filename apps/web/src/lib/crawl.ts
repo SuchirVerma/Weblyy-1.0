@@ -620,7 +620,7 @@ export async function crawl(input: string, log: Log): Promise<SiteKnowledge> {
   const hoursSeen = new Set<string>();
   // Same schedule written differently ("Mon – Sat" vs "Mon, Tue, …") still counts once if the times match.
   const hours = [...ld.hours.map(prettyHours), ...(all("hours") as string[])].filter((h) => {
-    const key = h.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const key = hoursKey(h);
     if (hoursSeen.has(key)) return false;
     hoursSeen.add(key);
     return true;
@@ -655,6 +655,17 @@ export async function crawl(input: string, log: Log): Promise<SiteKnowledge> {
     services,
     text: fullText.slice(0, 24000),
   };
+}
+
+/** "Tuesday to Sunday, 10:00 am to 8:30 pm" and "Tue-Sun 10:00 am – 8:30 pm" produce the same key. */
+function hoursKey(h: string) {
+  return h
+    .toLowerCase()
+    .replace(/\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b/g, "$1")
+    .replace(/\b(open|opening|hours|timings?|daily|we are)\b/g, "")
+    .replace(/\s*(?:to|–|-|—)\s*/g, "-")
+    .replace(/(\d)(?::00)?\s*(am|pm)/g, "$1$2")
+    .replace(/[^a-z0-9:-]/g, "");
 }
 
 function dedupeParts(addr: string) {
