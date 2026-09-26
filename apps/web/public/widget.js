@@ -74,6 +74,14 @@
     toggle(false);
   });
 
+  // Let the host page open the chat from its own buttons: window.FlowScoutWidget.open()
+  window.FlowScoutWidget = {
+    open: function () {
+      isOpen = true;
+      toggle(true);
+    },
+  };
+
   function mount() {
     document.body.appendChild(btn);
     document.body.appendChild(close);

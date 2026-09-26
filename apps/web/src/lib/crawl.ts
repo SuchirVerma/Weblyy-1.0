@@ -6,7 +6,7 @@ import * as cheerio from "cheerio";
 import { isPublicHost } from "./net";
 import { instagramHandle, LINK_HUBS, NOT_A_WEBSITE, readInstagram } from "./instagram";
 import { renderPage } from "./render";
-import type { BusinessType, FaqItem, FormInfo, PriceItem, SiteKnowledge } from "./types";
+import type { BusinessType, FaqItem, FormInfo, PriceItem, SiteKnowledge, SiteSignals } from "./types";
 
 const MAX_BYTES = 2_500_000;
 const MAX_EXTRA_PAGES = 5;
@@ -214,6 +214,7 @@ interface PageData {
   jsonLd: Record<string, unknown>[];
   siteName: string;
   description: string;
+  signals: SiteSignals;
 }
 
 function fieldLabel($: cheerio.CheerioAPI, el: cheerio.Cheerio<never>): string {
@@ -320,6 +321,26 @@ function extractPage(url: URL, html: string): PageData {
   const description =
     $('meta[name="description"]').attr("content") ?? $('meta[property="og:description"]').attr("content") ?? "";
   const title = clean($("title").first().text());
+  const ctaCount = $("a, button")
+    .filter((_, el) => /book|appointment|call now|whatsapp|chat|enquir|inquir|contact us|get a quote|order|reserve|schedule|register|enrol|sign up/i.test($(el).text()))
+    .length;
+  const signalsBase = {
+    https: url.protocol === "https:",
+    viewport: $('meta[name="viewport"]').length > 0,
+    title,
+    h1: clean($("h1").first().text()).slice(0, 120),
+    metaDescription: clean($('meta[name="description"]').attr("content") ?? ""),
+    jsonLdTypes: [
+      ...new Set(
+        jsonLd.flatMap((j) => {
+          const t = j["@type"];
+          return Array.isArray(t) ? t.map(String) : t ? [String(t)] : [];
+        }),
+      ),
+    ],
+    ctaCount,
+    ogImage: $('meta[property="og:image"]').length > 0,
+  };
 
   $("script, style, noscript, svg, template, iframe").remove();
 
@@ -375,7 +396,8 @@ function extractPage(url: URL, html: string): PageData {
     const q = clean($(h).text());
     if (!q.endsWith("?") || q.length > 160 || q.length < 8) return;
     const a = clean($(h).next().text() || $(h).parent().next().text());
-    if (a && !faqs.some((f) => f.q === q)) faqs.push({ q, a: a.slice(0, 400) });
+    const cta = /^(ready to|want to|looking for|need|why wait|what are you waiting|book|call|get|start|join|contact)\b/i.test(q) || /[a-z][A-Z]/.test(q);
+    if (a && !cta && !faqs.some((f) => f.q === q)) faqs.push({ q, a: a.slice(0, 400) });
   });
 
   $("br, p, div, li, td, th, h1, h2, h3, h4, h5, h6, a, span, section, header, footer, nav, label, option, summary, dt, dd, address, button").after(" ");
@@ -424,6 +446,7 @@ function extractPage(url: URL, html: string): PageData {
     jsonLd,
     siteName: clean(siteName),
     description: clean(description),
+    signals: { ...signalsBase, wordCount: bodyText.split(/\s+/).length },
   };
 }
 
@@ -653,6 +676,7 @@ async function crawlSite(input: string, log: Log): Promise<SiteKnowledge> {
     socialLinks,
     mapUrl: pages.map((p) => p.mapUrl).find(Boolean) ?? "",
     rendered: renders > 0,
+    signals: mergeSignals(pages.filter((p) => p.url === pages[0].url || p.url === base.toString()).map((p) => p.signals)),
     services,
     text: fullText.slice(0, 24000),
   };
@@ -680,6 +704,24 @@ function dedupeParts(addr: string) {
       return true;
     })
     .join(", ");
+}
+
+function mergeSignals(list: SiteSignals[]): SiteSignals {
+  const first = list[0];
+  return list.reduce(
+    (acc, s) => ({
+      https: acc.https || s.https,
+      viewport: acc.viewport || s.viewport,
+      title: acc.title || s.title,
+      h1: acc.h1 || s.h1,
+      metaDescription: acc.metaDescription || s.metaDescription,
+      jsonLdTypes: [...new Set([...acc.jsonLdTypes, ...s.jsonLdTypes])],
+      ctaCount: Math.max(acc.ctaCount, s.ctaCount),
+      ogImage: acc.ogImage || s.ogImage,
+      wordCount: Math.max(acc.wordCount, s.wordCount),
+    }),
+    first,
+  );
 }
 
 const DAYS: Record<string, string> = { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun" };

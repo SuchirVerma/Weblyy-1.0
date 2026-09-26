@@ -2,7 +2,9 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { ChatTurn, ScanResult, SiteKnowledge } from "./types";
+import type { Audit } from "./audit";
+import type { SearchPack } from "./aisearch";
+import type { Answers, ChatTurn, ScanResult, SiteKnowledge } from "./types";
 
 export interface LogEntry {
   at: number;
@@ -24,14 +26,64 @@ export interface ChatMessage {
   delivered?: "chat" | "whatsapp" | "whatsapp-failed";
 }
 
+export interface LeadContext {
+  name?: string;
+  phone?: string;
+  email?: string;
+  interests: string[];
+  intents: string[];
+  when?: string;
+  askedContact?: boolean;
+  leadId?: string;
+}
+
 export interface Conversation {
   from: string;
+  lead?: LeadContext;
   messages: ChatMessage[];
   /** An escalated message the owner hasn't answered yet */
   needsOwner: boolean;
   /** The owner is handling this customer; the agent stays quiet until handed back */
   ownerHandling: boolean;
   lastAt: number;
+}
+
+export type LeadStatus = "new" | "qualified" | "booked" | "converted" | "lost";
+
+export interface Lead {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  name: string;
+  phone: string;
+  email: string;
+  interest: string;
+  source: string;
+  status: LeadStatus;
+  /** 0-100 from the AI qualification */
+  score: number;
+  temperature: "hot" | "warm" | "cold";
+  qualification: string[];
+  from: string;
+  followUp: string;
+  followUpSent: boolean;
+}
+
+export interface AutomationRun {
+  id: string;
+  at: number;
+  automation: string;
+  steps: string[];
+  detail: string;
+}
+
+export interface Workspace {
+  createdAt: number;
+  sourceUrl: string;
+  answers: Answers;
+  auditBefore: Audit;
+  auditAfter: Audit;
+  search: SearchPack;
 }
 
 export interface DeployedAgent {
@@ -43,6 +95,10 @@ export interface DeployedAgent {
   stats: { messages: number; escalations: number; customers: string[] };
   log: LogEntry[];
   conversations: Record<string, Conversation>;
+  leads: Lead[];
+  runs: AutomationRun[];
+  automations: Record<string, boolean>;
+  workspace?: Workspace;
 }
 
 const DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
@@ -57,6 +113,9 @@ async function load() {
     const list = JSON.parse(await readFile(FILE, "utf8")) as DeployedAgent[];
     for (const a of list) {
       a.conversations ??= {};
+      a.leads ??= [];
+      a.runs ??= [];
+      a.automations ??= {};
       a.ownerKey ??= randomBytes(12).toString("hex");
       if (!agents.has(a.id)) agents.set(a.id, a);
     }
@@ -106,6 +165,9 @@ export async function createAgent(knowledge: SiteKnowledge, workflowName: string
     stats: { messages: 0, escalations: 0, customers: [] },
     log: [],
     conversations: {},
+    leads: [],
+    runs: [],
+    automations: {},
   };
   agents.set(id, agent);
   if (agents.size > MAX_AGENTS) {
@@ -187,6 +249,18 @@ export function recordMessage(agent: DeployedAgent, entry: LogEntry) {
   if (!agent.stats.customers.includes(entry.from)) agent.stats.customers.push(entry.from);
   agent.log.push(entry);
   if (agent.log.length > 60) agent.log.splice(0, agent.log.length - 60);
+  persist();
+}
+
+export const newId = () => randomBytes(6).toString("hex");
+
+export function savePersist() {
+  persist();
+}
+
+export function recordRun(agent: DeployedAgent, automation: string, steps: string[], detail: string) {
+  agent.runs.push({ id: newId(), at: Date.now(), automation, steps, detail });
+  if (agent.runs.length > 200) agent.runs.splice(0, agent.runs.length - 200);
   persist();
 }
 

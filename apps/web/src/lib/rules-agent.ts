@@ -10,6 +10,7 @@ const PATTERNS: [AgentReply["intent"], RegExp][] = [
   ["hours", /timing|\btime\b|open|close|khul|band |kab tak|kab se|hours|sunday|holiday/i],
   ["location", /where|address|location|kaha|kahan|map|direction|parking|reach|metro/i],
   ["greeting", /^(hi+|hello|hey|namaste|namaskar|good (morning|evening|afternoon)|hlo|helo)\b[\s!.]*$/i],
+  ["thanks", /^(thanks?|thank you|thx|ty|ok+|okay|shukriya|dhanyavad|great|cool|perfect|done|theek hai|thik hai)\b[\s!.🙏👍]*$/i],
 ];
 
 const MEDICAL = /pain|dard|swell|sujan|bleed|khoon|fever|bukhar|symptom|ache|infection|dawai|dawa|medicine|tablet|dose|prescri|emergency|urgent|broken tooth|toot gaya|allerg/i;
@@ -131,6 +132,8 @@ export function rulesReply(k: SiteKnowledge, message: string): AgentReply {
         escalate: true,
         source: "Escalation rule",
       };
+    case "thanks":
+      return { ...base, reply: T("You're welcome! Anything else I can help with?", "Aapka swagat hai! Aur kuch madad chahiye?"), escalate: false, source: "none" };
     case "greeting":
       return {
         ...base,

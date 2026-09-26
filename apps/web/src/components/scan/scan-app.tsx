@@ -3,17 +3,17 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useState } from "react";
 import type { Analysis, Answers, ScanResult, Workflow } from "@/lib/types";
 import { LiveConsole, type Deployment } from "./live-console";
-import { Questions } from "./questions";
+import { DEFAULT_ANSWERS_UI, Questions } from "./questions";
 import { Results } from "./results";
 import { Scanning } from "./scanning";
 import styles from "./scan.module.css";
 
 type Stage = "scan" | "ask" | "score" | "live";
 const STAGES: { key: Stage; label: string }[] = [
-  { key: "scan", label: "Scan" },
-  { key: "ask", label: "Ask" },
-  { key: "score", label: "Score" },
-  { key: "live", label: "Deploy" },
+  { key: "scan", label: "Analyze" },
+  { key: "ask", label: "Details" },
+  { key: "score", label: "AI readiness report" },
+  { key: "live", label: "Agent live" },
 ];
 
 export function ScanApp({ url }: { url: string }) {
@@ -23,12 +23,39 @@ export function ScanApp({ url }: { url: string }) {
   const [answers, setAnswers] = useState<Answers | null>(null);
   const [deployment, setDeployment] = useState<Deployment | null>(null);
 
+  const [reporting, setReporting] = useState(false);
+  const [reportError, setReportError] = useState("");
+
   const go = useCallback((s: Stage) => {
     setStage(s);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const current = STAGES.findIndex((s) => s.key === stage);
+
+  // Straight from the scan to the report, using typical answers. The owner can refine them later.
+  const report = async () => {
+    if (!scan) return;
+    setReporting(true);
+    setReportError("");
+    try {
+      const a = answers ?? DEFAULT_ANSWERS_UI;
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ scanId: scan.id, answers: a }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d?.error || "Couldn't build the report.");
+      setAnswers(a);
+      setAnalysis(d as Analysis);
+      go("score");
+    } catch (e) {
+      setReportError(e instanceof Error ? e.message : "Couldn't build the report.");
+    } finally {
+      setReporting(false);
+    }
+  };
 
   return (
     <div className={`wrap ${styles.app}`}>
@@ -54,7 +81,9 @@ export function ScanApp({ url }: { url: string }) {
               url={url}
               done={scan}
               onDone={(id, result) => setScan({ id, result })}
-              onNext={() => go("ask")}
+              onNext={report}
+              busy={reporting}
+              error={reportError}
             />
           )}
           {stage === "ask" && scan && (
@@ -75,6 +104,7 @@ export function ScanApp({ url }: { url: string }) {
               scanId={scan.id}
               scan={scan.result}
               analysis={analysis}
+              answers={answers}
               onEditAnswers={() => go("ask")}
               onDeployed={(d: Deployment) => {
                 setDeployment(d);

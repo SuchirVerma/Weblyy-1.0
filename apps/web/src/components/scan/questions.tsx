@@ -49,7 +49,7 @@ const Q = [
   },
 ] as const;
 
-const DEFAULTS: Answers = { dailyMessages: 40, replier: "owner", reminders: "manual", afterHours: "sometimes", hourlyCost: 150 };
+export const DEFAULT_ANSWERS_UI: Answers = { dailyMessages: 40, replier: "owner", reminders: "manual", afterHours: "sometimes", hourlyCost: 150 };
 
 export function Questions({
   scanId,
@@ -64,7 +64,7 @@ export function Questions({
   onBack: () => void;
   onDone: (a: Answers, an: Analysis) => void;
 }) {
-  const [a, setA] = useState<Answers>(initial ?? DEFAULTS);
+  const [a, setA] = useState<Answers>(initial ?? DEFAULT_ANSWERS_UI);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -161,11 +161,11 @@ export function Questions({
         <button className="btn btn-primary" onClick={submit} disabled={busy} aria-busy={busy}>
           {busy ? (
             <>
-              <span className={styles.spinner} aria-hidden="true" /> Scoring every workflow…
+              <span className={styles.spinner} aria-hidden="true" /> Updating your report…
             </>
           ) : (
             <>
-              See my score <Arrow />
+              Update my report <Arrow />
             </>
           )}
         </button>

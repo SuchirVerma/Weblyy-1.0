@@ -32,6 +32,7 @@ export function PhoneChat({
   from,
   onReply,
   full,
+  source,
 }: {
   agentId: string;
   name: string;
@@ -39,6 +40,7 @@ export function PhoneChat({
   from?: string | (() => string);
   onReply?: (r: AgentReply, ms: number, text: string) => void;
   full?: boolean;
+  source?: string;
 }) {
   const [msgs, setMsgs] = useState<Bubble[]>([
     { id: 0, who: "system", text: `You're chatting with ${name}'s assistant. It answers from the business's own website.` },
@@ -110,7 +112,7 @@ export function PhoneChat({
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ agentId, message, from: fromId() ?? undefined }),
+        body: JSON.stringify({ agentId, message, from: fromId() ?? undefined, source }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "The agent didn't answer.");

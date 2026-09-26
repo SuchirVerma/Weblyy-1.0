@@ -47,9 +47,23 @@ export interface SiteKnowledge {
   /** Whether a real browser was used (JavaScript content included) */
   rendered: boolean;
   instagram?: { handle: string; url: string; followers: string; posts: string; bio: string; link: string };
+  /** Technical and content signals from the homepage, used by the AI readiness audit */
+  signals?: SiteSignals;
   services: string[];
   /** Trimmed visible text of the crawled pages, for the agent's context */
   text: string;
+}
+
+export interface SiteSignals {
+  https: boolean;
+  viewport: boolean;
+  title: string;
+  h1: string;
+  metaDescription: string;
+  jsonLdTypes: string[];
+  ctaCount: number;
+  ogImage: boolean;
+  wordCount: number;
 }
 
 export type BusinessType = "salon" | "clinic" | "restaurant" | "education" | "retail" | "fitness" | "services";
@@ -91,6 +105,8 @@ export interface SubScores {
 }
 
 export interface Analysis {
+  /** The five-category AI readiness audit */
+  audit?: import("./audit").Audit;
   readiness: number;
   subScores: SubScores;
   workflows: Workflow[];

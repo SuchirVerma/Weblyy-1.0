@@ -12,8 +12,8 @@
   gap: 22px;
 }
 .heroTitle {
-  font-size: clamp(2.5rem, 6vw, 4.9rem);
-  max-width: 14ch;
+  font-size: clamp(2.8rem, 7vw, 5.6rem);
+  max-width: 12ch;
 }
 .heroTitleSoft {
   color: var(--muted);
@@ -667,4 +667,62 @@
   .plug {
     grid-template-columns: 1fr;
   }
+}
+
+.secondary {
+  justify-self: start;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.secondary:hover {
+  text-decoration: underline;
+}
+.modules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1100px) {
+  .modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .modules {
+    grid-template-columns: 1fr;
+  }
+}
+.module {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 22px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.module b {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+.module small {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.module p {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}
+.moduleNum {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--faint);
 }

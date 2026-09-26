@@ -21,6 +21,21 @@ The results page includes a **site report**: every contact detail, hours, publis
 
 No API keys are needed. Without `AI_API_KEY` the app uses its rules engine for scoring and replies. Add keys in `.env.local` (see `/.env.example` at the repo root).
 
+## The demo flow
+
+1. Home page → enter a website, business name or @instagram → **Analyze My Website**.
+2. The scan streams in; click **See my AI readiness report**.
+3. The report: an AI readiness score across **Website, AI Customer Agent, Lead Capture, AI Search Readiness, Automation**, with detected problems and opportunities. (Optional: refine with 4 quick questions.)
+4. **Make My Business AI-Ready** → opens the **AI Business Command Center** (`/dashboard/<id>?key=…`, private).
+5. **Website**: the AI-ready website (`/site/<id>`), built from the scanned content, with the agent and a lead form.
+6. **AI Agent**: chat as a customer; ask a price, then share a name and number.
+7. **AI Search**: readiness checks, recommendations, and generated meta tags, JSON-LD, FAQs and llms.txt (no ranking promises).
+8. **Leads**: the Lead Center with AI qualification (hot/warm/cold + reasons), status, and one-click follow-up.
+9. **Automations**: toggles and a live run log (lead capture, qualification + follow-up, booking requests, form leads, escalation, WhatsApp, n8n).
+10. **Analytics** and **Settings** (connections, snippets, links).
+
+The original single-workflow path (blueprint → hold to deploy → live console with owner inbox) is still there under "Automation opportunities" on the report.
+
 ## What you can type
 
 - **A business name**, like "North Delhi Dental Clinic Model Town". FlowScout searches the web (Brave, then DuckDuckGo, then DuckDuckGo in a real browser; results cached for 6 hours) and lets you pick the right website or Instagram profile. Set `BRAVE_SEARCH_API_KEY` for the official Brave API.

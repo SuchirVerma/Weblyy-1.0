@@ -14,17 +14,45 @@ export default function Home() {
       <main id="main" tabIndex={-1}>
         <section className={`wrap ${styles.hero}`}>
           <div className={styles.heroCopy}>
-            <p className="kicker">For salons, clinics, coaching centres and every shop that runs on WhatsApp</p>
+            <p className="kicker">The AI-Ready Business Platform</p>
             <h1 className={`h-display ${styles.heroTitle}`}>
-              Your website already knows the answers. <span className="em">Why are you still typing them?</span>
+              Make your business <span className="em">AI-ready.</span>
             </h1>
             <p className="lede">
-              Type your business name, website or Instagram. FlowScout finds every place customers reach you, spots the replies you type again and
-              again, and switches on a WhatsApp agent that answers from your own site, in Hinglish too. Anything tricky comes to your inbox.
+              Transform your existing website into an AI-powered customer acquisition system. We audit your site, rebuild it to convert, add an AI Customer
+              Agent, improve your readiness for AI search, and turn every conversation into a qualified lead.
             </p>
             <ScanBar />
+            <a href="#how" className={styles.secondary}>
+              See how it works ↓
+            </a>
           </div>
           <HeroVisual />
+        </section>
+
+        <section id="platform" className={`wrap ${styles.section}`} aria-labelledby="platform-h">
+          <Reveal>
+            <p className="kicker">One platform, five modules</p>
+            <h2 id="platform-h" className="h-section" style={{ maxWidth: "26ch" }}>
+              Everything a business needs to <span className="em">win customers in the AI era.</span>
+            </h2>
+          </Reveal>
+          <ul className={styles.modules}>
+            {[
+              ["AI Website", "Website Transformation", "Your existing site, rebuilt mobile-first with clear calls to action, your real prices and FAQs, and a lead form."],
+              ["AI Customer Agent", "Answers · qualifies · books", "Answers from your own website 24/7 in English and Hinglish, captures contact details, and hands tricky chats to you."],
+              ["AI Search", "AI Search Readiness", "Structured business data, FAQs and clear descriptions that make it easier for AI assistants and search to understand you."],
+              ["Lead Generation", "Lead Center", "Every interested visitor becomes a lead with an AI qualification: hot, warm or cold, with the reasons."],
+              ["Automations", "Runs by itself", "Lead follow-ups, booking requests and owner alerts, with a live log of everything that ran."],
+            ].map(([t, sub, d], i) => (
+              <Reveal as="li" key={t} delay={i * 70} className={styles.module}>
+                <span className={styles.moduleNum}>0{i + 1}</span>
+                <b>{t}</b>
+                <small>{sub}</small>
+                <p className="muted">{d}</p>
+              </Reveal>
+            ))}
+          </ul>
         </section>
 
         <section className={`wrap ${styles.strip}`} aria-label="A typical salon">
@@ -65,7 +93,7 @@ export default function Home() {
           <Reveal>
             <p className="kicker">How it works</p>
             <h2 id="how-h" className="h-section">
-              From a URL to a working agent <span className="em">in four steps.</span>
+              From your website to an AI-ready business <span className="em">in minutes.</span>
             </h2>
           </Reveal>
           <Steps />
@@ -167,11 +195,14 @@ export default function Home() {
 
         <section className={`wrap ${styles.final}`} aria-labelledby="final-h">
           <Reveal className={styles.finalCard}>
-            <h2 id="final-h" className="h-display" style={{ fontSize: "clamp(2rem, 5vw, 3.6rem)" }}>
-              See what your website <span className="em">is hiding.</span>
+            <p className="kicker" style={{ textAlign: "center" }}>
+              We don&apos;t just build websites
+            </p>
+            <h2 id="final-h" className="h-display" style={{ fontSize: "clamp(2rem, 5vw, 3.6rem)", marginTop: 10 }}>
+              We transform businesses into <span className="em">AI-ready businesses.</span>
             </h2>
             <p className="lede" style={{ margin: "14px auto 28px", textAlign: "center" }}>
-              One scan, about a minute. No sign-up.
+              Start with a free AI readiness audit. About a minute, no sign-up.
             </p>
             <div style={{ display: "flex", justifyContent: "center" }}>
               <div style={{ width: "100%", maxWidth: 580 }}>

@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  let body: { agentId?: unknown; message?: unknown; from?: unknown };
+  let body: { agentId?: unknown; message?: unknown; from?: unknown; source?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -23,5 +23,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Slow down a little, the agent is catching its breath." }, { status: 429 });
   }
   const from = typeof body.from === "string" && body.from ? body.from.slice(0, 60) : `web-${ip}`;
-  return Response.json(await respond(agent, from, message));
+  const SOURCES = ["Website AI Agent", "Chat link", "QR code", "Command Center test"];
+  const source = typeof body.source === "string" && SOURCES.includes(body.source) ? body.source : "Chat link";
+  return Response.json(await respond(agent, from, message, source));
 }

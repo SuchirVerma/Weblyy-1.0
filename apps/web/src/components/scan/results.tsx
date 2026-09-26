@@ -1,10 +1,11 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import type { Analysis, ScanResult, Workflow } from "@/lib/types";
+import type { Analysis, Answers, ScanResult, Workflow } from "@/lib/types";
 import { CHANNEL_NAME } from "../radar";
 import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
+import { MakeReady } from "./make-ready";
 import { SiteReport } from "./site-report";
 import type { Deployment } from "./live-console";
 import { useReducedSafe } from "../use-reduced";
@@ -110,10 +111,12 @@ export function Results({
   analysis,
   onEditAnswers,
   onDeployed,
+  answers,
 }: {
   scanId: string;
   scan: ScanResult;
   analysis: Analysis;
+  answers: Answers | null;
   onEditAnswers: () => void;
   onDeployed: (d: Deployment) => void;
 }) {
@@ -122,6 +125,8 @@ export function Results({
   const bpRef = useRef<HTMLDivElement>(null);
   const k = scan.knowledge;
   const s = analysis.subScores;
+  const audit = analysis.audit;
+  const score = audit?.score ?? analysis.readiness;
 
   const open = (w: Workflow) => {
     setSelected(w);
@@ -132,48 +137,106 @@ export function Results({
     <div className={styles.results}>
       <section className={styles.scoreHero} aria-labelledby="score-h">
         <div className={styles.scoreLeft}>
-          <p className="kicker">Automation readiness · {k.name}</p>
+          <p className="kicker">AI readiness · {k.name}</p>
           <h1 id="score-h" className="sr-only">
-            Automation readiness score: {analysis.readiness} out of 100
+            AI readiness score: {score} out of 100
           </h1>
-          <Gauge value={analysis.readiness} />
+          <Gauge value={score} />
         </div>
 
         <div className={styles.scoreRight}>
-          <div className={styles.money}>
-            <div>
-              <span className="muted">Hours back every week</span>
-              <b>
-                <CountUp to={analysis.hoursPerWeek} decimals={1} />
-                <small> hrs</small>
-              </b>
+          <p className={styles.summary}>
+            We analyzed {k.url.includes("instagram.com") ? `@${k.instagram?.handle ?? "the profile"} on Instagram` : `${k.pages.length} page${k.pages.length === 1 ? "" : "s"} of ${k.name}`} across
+            five areas that decide whether a business is ready for AI-era customers.
+          </p>
+          {audit ? (
+            <ul className={styles.cats}>
+              {audit.categories.map((c, i) => (
+                <motion.li key={c.key} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}>
+                  <details>
+                    <summary>
+                      <span className={styles.catIcon} data-level={c.level} aria-hidden="true">
+                        {c.level === "good" ? "✓" : c.level === "warn" ? "!" : "✕"}
+                      </span>
+                      <span className={styles.catName}>
+                        <b>{c.label}</b>
+                        <small>{c.summary}</small>
+                      </span>
+                      <span className={styles.catScore}>{c.score}</span>
+                    </summary>
+                    <ul className={styles.catChecks}>
+                      {c.checks.map((x) => (
+                        <li key={x.label} data-ok={x.ok === true ? "yes" : x.ok === "partial" ? "partial" : "no"}>
+                          <b>{x.label}</b> <span className="muted">{x.detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </motion.li>
+              ))}
+            </ul>
+          ) : (
+            <div className={styles.bars}>
+              <Bar label="Responsiveness" hint="how fast customers hear back" value={s.responsiveness} />
+              <Bar label="Channel coverage" hint="ways to reach you" value={s.coverage} />
+              <Bar label="Repetitive load" hint="lower is better" value={s.repetitiveLoad} invert />
+              <Bar label="Automation potential" hint="how much can be handed over" value={s.potential} />
             </div>
-            <div>
-              <span className="muted">Staff time recoverable</span>
-              <b>
-                <CountUp to={analysis.rupeesPerMonth} prefix="₹" />
-                <small> /month</small>
-              </b>
-            </div>
-          </div>
-          <p className={styles.summary}>{analysis.summary}</p>
-          <div className={styles.bars}>
-            <Bar label="Responsiveness" hint="how fast customers hear back" value={s.responsiveness} />
-            <Bar label="Channel coverage" hint="ways to reach you" value={s.coverage} />
-            <Bar label="Repetitive load" hint="lower is better" value={s.repetitiveLoad} invert />
-            <Bar label="Automation potential" hint="how much can be handed over" value={s.potential} />
-          </div>
+          )}
           <div className={styles.scoreMeta}>
             <span className="pill">
               <span className={`dot ${analysis.engine === "rules" ? "warn" : ""}`} />
-              {analysis.engine === "ai" ? "Scored with AI" : "Scored with the rules engine"}
+              {analysis.engine === "ai" ? "Analyzed with AI" : "Analyzed with the rules engine"}
             </span>
             <button className="btn btn-ghost btn-sm" onClick={onEditAnswers}>
-              Change my answers
+              Refine with 4 quick questions
             </button>
           </div>
         </div>
       </section>
+
+      {audit && (
+        <section className={styles.probs} aria-label="Problems and opportunities">
+          <div className={styles.probCol}>
+            <h2 className={styles.h2}>Detected problems</h2>
+            <ul>
+              {(audit.problems.length ? audit.problems : ["No major problems found."]).map((p) => (
+                <li key={p} data-kind="problem">
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className={styles.probCol}>
+            <h2 className={styles.h2}>Opportunities</h2>
+            <ul>
+              {audit.opportunities.map((o) => (
+                <li key={o} data-kind="opp">
+                  {o}
+                </li>
+              ))}
+            </ul>
+            <div className={styles.money}>
+              <div>
+                <span className="muted">Hours back every week</span>
+                <b>
+                  <CountUp to={analysis.hoursPerWeek} decimals={1} />
+                  <small> hrs</small>
+                </b>
+              </div>
+              <div>
+                <span className="muted">Staff time recoverable</span>
+                <b>
+                  <CountUp to={analysis.rupeesPerMonth} prefix="₹" />
+                  <small> /month</small>
+                </b>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {audit && <MakeReady scanId={scanId} answers={answers} audit={audit} name={k.name} />}
 
       <section className={styles.findings} aria-labelledby="find-h">
         <div className={styles.findHead}>
@@ -214,10 +277,10 @@ export function Results({
         <div className={styles.findHead}>
           <div>
             <h2 id="board-h" className={styles.h2}>
-              {analysis.workflows.length} workflows, ranked
+              Automation opportunities: {analysis.workflows.length} workflows, ranked
             </h2>
             <p className="muted" style={{ margin: "4px 0 0" }}>
-              Pick one to see its blueprint and switch the agent on.
+              Pick one to see its blueprint, or switch on a single-workflow agent.
             </p>
           </div>
         </div>

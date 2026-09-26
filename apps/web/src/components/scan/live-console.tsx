@@ -70,7 +70,7 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
       .catch(() => ({}))
       .then(async (s: { publicOrigin?: string | null }) => {
         const origin = s.publicOrigin || window.location.origin;
-        const url = `${origin}${deployment.chatPath}`;
+        const url = `${origin}${deployment.chatPath}?src=qr`;
         const data = await QRCode.toDataURL(url, { margin: 1, width: 420, color: { dark: "#111827", light: "#ffffff" } });
         if (!alive) return;
         setChatUrl(url);

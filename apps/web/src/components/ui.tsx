@@ -41,6 +41,9 @@ export function Nav({ right }: { right?: ReactNode }) {
           FlowScout
         </Link>
         <nav className="nav-links" aria-label="Main">
+          <Link href="/#platform" className="hide-sm">
+            Platform
+          </Link>
           <Link href="/#how" className="hide-sm">
             How it works
           </Link>
@@ -87,7 +90,7 @@ export function ScanBar({ autoFocus, compact, initial = "" }: { autoFocus?: bool
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Business name, website or @instagram"
+            placeholder="Your website URL, business name or @instagram"
             autoComplete="off"
             spellCheck={false}
             autoFocus={autoFocus}
@@ -96,7 +99,7 @@ export function ScanBar({ autoFocus, compact, initial = "" }: { autoFocus?: bool
           />
         </label>
         <button className="btn btn-primary" type="submit">
-          {looksLikeName ? "Find it" : "Scan my business"}
+          {looksLikeName ? "Find my business" : "Analyze My Website"}
           <Arrow />
         </button>
       </form>

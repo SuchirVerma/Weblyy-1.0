@@ -559,3 +559,14 @@ body.paused *::after {
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+/* AI-ready website: keep the chat bubble above the mobile action bar */
+@media (max-width: 760px) {
+  body:has([data-fs-site]) .fs-w-btn {
+    bottom: 84px !important;
+    padding: 0 16px !important;
+  }
+  body:has([data-fs-site]) .fs-w-btn span {
+    display: none;
+  }
+}

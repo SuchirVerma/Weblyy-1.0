@@ -15,11 +15,15 @@ export function Scanning({
   done,
   onDone,
   onNext,
+  busy,
+  error: nextError,
 }: {
   url: string;
   done: { id: string; result: ScanResult } | null;
   onDone: (id: string, r: ScanResult) => void;
   onNext: () => void;
+  busy?: boolean;
+  error?: string;
 }) {
   const [lines, setLines] = useState<Line[]>(() =>
     done ? done.result.touchpoints.map((t, i) => ({ id: i, level: "ok" as const, text: `${t.label}: ${t.detail}` })) : [],
@@ -167,9 +171,22 @@ export function Scanning({
               <b style={{ color: "var(--text)" }}>{done.result.knowledge.name}</b> · {done.result.knowledge.businessType} · {done.result.knowledge.pages.length} pages read
               {done.result.knowledge.prices.length ? ` · ${done.result.knowledge.prices.length} prices` : ""}
             </p>
-            <button className="btn btn-primary" onClick={onNext} autoFocus>
-              Next: 4 quick questions <Arrow />
+            <button className="btn btn-primary" onClick={onNext} autoFocus disabled={busy} aria-busy={busy}>
+              {busy ? (
+                <>
+                  <span className={styles.spinner} aria-hidden="true" /> Building your report…
+                </>
+              ) : (
+                <>
+                  See my AI readiness report <Arrow />
+                </>
+              )}
             </button>
+            {nextError && (
+              <p role="alert" style={{ margin: 0, color: "var(--bad)", width: "100%" }}>
+                {nextError}
+              </p>
+            )}
           </motion.div>
         )}
       </div>

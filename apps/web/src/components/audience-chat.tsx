@@ -16,10 +16,10 @@ function visitorId(): string {
 }
 
 /** Full-screen chat for audience phones. Each phone gets its own anonymous id so the counters count people. */
-export function AudienceChat({ agentId, name, suggestions }: { agentId: string; name: string; suggestions: string[] }) {
+export function AudienceChat({ agentId, name, suggestions, source }: { agentId: string; name: string; suggestions: string[]; source?: string }) {
   return (
     <div style={{ maxWidth: 560, margin: "0 auto" }}>
-      <PhoneChat agentId={agentId} name={name} suggestions={suggestions} from={visitorId} full />
+      <PhoneChat agentId={agentId} name={name} suggestions={suggestions} from={visitorId} full source={source} />
     </div>
   );
 }

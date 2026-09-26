@@ -21,6 +21,6 @@ export async function POST(req: Request) {
   if (!agent) return twiml("This assistant isn't set up yet.");
   if (!body) return twiml("");
   if (!allow(`wa:${from}`, 10, 60_000)) return twiml("");
-  const reply = await respond(agent, from, body);
+  const reply = await respond(agent, from, body, "WhatsApp");
   return twiml(reply.reply);
 }

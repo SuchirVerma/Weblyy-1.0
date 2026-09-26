@@ -1,8 +1,14 @@
-# FlowScout
+# FlowScout: the AI-Ready Business Platform
 
-> **From website to working agent in 5 minutes.**
+> **We don't just build websites. We transform existing businesses into AI-ready businesses.**
 
-Paste a business URL. FlowScout finds the customer conversations the team handles by hand (WhatsApp, email, forms, bookings), scores which ones are safe to automate, and deploys a working AI agent in minutes.
+Give us your existing website. FlowScout audits it, transforms it into an AI-ready website, adds an AI Customer Agent, improves AI search readiness, captures and qualifies leads, and runs the follow-up automations, all from one AI Business Command Center.
+
+```
+Existing website → AI Business Audit → AI Readiness Score → Website Transformation
+→ AI Customer Agent → AI Search Optimization → Lead Capture → Lead Qualification
+→ Automations → AI Business Command Center
+```
 
 **Status:** working prototype. See [docs/progress.md](docs/progress.md).
 

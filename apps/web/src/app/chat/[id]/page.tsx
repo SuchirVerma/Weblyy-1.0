@@ -10,8 +10,10 @@ export async function generateMetadata({ params }: PageProps<"/chat/[id]">) {
   return { title: agent ? `Chat with ${agent.knowledge.name}` : "Chat not found | FlowScout" };
 }
 
-export default async function ChatPage({ params }: PageProps<"/chat/[id]">) {
+export default async function ChatPage({ params, searchParams }: PageProps<"/chat/[id]">) {
   const { id } = await params;
+  const { embed, src } = await searchParams;
+  const source = embed === "1" ? "Website AI Agent" : src === "qr" ? "QR code" : "Chat link";
   const agent = await getAgent(id);
   if (!agent) {
     return (
@@ -34,7 +36,7 @@ export default async function ChatPage({ params }: PageProps<"/chat/[id]">) {
   const suggestions = [k.prices[0] ? `${k.prices[0].name} kitne ka hai?` : "Price kya hai?", "Saturday 4pm free hai?", "Kab tak khule ho?", "Where are you located?"];
   return (
     <main id="main" tabIndex={-1}>
-      <AudienceChat agentId={agent.id} name={k.name} suggestions={suggestions} />
+      <AudienceChat agentId={agent.id} name={k.name} suggestions={suggestions} source={source} />
     </main>
   );
 }
