@@ -1,7 +1,8 @@
 "use client";
 import { animate, motion, useInView, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { canGoBack } from "./nav-history";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 export function Logo({ size = 26 }: { size?: number }) {
@@ -32,14 +33,37 @@ export function StatusPill() {
   );
 }
 
+/** Goes to the previous screen (page, dashboard tab or scan step). Opens the homepage when there is nothing to go back to. */
+export function BackButton({ fallback = "/", className = "" }: { fallback?: string; className?: string }) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      className={`back-btn ${className}`}
+      onClick={() => {
+        if (canGoBack()) window.history.back();
+        else router.push(fallback);
+      }}
+      aria-label="Go back"
+    >
+      <span aria-hidden="true">←</span>
+      <span className="back-label">Back</span>
+    </button>
+  );
+}
+
 export function Nav({ right }: { right?: ReactNode }) {
+  const path = usePathname();
   return (
     <header className="nav">
       <div className="wrap nav-inner">
-        <Link href="/" className="brand" aria-label="Weblyy home">
-          <Logo />
-          Weblyy
-        </Link>
+        <div className="nav-start">
+          {path !== "/" && <BackButton />}
+          <Link href="/" className="brand" aria-label="Weblyy home">
+            <Logo />
+            Weblyy
+          </Link>
+        </div>
         <nav className="nav-links" aria-label="Main">
           <Link href="/how" className="hide-sm">
             How it works

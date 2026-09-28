@@ -1,10 +1,11 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Analysis, Answers, ScanResult, Workflow } from "@/lib/types";
 import { LiveConsole, type Deployment } from "./live-console";
 import { DEFAULT_ANSWERS_UI, Questions } from "./questions";
 import { Arrow } from "../ui";
+import { NAV_EVENT } from "../nav-history";
 import { MAKE_READY_EVENT } from "./make-ready";
 import { Results } from "./results";
 import { Scanning } from "./scanning";
@@ -28,10 +29,42 @@ export function ScanApp({ url }: { url: string }) {
   const [reporting, setReporting] = useState(false);
   const [reportError, setReportError] = useState("");
 
+  // Each step gets its own history entry, so Back (ours or the browser's) returns to the previous step.
   const go = useCallback((s: Stage) => {
     setStage(s);
+    const u = new URL(window.location.href);
+    if (u.searchParams.get("step") !== s) {
+      if (s === "scan") u.searchParams.delete("step");
+      else u.searchParams.set("step", s);
+      window.history.pushState(null, "", u);
+      window.dispatchEvent(new Event(NAV_EVENT));
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  // A reload restarts at the first step, so drop a leftover ?step= from the address.
+  useEffect(() => {
+    const u = new URL(window.location.href);
+    if (u.searchParams.has("step")) {
+      u.searchParams.delete("step");
+      window.history.replaceState(null, "", u);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => {
+      const want = (new URL(window.location.href).searchParams.get("step") ?? "scan") as Stage;
+      setStage((cur) => {
+        if (want === "score" && !(scan && analysis)) return "scan";
+        if (want === "ask" && !scan) return "scan";
+        if (want === "live" && !deployment) return analysis ? "score" : "scan";
+        return STAGES.some((x) => x.key === want) ? want : cur;
+      });
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [scan, analysis, deployment]);
 
   const current = STAGES.findIndex((s) => s.key === stage);
 

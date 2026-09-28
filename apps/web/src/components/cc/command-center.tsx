@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { Logo } from "../ui";
+import { BackButton, Logo } from "../ui";
 import { GoLive } from "./go-live";
 import { AgentTab, AnalyticsTab, AutomationsTab, LeadsTab, OverviewTab, SearchTab, SettingsTab, WebsiteTab } from "./tabs";
 import type { CCData } from "./types";
@@ -32,7 +32,8 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
   const tab: TabKey = TABS.some((t) => t.key === hash) ? (hash as TabKey) : "overview";
 
   const go = useCallback((t: TabKey) => {
-    history.replaceState(null, "", `#${t}`);
+    if (window.location.hash.slice(1) === t) return;
+    history.pushState(null, "", `#${t}`);
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -83,10 +84,13 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
   return (
     <div className={styles.shell}>
       <aside className={styles.side}>
-        <Link href="/" className={styles.brand} aria-label="Weblyy home">
-          <Logo size={24} />
-          Weblyy
-        </Link>
+        <div className={styles.sideTop}>
+          <BackButton />
+          <Link href="/" className={styles.brand} aria-label="Weblyy home">
+            <Logo size={24} />
+            Weblyy
+          </Link>
+        </div>
         <div className={styles.biz}>
           <span className={styles.bizMark}>{data?.business.name.slice(0, 1) ?? "·"}</span>
           <div>

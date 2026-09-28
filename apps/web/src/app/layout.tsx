@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { NavHistory } from "@/components/nav-history";
 import { Albert_Sans, Bricolage_Grotesque, DM_Mono } from "next/font/google";
 import { MotionRoot } from "@/components/motion-root";
 import "./globals.css";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="env-grid" />
           <div className="env-grain" />
         </div>
+        <NavHistory />
         <MotionRoot>{children}</MotionRoot>
       </body>
     </html>
