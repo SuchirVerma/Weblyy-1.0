@@ -727,3 +727,15 @@
   font-size: 0.72rem;
   color: var(--faint);
 }
+
+.heroOnly {
+  min-height: calc(100vh - 76px);
+  min-height: calc(100svh - 76px);
+  padding-bottom: 40px;
+}
+
+@media (max-width: 900px) {
+  .heroOnly > :last-child {
+    display: none;
+  }
+}

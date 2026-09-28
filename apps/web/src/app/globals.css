@@ -209,8 +209,23 @@ body.paused *::after {
   color: var(--text);
 }
 @media (max-width: 720px) {
-  .nav-links .hide-sm {
+  /* Phones: keep the three menu tabs, drop the button (the search box is right there). */
+  .nav-links {
+    gap: 12px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  .nav-links .btn {
     display: none;
+  }
+  .brand {
+    font-size: 1.1rem;
+  }
+}
+@media (max-width: 380px) {
+  .nav-links {
+    gap: 10px;
+    font-size: 0.78rem;
   }
 }
 

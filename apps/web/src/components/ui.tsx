@@ -41,20 +41,17 @@ export function Nav({ right }: { right?: ReactNode }) {
           Weblyy
         </Link>
         <nav className="nav-links" aria-label="Main">
-          <Link href="/#platform" className="hide-sm">
-            Platform
-          </Link>
-          <Link href="/#how" className="hide-sm">
+          <Link href="/how" className="hide-sm">
             How it works
           </Link>
           <Link href="/owner-demo" className="hide-sm">
-            Owner demo
+            See a demo
           </Link>
-          <Link href="/#setup" className="hide-sm">
+          <Link href="/setup" className="hide-sm">
             We set it up
           </Link>
           {right ?? (
-            <Link href="/#main" className="btn btn-primary btn-sm">
+            <Link href="/#product" className="btn btn-primary btn-sm">
               Analyze my website
             </Link>
           )}
