@@ -469,15 +469,18 @@ button.stat:hover {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 10px;
 }
 .runs li {
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  font-size: 0.86rem;
+  gap: 2px;
+  padding: 12px 0;
+  font-size: 0.9rem;
+}
+.runs li + li {
+  border-top: 1px solid var(--line);
+}
+.runTop b {
+  font-weight: 600;
 }
 .runTop {
   display: flex;
@@ -956,6 +959,97 @@ button.tr:hover {
 }
 .toggle[aria-checked="true"] span {
   transform: translateX(18px);
+}
+
+.jobSummary {
+  margin: -8px 0 0;
+  color: var(--muted);
+}
+.jobSummary b {
+  color: var(--text);
+}
+.jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0 24px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.job {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 0;
+}
+.job + .job {
+  border-top: 1px solid var(--line);
+}
+.job[data-state="off"] .jobMain {
+  opacity: 0.55;
+}
+.jobMain {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  max-width: 62ch;
+}
+.jobMain h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+.jobMain > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+.jobHow {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+.jobHow summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+}
+.jobHow summary span {
+  color: var(--faint);
+  font-weight: 400;
+}
+.jobHow ol {
+  margin: 10px 0 2px;
+  padding-left: 20px;
+  list-style: decimal;
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+}
+.jobHow ol li::marker {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.jobTag {
+  flex: none;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ok);
+}
+.jobTag[data-tone="warn"] {
+  color: var(--warn);
+}
+@media (max-width: 560px) {
+  .jobs {
+    padding: 0 16px;
+  }
+  .job {
+    gap: 14px;
+  }
 }
 
 /* --------------------------------------------------------------- analytics */

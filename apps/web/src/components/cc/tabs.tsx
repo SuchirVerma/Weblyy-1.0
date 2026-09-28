@@ -243,11 +243,6 @@ function RunList({ runs }: { runs: CCData["runs"] }) {
             <small>{ago(r.at)}</small>
           </div>
           <span className="muted">{r.detail}</span>
-          <div className={styles.flow}>
-            {r.steps.map((s, i) => (
-              <span key={i}>{s}</span>
-            ))}
-          </div>
         </motion.li>
       ))}
     </ul>
@@ -676,52 +671,65 @@ export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
   return (
     <div className={styles.stack}>
       <Head kicker="Autopilot" title={<>Jobs your assistant <span className="em">does for you.</span></>} />
-      <div className={styles.autos}>
+      <p className={styles.jobSummary}>
+        <b>
+          {data.automations.filter((a) => a.on && !(a.requires === "twilio" && !a.ready) && a.requires !== "n8n").length} of {data.automations.length}
+        </b>{" "}
+        jobs are running. Switch any of them off whenever you like.
+      </p>
+      <ul className={styles.jobs}>
         {data.automations.map((a) => {
           const state = a.requires === "twilio" && !a.ready ? "setup" : a.requires === "n8n" ? "export" : a.on ? "on" : "off";
           return (
-            <section key={a.key} className={styles.auto} data-state={state}>
-              <div className={styles.autoTop}>
-                <div>
-                  <h3>{a.name}</h3>
-                  <small className="muted">When: {a.trigger}</small>
-                </div>
-                {a.toggleable && state !== "setup" ? (
-                  <button
-                    className={styles.toggle}
-                    role="switch"
-                    aria-checked={a.on}
-                    aria-label={`${a.name}: ${a.on ? "on" : "off"}`}
-                    disabled={busy === a.key}
-                    onClick={async () => {
-                      setBusy(a.key);
-                      try {
-                        await act({ action: "automation", automation: a.key, on: !a.on });
-                      } finally {
-                        setBusy("");
-                      }
-                    }}
-                  >
-                    <span />
-                  </button>
-                ) : (
-                  <Status level={state === "setup" ? "warn" : "good"}>{state === "setup" ? "Needs Twilio" : state === "export" ? "Export in Settings" : "Always on"}</Status>
-                )}
+            <li key={a.key} className={styles.job} data-state={state}>
+              <div className={styles.jobMain}>
+                <h3>{a.name}</h3>
+                <p>{a.description}</p>
+                <details className={styles.jobHow}>
+                  <summary>
+                    How it works
+                    {a.runs > 0 && (
+                      <span>
+                        {" "}
+                        · ran {a.runs} time{a.runs === 1 ? "" : "s"}
+                        {a.lastRun ? `, last ${ago(a.lastRun)}` : ""}
+                      </span>
+                    )}
+                  </summary>
+                  <ol>
+                    {a.steps.map((st, i) => (
+                      <li key={i}>{st}</li>
+                    ))}
+                  </ol>
+                </details>
               </div>
-              <div className={styles.flow}>
-                {a.steps.map((s, i) => (
-                  <span key={i}>{s}</span>
-                ))}
-              </div>
-              <p className="muted">{a.description}</p>
-              <small className={styles.autoMeta}>
-                {a.runs} run{a.runs === 1 ? "" : "s"}
-                {a.lastRun ? ` · last ${ago(a.lastRun)}` : ""}
-              </small>
-            </section>
+              {a.toggleable && state !== "setup" ? (
+                <button
+                  className={styles.toggle}
+                  role="switch"
+                  aria-checked={a.on}
+                  aria-label={`${a.name}: ${a.on ? "on" : "off"}`}
+                  disabled={busy === a.key}
+                  onClick={async () => {
+                    setBusy(a.key);
+                    try {
+                      await act({ action: "automation", automation: a.key, on: !a.on });
+                    } finally {
+                      setBusy("");
+                    }
+                  }}
+                >
+                  <span />
+                </button>
+              ) : (
+                <span className={styles.jobTag} data-tone={state === "setup" ? "warn" : "ok"}>
+                  {state === "setup" ? "Needs Twilio" : state === "export" ? "Export in Settings" : "Always on"}
+                </span>
+              )}
+            </li>
           );
         })}
-      </div>
+      </ul>
       <section className={styles.panel}>
         <h2>Run log</h2>
         <RunList runs={data.runs} />
