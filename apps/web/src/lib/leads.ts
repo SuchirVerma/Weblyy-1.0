@@ -149,7 +149,7 @@ async function onNewLead(agent: DeployedAgent, lead: Lead, via: "capture" | "for
   recordRun(agent, capture.name, capture.steps, `${lead.name || "A customer"} · ${lead.interest} · via ${lead.source}`);
   if (isOn(agent.automations, "qualify")) {
     const q = AUTOMATIONS.find((a) => a.key === "qualify")!;
-    recordRun(agent, q.name, q.steps, `${lead.name || "Lead"} scored ${lead.score} (${lead.temperature}) · follow-up drafted`);
+    recordRun(agent, q.name, q.steps, `${lead.name || "A customer"} is ${lead.temperature === "hot" ? "very interested" : lead.temperature === "warm" ? "interested" : "just asking"} · reply ready to send`);
     const owner = process.env.OWNER_WHATSAPP;
     if (owner && lead.temperature === "hot") {
       await sendWhatsApp(owner, `New hot lead for ${agent.knowledge.name}: ${lead.name || "Customer"} ${lead.phone}, interested in ${lead.interest}.`).catch(() => false);

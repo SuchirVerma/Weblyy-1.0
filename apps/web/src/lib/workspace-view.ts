@@ -1,5 +1,5 @@
 import "server-only";
-import { AUTOMATIONS, isOn } from "./automations";
+import { AUTOMATIONS, isOn, runDetail, runName } from "./automations";
 import type { DeployedAgent } from "./store";
 
 const twilioReady = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM);
@@ -46,13 +46,13 @@ export function workspaceView(agent: DeployedAgent) {
       minutesSaved: handled * 2,
     },
     leads: agent.leads.slice(0, 200),
-    runs: agent.runs.slice(-60).reverse(),
+    runs: agent.runs.slice(-60).reverse().map((r) => ({ ...r, automation: runName(r.automation), detail: runDetail(r.detail) })),
     automations: AUTOMATIONS.map((a) => ({
       ...a,
       on: isOn(agent.automations, a.key),
       ready: a.requires === "twilio" ? twilioReady() : true,
-      runs: agent.runs.filter((r) => r.automation === a.name).length,
-      lastRun: [...agent.runs].reverse().find((r) => r.automation === a.name)?.at ?? null,
+      runs: agent.runs.filter((r) => runName(r.automation) === a.name).length,
+      lastRun: [...agent.runs].reverse().find((r) => runName(r.automation) === a.name)?.at ?? null,
     })),
     analytics: { intents, bySource },
     links: {

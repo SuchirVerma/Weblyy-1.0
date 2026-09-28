@@ -675,7 +675,7 @@ export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
         <b>
           {data.automations.filter((a) => a.on && !(a.requires === "twilio" && !a.ready) && a.requires !== "n8n").length} of {data.automations.length}
         </b>{" "}
-        jobs are running. Switch any of them off whenever you like.
+        jobs are switched on. A green switch means the job is on. Tap it to turn it off.
       </p>
       <ul className={styles.jobs}>
         {data.automations.map((a) => {
@@ -723,7 +723,7 @@ export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
                 </button>
               ) : (
                 <span className={styles.jobTag} data-tone={state === "setup" ? "warn" : "ok"}>
-                  {state === "setup" ? "Needs Twilio" : state === "export" ? "Export in Settings" : "Always on"}
+                  {state === "setup" ? "We set this up for you" : state === "export" ? "Optional" : "Always on"}
                 </span>
               )}
             </li>
@@ -731,7 +731,7 @@ export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
         })}
       </ul>
       <section className={styles.panel}>
-        <h2>Run log</h2>
+        <h2>What your assistant did</h2>
         <RunList runs={data.runs} />
       </section>
     </div>

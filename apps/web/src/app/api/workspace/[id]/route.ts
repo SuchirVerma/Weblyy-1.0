@@ -1,4 +1,4 @@
-import { AUTOMATIONS } from "@/lib/automations";
+import { AUTOMATIONS, automationDef } from "@/lib/automations";
 import { ownerKeyOk } from "@/lib/owner-auth";
 import { getAgent, recordOwnerReply, recordRun, savePersist, type LeadStatus } from "@/lib/store";
 import { sendWhatsApp } from "@/lib/twilio";
@@ -45,7 +45,7 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/workspace/[id]
     if (!statuses.includes(body.status as LeadStatus)) return Response.json({ error: "Unknown status." }, { status: 400 });
     lead.status = body.status as LeadStatus;
     lead.updatedAt = Date.now();
-    if (lead.status === "booked") recordRun(agent, "Appointment requests", ["Appointment request", "AI Customer Agent", "Qualification", "Owner confirms in inbox"], `${lead.name || "Lead"} marked as booked`);
+    if (lead.status === "booked") recordRun(agent, automationDef("booking")!.name, automationDef("booking")!.steps, `${lead.name || "Lead"} marked as booked`);
     savePersist();
     return Response.json({ ok: true, lead });
   }
@@ -54,7 +54,7 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/workspace/[id]
     // Sent by the owner through WhatsApp or a call from their own phone; just record it.
     lead.followUpSent = true;
     lead.updatedAt = Date.now();
-    recordRun(agent, "Qualify and follow up new leads", ["New lead", "AI qualification", "Save to Lead Center", "Notify business", "Follow-up sent"], `Follow-up sent to ${lead.name || "lead"} on WhatsApp`);
+    recordRun(agent, automationDef("qualify")!.name, automationDef("qualify")!.steps, `Follow-up sent to ${lead.name || "lead"} on WhatsApp`);
     savePersist();
     return Response.json({ ok: true, lead });
   }
@@ -67,7 +67,7 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/workspace/[id]
     recordOwnerReply(agent, lead.from, text, delivered);
     lead.followUpSent = true;
     lead.updatedAt = Date.now();
-    recordRun(agent, "Qualify and follow up new leads", ["New lead", "AI qualification", "Save to Lead Center", "Notify business", "Follow-up sent"], `Follow-up sent to ${lead.name || "lead"}`);
+    recordRun(agent, automationDef("qualify")!.name, automationDef("qualify")!.steps, `Follow-up sent to ${lead.name || "lead"}`);
     savePersist();
     return Response.json({ ok: true, lead, delivered });
   }

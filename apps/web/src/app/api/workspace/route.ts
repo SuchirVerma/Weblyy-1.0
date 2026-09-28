@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     auditAfter: auditBusiness(scan, answers, { agent: true, website: true, search: true, leadCenter: true, automations: true }),
     search: buildSearchPack(scan.knowledge, `${origin}${sitePath}`),
   };
-  recordRun(agent, "Business made AI-ready", ["Audit", "AI-ready website", "AI Customer Agent", "AI Search", "Lead Center", "Automations"], `${scan.knowledge.name} is live`);
+  recordRun(agent, "Your business went live", ["Audit", "AI-ready website", "AI Customer Agent", "AI Search", "Lead Center", "Automations"], `${scan.knowledge.name} is live`);
   savePersist();
   return Response.json({
     id: agent.id,
