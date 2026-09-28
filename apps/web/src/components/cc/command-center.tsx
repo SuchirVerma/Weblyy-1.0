@@ -2,18 +2,20 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Logo } from "../ui";
+import { GoLive } from "./go-live";
 import { AgentTab, AnalyticsTab, AutomationsTab, LeadsTab, OverviewTab, SearchTab, SettingsTab, WebsiteTab } from "./tabs";
 import type { CCData } from "./types";
 import styles from "./cc.module.css";
 
 const TABS = [
-  { key: "overview", label: "Overview", icon: "◎" },
-  { key: "website", label: "Website", icon: "▭" },
-  { key: "agent", label: "AI Agent", icon: "✦" },
-  { key: "search", label: "AI Search", icon: "⌕" },
-  { key: "leads", label: "Leads", icon: "◉" },
-  { key: "automations", label: "Automations", icon: "⇄" },
-  { key: "analytics", label: "Analytics", icon: "▤" },
+  { key: "overview", label: "Home", icon: "⌂" },
+  { key: "golive", label: "Go live", icon: "➜" },
+  { key: "website", label: "My website", icon: "▭" },
+  { key: "agent", label: "Chats", icon: "✦" },
+  { key: "leads", label: "Customers", icon: "◉" },
+  { key: "search", label: "Get found online", icon: "⌕" },
+  { key: "automations", label: "Autopilot", icon: "⇄" },
+  { key: "analytics", label: "Results", icon: "▤" },
   { key: "settings", label: "Settings", icon: "⚙" },
 ] as const;
 export type TabKey = (typeof TABS)[number]["key"];
@@ -89,7 +91,7 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
           <span className={styles.bizMark}>{data?.business.name.slice(0, 1) ?? "·"}</span>
           <div>
             <b>{data?.business.name ?? "Loading…"}</b>
-            <small>AI Business Command Center</small>
+            <small>Your Weblyy dashboard</small>
           </div>
         </div>
         <nav className={styles.nav} aria-label="Command Center">
@@ -116,6 +118,7 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
         {data && (
           <div key={tab} className={styles.tabIn}>
               {tab === "overview" && <OverviewTab data={data} go={go} />}
+              {tab === "golive" && <GoLive data={data} ownerKey={ownerKey} />}
               {tab === "website" && <WebsiteTab data={data} />}
               {tab === "agent" && <AgentTab data={data} ownerKey={ownerKey} />}
               {tab === "search" && <SearchTab data={data} />}

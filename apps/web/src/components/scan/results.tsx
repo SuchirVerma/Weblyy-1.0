@@ -197,7 +197,7 @@ export function Results({
           <div className={styles.scoreMeta}>
             <span className="pill">
               <span className={`dot ${analysis.engine === "rules" ? "warn" : ""}`} />
-              {analysis.engine === "ai" ? "Analyzed with AI" : "Analyzed with the rules engine"}
+              {analysis.engine === "ai" ? "Analyzed with AI" : "Instant analysis"}
             </span>
             <button className="btn btn-ghost btn-sm" onClick={onEditAnswers}>
               Refine with 4 quick questions
@@ -266,130 +266,138 @@ export function Results({
 
       {audit && <MakeReady scanId={scanId} answers={answers} audit={audit} name={k.name} />}
 
+      <details className={styles.detailsAll}>
+        <summary>
+          <span>
+            <b>See the detailed report</b>
+            <small>Optional: every finding, where you&apos;re listed online, everything we read, and individual automations</small>
+          </span>
+        </summary>
       <section className={styles.findings} aria-labelledby="find-h">
-        <div className={styles.findHead}>
-          <h2 id="find-h" className={styles.h2}>
-            {roast ? "The honest version" : "What we found"}
-          </h2>
-          <button className={styles.switch} role="switch" aria-checked={roast} onClick={() => setRoast(!roast)}>
-            <span className={styles.switchTrack}>
-              <span className={styles.switchThumb} />
-            </span>
-            Roast my website <span aria-hidden="true">🔥</span>
-          </button>
-        </div>
-        <AnimatePresence mode="wait">
-          {roast ? (
-            <motion.ul key="roast" className={styles.roastList} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              {analysis.roast.map((line, i) => (
-                <motion.li key={line} initial={{ opacity: 0, x: -12, rotate: -1 }} animate={{ opacity: 1, x: 0, rotate: 0 }} transition={{ delay: i * 0.9 }}>
-                  <Typewriter text={line} delay={i * 900 + 150} />
-                </motion.li>
-              ))}
-            </motion.ul>
-          ) : (
-            <motion.ul key="plain" className={styles.findList} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              {(allFindings ? analysis.findings : analysis.findings.slice(0, 3)).map((f, i) => (
-                <motion.li key={f} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                  {f}
-                </motion.li>
-              ))}
-            </motion.ul>
+          <div className={styles.findHead}>
+            <h2 id="find-h" className={styles.h2}>
+              {roast ? "The honest version" : "What we found"}
+            </h2>
+            <button className={styles.switch} role="switch" aria-checked={roast} onClick={() => setRoast(!roast)}>
+              <span className={styles.switchTrack}>
+                <span className={styles.switchThumb} />
+              </span>
+              Roast my website <span aria-hidden="true">🔥</span>
+            </button>
+          </div>
+          <AnimatePresence mode="wait">
+            {roast ? (
+              <motion.ul key="roast" className={styles.roastList} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                {analysis.roast.map((line, i) => (
+                  <motion.li key={line} initial={{ opacity: 0, x: -12, rotate: -1 }} animate={{ opacity: 1, x: 0, rotate: 0 }} transition={{ delay: i * 0.9 }}>
+                    <Typewriter text={line} delay={i * 900 + 150} />
+                  </motion.li>
+                ))}
+              </motion.ul>
+            ) : (
+              <motion.ul key="plain" className={styles.findList} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                {(allFindings ? analysis.findings : analysis.findings.slice(0, 3)).map((f, i) => (
+                  <motion.li key={f} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                    {f}
+                  </motion.li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+          {!roast && analysis.findings.length > 3 && (
+            <button className={`btn btn-ghost btn-sm ${styles.more}`} onClick={() => setAllFindings(!allFindings)} aria-expanded={allFindings}>
+              {allFindings ? "Show less" : `Show all ${analysis.findings.length} findings`}
+            </button>
           )}
-        </AnimatePresence>
-        {!roast && analysis.findings.length > 3 && (
-          <button className={`btn btn-ghost btn-sm ${styles.more}`} onClick={() => setAllFindings(!allFindings)} aria-expanded={allFindings}>
-            {allFindings ? "Show less" : `Show all ${analysis.findings.length} findings`}
+        </section>
+  
+        {scan.presence && <WebPresencePanel presence={scan.presence} />}
+  
+        {showReport ? (
+          <SiteReport scan={scan} analysis={analysis} />
+        ) : (
+          <button className={styles.reportToggle} onClick={() => setShowReport(true)} aria-expanded={false}>
+            <span>
+              <b>Everything we read on {k.name}</b>
+              <small>
+                {k.pages.length} page{k.pages.length === 1 ? "" : "s"} · {k.prices.length} prices · {k.faqs.length} FAQs · {k.phones.length + k.whatsapp.length + k.emails.length} contacts
+              </small>
+            </span>
+            <span className="btn btn-ghost btn-sm">Open full report</span>
           </button>
         )}
-      </section>
-
-      {scan.presence && <WebPresencePanel presence={scan.presence} />}
-
-      {showReport ? (
-        <SiteReport scan={scan} analysis={analysis} />
-      ) : (
-        <button className={styles.reportToggle} onClick={() => setShowReport(true)} aria-expanded={false}>
-          <span>
-            <b>Everything we read on {k.name}</b>
-            <small>
-              {k.pages.length} page{k.pages.length === 1 ? "" : "s"} · {k.prices.length} prices · {k.faqs.length} FAQs · {k.phones.length + k.whatsapp.length + k.emails.length} contacts
-            </small>
-          </span>
-          <span className="btn btn-ghost btn-sm">Open full report</span>
-        </button>
-      )}
-
-      <section aria-labelledby="board-h" className={styles.boardWrap}>
-        <div className={styles.findHead}>
-          <div>
-            <h2 id="board-h" className={styles.h2}>
-              Automation opportunities: {analysis.workflows.length} workflows, ranked
-            </h2>
-            <p className="muted" style={{ margin: "4px 0 0" }}>
-              Pick one to see its blueprint, or switch on a single-workflow agent.
-            </p>
+  
+        <section aria-labelledby="board-h" className={styles.boardWrap}>
+          <div className={styles.findHead}>
+            <div>
+              <h2 id="board-h" className={styles.h2}>
+                Automation opportunities: {analysis.workflows.length} workflows, ranked
+              </h2>
+              <p className="muted" style={{ margin: "4px 0 0" }}>
+                Pick one to see its blueprint, or switch on a single-workflow agent.
+              </p>
+            </div>
           </div>
-        </div>
-        <ul className={styles.board}>
-          {analysis.workflows.map((w, i) => {
-            const v = VERDICT[w.verdict];
-            const isSel = selected?.id === w.id;
-            return (
-              <motion.li
-                key={w.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <button
-                  className={styles.wf}
-                  data-selected={isSel || undefined}
-                  data-verdict={w.verdict}
-                  onClick={() => open(w)}
-                  style={{ ["--tone" as string]: v.tone }}
-                  aria-label={`${w.name}: score ${w.score}, ${v.label}. Open blueprint.`}
+          <ul className={styles.board}>
+            {analysis.workflows.map((w, i) => {
+              const v = VERDICT[w.verdict];
+              const isSel = selected?.id === w.id;
+              return (
+                <motion.li
+                  key={w.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <div className={styles.wfTop}>
-                    <span className={styles.wfChannel} style={{ ["--c" as string]: `var(--ch-${w.channel})` }}>
-                      {CHANNEL_NAME[w.channel]}
-                    </span>
-                    <span className={styles.wfVerdict}>{v.label}</span>
-                  </div>
-                  <b className={styles.wfName}>{w.name}</b>
-                  {/[?!.]$/.test(w.trigger.replace(/"$/, "")) ? (
-                    <q className={styles.wfTrigger}>{w.trigger.replace(/^"|"$/g, "")}</q>
-                  ) : (
-                    <span className={styles.wfTrigger}>When: {w.trigger}</span>
-                  )}
-                  <div className={styles.wfScore}>
-                    <div className={styles.wfTrack}>
-                      <motion.div
-                        className={styles.wfFill}
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: w.score / 100 }}
-                        transition={{ duration: 0.9, delay: 0.3 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                      />
+                  <button
+                    className={styles.wf}
+                    data-selected={isSel || undefined}
+                    data-verdict={w.verdict}
+                    onClick={() => open(w)}
+                    style={{ ["--tone" as string]: v.tone }}
+                    aria-label={`${w.name}: score ${w.score}, ${v.label}. Open blueprint.`}
+                  >
+                    <div className={styles.wfTop}>
+                      <span className={styles.wfChannel} style={{ ["--c" as string]: `var(--ch-${w.channel})` }}>
+                        {CHANNEL_NAME[w.channel]}
+                      </span>
+                      <span className={styles.wfVerdict}>{v.label}</span>
                     </div>
-                    <span className="mono">{w.score}</span>
-                  </div>
-                  <span className={styles.wfHours}>{w.hoursPerWeek > 0 ? `saves ~${w.hoursPerWeek} hrs/week` : "stays with a person"}</span>
-                </button>
-              </motion.li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <div ref={bpRef} style={{ scrollMarginTop: 90 }}>
-        <AnimatePresence mode="wait">
-          {selected && (
-            <motion.div key={selected.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.45 }}>
-              <Blueprint scanId={scanId} scan={scan} workflow={selected} onDeployed={onDeployed} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                    <b className={styles.wfName}>{w.name}</b>
+                    {/[?!.]$/.test(w.trigger.replace(/"$/, "")) ? (
+                      <q className={styles.wfTrigger}>{w.trigger.replace(/^"|"$/g, "")}</q>
+                    ) : (
+                      <span className={styles.wfTrigger}>When: {w.trigger}</span>
+                    )}
+                    <div className={styles.wfScore}>
+                      <div className={styles.wfTrack}>
+                        <motion.div
+                          className={styles.wfFill}
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: w.score / 100 }}
+                          transition={{ duration: 0.9, delay: 0.3 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                        />
+                      </div>
+                      <span className="mono">{w.score}</span>
+                    </div>
+                    <span className={styles.wfHours}>{w.hoursPerWeek > 0 ? `saves ~${w.hoursPerWeek} hrs/week` : "stays with a person"}</span>
+                  </button>
+                </motion.li>
+              );
+            })}
+          </ul>
+        </section>
+  
+        <div ref={bpRef} style={{ scrollMarginTop: 90 }}>
+          <AnimatePresence mode="wait">
+            {selected && (
+              <motion.div key={selected.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.45 }}>
+                <Blueprint scanId={scanId} scan={scan} workflow={selected} onDeployed={onDeployed} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        </details>
     </div>
   );
 }

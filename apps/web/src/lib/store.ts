@@ -77,6 +77,20 @@ export interface AutomationRun {
   detail: string;
 }
 
+export interface SetupRequest {
+  id: string;
+  at: number;
+  agentId: string;
+  business: string;
+  name: string;
+  phone: string;
+  platform: string;
+  goal: string;
+  bestTime: string;
+  note: string;
+  status: "new" | "contacted" | "done";
+}
+
 export interface Workspace {
   createdAt: number;
   sourceUrl: string;
@@ -99,6 +113,7 @@ export interface DeployedAgent {
   runs: AutomationRun[];
   automations: Record<string, boolean>;
   workspace?: Workspace;
+  setupRequest?: SetupRequest;
 }
 
 const DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
@@ -268,4 +283,13 @@ export function historyFor(agent: DeployedAgent, from: string): ChatTurn[] {
   const c = agent.conversations[from];
   if (!c) return [];
   return c.messages.slice(-10).map((m) => ({ role: m.role === "customer" ? ("customer" as const) : ("agent" as const), text: m.text }));
+}
+
+/** Every done-for-you setup request across businesses, newest first (for the Weblyy team). */
+export async function allSetupRequests() {
+  await ready();
+  return [...agents.values()]
+    .map((a) => a.setupRequest)
+    .filter((r): r is SetupRequest => Boolean(r))
+    .sort((a, b) => b.at - a.at);
 }

@@ -50,10 +50,14 @@ export function Nav({ right }: { right?: ReactNode }) {
           <Link href="/owner-demo" className="hide-sm">
             Owner demo
           </Link>
-          <Link href="/integrate" className="hide-sm">
-            Integrate
+          <Link href="/#setup" className="hide-sm">
+            We set it up
           </Link>
-          {right ?? <StatusPill />}
+          {right ?? (
+            <Link href="/#main" className="btn btn-primary btn-sm">
+              Analyze my website
+            </Link>
+          )}
         </nav>
       </div>
     </header>

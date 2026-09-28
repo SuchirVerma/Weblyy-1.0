@@ -1330,3 +1330,45 @@
 .reportToggle small {
   color: var(--faint);
 }
+
+.detailsAll {
+  display: grid;
+  gap: 40px;
+}
+.detailsAll > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  border: 1px dashed var(--line-strong);
+  background: var(--surface);
+}
+.detailsAll > summary::-webkit-details-marker {
+  display: none;
+}
+.detailsAll > summary > span {
+  display: grid;
+  gap: 2px;
+}
+.detailsAll > summary small {
+  color: var(--muted);
+}
+.detailsAll > summary::after {
+  content: "Show ▾";
+  flex: none;
+  font-weight: 600;
+  color: var(--accent);
+}
+.detailsAll[open] > summary::after {
+  content: "Hide ▴";
+}
+.detailsAll[open] > summary {
+  margin-bottom: 32px;
+}
+.detailsAll > :not(summary) + :not(summary) {
+  margin-top: 40px;
+}

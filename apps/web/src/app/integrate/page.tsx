@@ -25,7 +25,14 @@ export default function IntegratePage() {
       <Nav />
       <main id="main" tabIndex={-1} className={`wrap ${styles.page}`}>
         <header className={styles.hero}>
-          <p className="kicker">For business owners</p>
+          <div className="card" style={{ padding: "20px 24px", display: "grid", gap: 8, borderColor: "var(--accent)" }}>
+            <b style={{ fontSize: "1.15rem" }}>Not technical? You can skip this whole page.</b>
+            <span className="muted">
+              Analyze your website, click &ldquo;Make my business AI-ready&rdquo;, then open <b>Go live → Let us set it up for you</b>. Our team calls you and does
+              everything below for free. This page is for people who want to do it themselves.
+            </span>
+          </div>
+          <p className="kicker">Do it yourself</p>
           <h1 className="h-display" style={{ fontSize: "clamp(2.2rem, 5vw, 3.8rem)", maxWidth: "18ch" }}>
             Put the agent where your customers <span className="em">already are.</span>
           </h1>

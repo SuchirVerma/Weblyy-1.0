@@ -1,4 +1,3 @@
-import { FormulaPlayground } from "@/components/formula";
 import { HeroVisual } from "@/components/hero-visual";
 import { CinematicIntro } from "@/components/intro/cinematic-intro";
 import { OwnerDemo } from "@/components/owner-demo";
@@ -118,21 +117,23 @@ export default function Home() {
           <OwnerDemo />
         </section>
 
-        <section className={`wrap ${styles.section}`} aria-labelledby="plug-h">
+        <section id="setup" className={`wrap ${styles.section}`} aria-labelledby="plug-h">
           <Reveal className={styles.plug}>
             <div>
-              <p className="kicker">Plug it into your business</p>
+              <p className="kicker">No coding. Ever.</p>
               <h2 id="plug-h" className="h-section" style={{ marginBottom: 8 }}>
-                Website, WhatsApp, QR code, <span className="em">Instagram bio.</span>
+                Not technical? <span className="em">We set it up for you.</span>
               </h2>
-              <p className="lede">One agent, every channel, one inbox. The website chat bubble is a single line of code, and the rest takes minutes.</p>
+              <p className="lede">
+                You run the business. Our team connects Weblyy to your website and WhatsApp on a quick call, and checks everything works. Free.
+              </p>
             </div>
             <ul className={styles.plugList}>
               {[
-                ["Website chat bubble", "One line of code on WordPress, Wix, Shopify or any site"],
-                ["WhatsApp number", "Through Twilio: test in 10 minutes, go live after Meta verification"],
-                ["QR at the counter", "Customers scan and chat, nothing to install"],
-                ["Instagram & Google", "Chat link in your bio and on your Google profile"],
+                ["1. Analyze your website", "Type your website or business name. Takes a minute."],
+                ["2. Click “Make my business AI-ready”", "Your new website and assistant are ready instantly."],
+                ["3. Tap “Request setup”", "We call you and put it on your website, WhatsApp and Google."],
+                ["Or do it in one tap yourself", "Share your new link on Instagram and WhatsApp, or print the QR poster for your counter."],
               ].map(([t, d]) => (
                 <li key={t}>
                   <b>{t}</b>
@@ -141,32 +142,13 @@ export default function Home() {
               ))}
             </ul>
             <div className="chips">
-              <Link className="btn btn-primary" href="/integrate">
-                See the setup guide <Arrow />
+              <Link className="btn btn-primary" href="/#main">
+                Analyze my website <Arrow />
               </Link>
               <a className="btn btn-ghost" href="/api/demo-agent" target="_blank" rel="noreferrer">
-                Try the chat bubble on a live site
+                See a live example
               </a>
             </div>
-          </Reveal>
-        </section>
-
-        <section id="theory" className={`wrap ${styles.section}`} aria-labelledby="theory-h">
-          <div className={styles.theoryHead}>
-            <Reveal>
-              <p className="kicker">The math, out in the open</p>
-              <h2 id="theory-h" className="h-section">
-                Every workflow gets a score <span className="em">you can argue with.</span>
-              </h2>
-            </Reveal>
-            <Reveal delay={100}>
-              <p className="lede">
-                Four factors multiplied together. Drag them to see why complaints never get automated.
-              </p>
-            </Reveal>
-          </div>
-          <Reveal delay={150}>
-            <FormulaPlayground />
           </Reveal>
         </section>
 

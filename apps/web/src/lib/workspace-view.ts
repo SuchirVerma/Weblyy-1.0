@@ -62,5 +62,6 @@ export function workspaceView(agent: DeployedAgent) {
       whatsappWebhookPath: `/api/whatsapp?agent=${agent.id}`,
     },
     integrations: { twilio: twilioReady(), n8n: n8nReady() },
+    setupRequest: agent.setupRequest ?? null,
   };
 }

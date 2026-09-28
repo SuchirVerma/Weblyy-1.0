@@ -57,6 +57,7 @@ export interface CCData {
   analytics: { intents: Record<string, number>; bySource: Record<string, number> };
   links: { sitePath: string; chatPath: string; ownerPath: string; whatsappWebhookPath: string };
   integrations: { twilio: boolean; n8n: boolean };
+  setupRequest: { at: number; name: string; phone: string; platform: string; bestTime: string; status: string } | null;
 }
 
 export const ago = (t: number) => {

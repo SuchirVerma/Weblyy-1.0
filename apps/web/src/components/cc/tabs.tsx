@@ -105,16 +105,16 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
   const activeAutos = data.automations.filter((a) => a.on && a.ready && !a.requires).length;
   const chatLeads = data.leads.filter((l) => l.source !== "Website form").length;
   const steps = [
-    { done: true, label: "Audit your website", hint: `Scored ${before?.score ?? "–"} / 100` },
-    { done: true, label: "Transform into an AI-ready website", hint: "Live now", tab: "website" as TabKey },
-    { done: data.stats.messages > 0, label: "Chat with your AI Customer Agent as a customer", hint: "Ask a price, then share a name and number", tab: "agent" as TabKey },
-    { done: data.leads.length > 0, label: "See the lead land in Lead Center", hint: data.leads.length ? `${data.leads.length} lead${data.leads.length > 1 ? "s" : ""} so far` : "Qualified automatically", tab: "leads" as TabKey },
-    { done: data.runs.some((r) => r.automation !== "Business made AI-ready"), label: "Watch the automations run", hint: "Qualification, follow-up, owner alerts", tab: "automations" as TabKey },
+    { done: true, label: "Website checked", hint: `Scored ${before?.score ?? "–"} / 100` },
+    { done: true, label: "Your new website is ready", hint: "Live now", tab: "website" as TabKey },
+    { done: data.stats.messages > 0, label: "Chat with your assistant like a customer", hint: "Ask a price, then share a name and number", tab: "agent" as TabKey },
+    { done: data.leads.length > 0, label: "See them appear in Customers", hint: data.leads.length ? `${data.leads.length} lead${data.leads.length > 1 ? "s" : ""} so far` : "Qualified automatically", tab: "leads" as TabKey },
+    { done: data.runs.some((r) => r.automation !== "Business made AI-ready"), label: "See what Autopilot did", hint: "Qualification, follow-up, owner alerts", tab: "automations" as TabKey },
   ];
 
   return (
     <div className={styles.stack}>
-      <Head kicker="AI Business Command Center" title={<>{data.business.name} is <span className="em">AI-ready.</span></>}>
+      <Head kicker="Your dashboard" title={<>{data.business.name} is <span className="em">AI-ready.</span></>}>
         <a className="btn btn-primary btn-sm" href={data.links.sitePath} target="_blank" rel="noreferrer">
           Open AI-ready website ↗
         </a>
@@ -122,6 +122,18 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
           Chat as a customer
         </button>
       </Head>
+
+      {!data.setupRequest && (
+        <section className={styles.nextStep}>
+          <div>
+            <b>Next step: put your assistant to work</b>
+            <span>We can set it up on your website and WhatsApp for you, free. No coding.</span>
+          </div>
+          <button className="btn btn-primary" onClick={() => go("golive")}>
+            Go live →
+          </button>
+        </section>
+      )}
 
       <section className={styles.hero}>
         <div className={styles.heroScore}>
@@ -164,35 +176,35 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
           <Status level="good">AI-ready site live</Status>
         </button>
         <button className={styles.stat} onClick={() => go("agent")}>
-          <small>AI Customer Agent</small>
+          <small>Your assistant</small>
           <b>Active</b>
           <Status level="good">{data.stats.messages} messages answered</Status>
         </button>
         <button className={styles.stat} onClick={() => go("search")}>
-          <small>AI Search</small>
+          <small>Found online</small>
           <b>{catOf(after, "search")?.score ?? 0}/100</b>
           <Status level="good">Optimized</Status>
         </button>
         <button className={styles.stat} onClick={() => go("leads")}>
-          <small>Leads</small>
+          <small>Customers</small>
           <b>{data.leads.length}</b>
-          <Status level={data.leads.length ? "good" : "off"}>{chatLeads} from the AI agent</Status>
+          <Status level={data.leads.length ? "good" : "off"}>{chatLeads} from chats</Status>
         </button>
         <button className={styles.stat} onClick={() => go("leads")}>
-          <small>Qualified leads</small>
+          <small>Serious buyers</small>
           <b>{qualified}</b>
-          <Status level={qualified ? "good" : "off"}>AI qualified</Status>
+          <Status level={qualified ? "good" : "off"}>Ready to buy</Status>
         </button>
         <button className={styles.stat} onClick={() => go("automations")}>
-          <small>Automations</small>
-          <b>{activeAutos} active</b>
+          <small>Autopilot</small>
+          <b>{activeAutos} jobs on</b>
           <Status level="good">{data.runs.length} runs</Status>
         </button>
       </section>
 
       <div className={styles.two}>
         <section className={styles.panel}>
-          <h2>Try the whole flow</h2>
+          <h2>Try it yourself</h2>
           <ol className={styles.journey}>
             {steps.map((s, i) => (
               <li key={i} data-done={s.done || undefined}>
@@ -211,7 +223,7 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
           </ol>
         </section>
         <section className={styles.panel}>
-          <h2>Live activity</h2>
+          <h2>What happened today</h2>
           <RunList runs={data.runs.slice(0, 7)} />
         </section>
       </div>
@@ -249,7 +261,7 @@ export function WebsiteTab({ data }: { data: CCData }) {
   const after = catOf(data.workspace?.auditAfter, "website");
   return (
     <div className={styles.stack}>
-      <Head kicker="Website Transformation" title={<>Your website, <span className="em">made AI-ready.</span></>}>
+      <Head kicker="My website" title={<>Your new website, <span className="em">ready for customers.</span></>}>
         <a className="btn btn-primary btn-sm" href={data.links.sitePath} target="_blank" rel="noreferrer">
           Open website ↗
         </a>
@@ -314,7 +326,7 @@ export function AgentTab({ data, ownerKey }: { data: CCData; ownerKey: string })
   ];
   return (
     <div className={styles.stack}>
-      <Head kicker="AI Customer Agent" title={<>Your agent is <span className="em">live and learning.</span></>} />
+      <Head kicker="Chats" title={<>Your assistant is <span className="em">answering customers.</span></>} />
       <div className={styles.agentGrid}>
         <div>
           <p className={styles.sideLabel}>Try it as a customer</p>
@@ -362,7 +374,7 @@ export function AgentTab({ data, ownerKey }: { data: CCData; ownerKey: string })
                 <span aria-hidden="true">✆</span>
                 <div>
                   <b>WhatsApp</b>
-                  <small>{data.integrations.twilio ? "Connected through Twilio." : "Connect Twilio in Settings to answer on WhatsApp."}</small>
+                  <small>{data.integrations.twilio ? "Connected." : "Not connected yet. We connect your WhatsApp number during the free setup (Go live)."}</small>
                 </div>
               </li>
             </ul>
@@ -387,7 +399,7 @@ export function SearchTab({ data }: { data: CCData }) {
   if (!s) return <p className="muted">Not available.</p>;
   return (
     <div className={styles.stack}>
-      <Head kicker="AI Search Optimization" title={<>Easier to understand for <span className="em">AI-powered search.</span></>} />
+      <Head kicker="Get found online" title={<>Help Google and AI assistants <span className="em">understand your business.</span></>} />
       <p className="lede">
         Clear facts help AI answer &ldquo;best {data.business.type} near me&rdquo; with you. No ranking is guaranteed.
       </p>
@@ -439,10 +451,13 @@ export function SearchTab({ data }: { data: CCData }) {
       </div>
 
       <section className={styles.panel}>
-        <h2>Generated for you</h2>
+        <h2>Already done for you</h2>
         <p className="muted" style={{ margin: "0 0 14px" }}>
-          Already applied on your AI-ready website. Copy them to your existing site too.
+          Your new Weblyy website already includes all of this. Nothing for you to do. If you keep your old website too, ask for the free setup in
+          &ldquo;Go live&rdquo; and our team will add it there.
         </p>
+        <details className={styles.dev}>
+          <summary>Technical details (for your web developer)</summary>
         <div className={styles.gen}>
           <CodeBlock label="Meta title" code={s.metaTitle} />
           <CodeBlock label="Meta description" code={s.metaDescription} />
@@ -450,6 +465,7 @@ export function SearchTab({ data }: { data: CCData }) {
           <CodeBlock label="Structured data (JSON-LD), paste in <head>" code={s.jsonLd.map((j) => `<script type="application/ld+json">\n${JSON.stringify(j, null, 2)}\n</script>`).join("\n")} />
           <CodeBlock label="llms.txt (plain-text summary for AI crawlers)" code={s.llmsTxt} />
         </div>
+        </details>
       </section>
 
       <section className={styles.panel}>
@@ -496,7 +512,7 @@ export function LeadsTab({ data, act }: { data: CCData; act: Act }) {
   };
   return (
     <div className={styles.stack}>
-      <Head kicker="Lead Center" title={<>Every interested customer, <span className="em">in one place.</span></>} />
+      <Head kicker="Customers" title={<>People who want to buy, <span className="em">in one list.</span></>} />
       <section className={styles.cards}>
         <div className={styles.stat}>
           <small>Total leads</small>
@@ -635,7 +651,7 @@ export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
   const [busy, setBusy] = useState("");
   return (
     <div className={styles.stack}>
-      <Head kicker="Automations" title={<>Routine work, <span className="em">running by itself.</span></>} />
+      <Head kicker="Autopilot" title={<>Jobs your assistant <span className="em">does for you.</span></>} />
       <div className={styles.autos}>
         {data.automations.map((a) => {
           const state = a.requires === "twilio" && !a.ready ? "setup" : a.requires === "n8n" ? "export" : a.on ? "on" : "off";
@@ -732,7 +748,7 @@ export function AnalyticsTab({ data }: { data: CCData }) {
   const agentShare = s.messages ? Math.round((s.handledByAgent / s.messages) * 100) : 0;
   return (
     <div className={styles.stack}>
-      <Head kicker="Analytics" title={<>How the business is <span className="em">performing.</span></>} />
+      <Head kicker="Results" title={<>What your assistant <span className="em">did for you.</span></>} />
       <section className={styles.cards}>
         <div className={styles.stat}>
           <small>Conversations</small>
@@ -830,15 +846,15 @@ export function SettingsTab({ data, ownerKey }: { data: CCData; ownerKey: string
             <li>
               <span aria-hidden="true">{data.integrations.twilio ? "✓" : "!"}</span>
               <div>
-                <b>WhatsApp (Twilio)</b>
-                <small>{data.integrations.twilio ? "Connected" : "Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_WHATSAPP_FROM, then use the webhook below."}</small>
+                <b>WhatsApp</b>
+                <small>{data.integrations.twilio ? "Connected" : "Not connected yet. Our team connects your WhatsApp number during the free setup."}</small>
               </div>
             </li>
             <li>
               <span aria-hidden="true">{data.integrations.n8n ? "✓" : "↓"}</span>
               <div>
-                <b>n8n</b>
-                <small>{data.integrations.n8n ? "Connected" : "Download the workflow from the scan's live console, or set N8N_URL and N8N_API_KEY."}</small>
+                <b>Other business tools</b>
+                <small>{data.integrations.n8n ? "Connected" : "Optional, for businesses with their own tools. We handle it during setup if you need it."}</small>
               </div>
             </li>
             <li>
@@ -857,13 +873,19 @@ export function SettingsTab({ data, ownerKey }: { data: CCData; ownerKey: string
         </section>
       </div>
       <section className={styles.panel}>
-        <h2>Put the agent on your existing site too</h2>
+        <h2>Put the assistant on your old website too</h2>
+        <p className="muted" style={{ margin: "0 0 14px" }}>
+          Don&apos;t worry about this part. Use &ldquo;Go live&rdquo; and we&apos;ll set it up for you, or send it to your web person in one tap.
+        </p>
+        <details className={styles.dev}>
+          <summary>Technical details (for your web developer)</summary>
         <div className={styles.gen}>
           <CodeBlock label="Website chat bubble (paste before </body>)" code={`<script src="{ORIGIN}/widget.js" data-agent="${data.id}" async></script>`} />
           <CodeBlock label="Chat link (Instagram bio, Google profile, QR code)" code={`{ORIGIN}${data.links.chatPath}`} />
           <CodeBlock label="WhatsApp webhook (Twilio sandbox: When a message comes in)" code={`{ORIGIN}${data.links.whatsappWebhookPath}`} />
           <CodeBlock label="Command Center link (keep it private)" code={`{ORIGIN}/dashboard/${data.id}?key=${ownerKey}`} />
         </div>
+        </details>
         {!origin && null}
       </section>
     </div>
