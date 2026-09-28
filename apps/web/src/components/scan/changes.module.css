@@ -1,0 +1,301 @@
+.wrap {
+  display: grid;
+  gap: 20px;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+.head h2 {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+.total {
+  color: var(--accent);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.legend > span + span {
+  margin-left: 10px;
+}
+.kind {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.kind[data-kind="new"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.kind[data-kind="better"] {
+  color: #b45309;
+  background: color-mix(in oklab, var(--warn) 14%, var(--surface));
+}
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.tab {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+.tab:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
+}
+.tab[aria-selected="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.tab:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.tabIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--bg-2);
+  font-size: 1.05rem;
+}
+.tabText {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+.tabText b {
+  font-size: 0.9rem;
+}
+.tabText small {
+  font-size: 0.76rem;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.tab em {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-style: normal;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--accent);
+}
+.tab em[data-zero] {
+  color: var(--ok);
+  background: color-mix(in oklab, var(--ok) 12%, var(--surface));
+}
+.panel {
+  display: grid;
+  gap: 14px;
+}
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+.card {
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+.card:hover {
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
+}
+.card[open] {
+  box-shadow: var(--shadow);
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
+}
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.cardTop::-webkit-details-marker {
+  display: none;
+}
+.cardIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  font-size: 1rem;
+}
+.cardTitle {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.cardTitle b {
+  font-size: 0.94rem;
+  line-height: 1.3;
+}
+.cardTitle small {
+  font-size: 0.76rem;
+  color: var(--faint);
+}
+.kind {
+  flex: none;
+}
+.chev {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px 3px 0;
+  border-right: 2px solid var(--faint);
+  border-bottom: 2px solid var(--faint);
+  transform: rotate(45deg);
+  transition: transform 0.25s var(--ease-out);
+}
+.card[open] .chev {
+  transform: rotate(-135deg);
+  margin: 3px 2px 0 0;
+}
+.card .compare {
+  padding: 0 16px 16px;
+}
+.compare {
+  display: grid;
+  gap: 8px;
+}
+.compare p {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+.compare p > span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.compare small {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.compare i {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 700;
+  color: #fff;
+}
+.compare [data-side="before"] {
+  background: var(--bg-2);
+  color: var(--muted);
+}
+.compare [data-side="before"] small {
+  color: var(--faint);
+}
+.compare [data-side="before"] i {
+  background: #9ca3af;
+}
+.compare [data-side="after"] {
+  background: color-mix(in oklab, var(--ok) 9%, var(--surface));
+  color: var(--text);
+}
+.compare [data-side="after"] small {
+  color: var(--ok);
+}
+.compare [data-side="after"] i {
+  background: var(--ok);
+}
+.none,
+.kept {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.none {
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px dashed var(--line-strong);
+  text-align: center;
+}
+.kept span {
+  color: var(--ok);
+  font-weight: 700;
+}
+@media (max-width: 1000px) {
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 2px 2px 10px;
+    margin: 0 -2px;
+  }
+  .tab {
+    flex: 0 0 150px;
+    scroll-snap-align: start;
+  }
+}
+@media (max-width: 560px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}

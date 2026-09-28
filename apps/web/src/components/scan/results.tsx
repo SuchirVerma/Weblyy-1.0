@@ -7,6 +7,7 @@ import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
 import { MakeReady } from "./make-ready";
 import { BeforeAfterChart, TopFixes } from "./before-after";
+import { ChangeList } from "./changes";
 import { ScoreReveal } from "./score-reveal";
 import { SiteReport } from "./site-report";
 import { WebPresencePanel } from "./web-presence";
@@ -224,6 +225,8 @@ export function Results({
         </section>
         )
       )}
+
+      {audit && after && <ChangeList before={audit} after={after} name={k.name} />}
 
       {audit && <MakeReady scanId={scanId} answers={answers} name={k.name} />}
 
