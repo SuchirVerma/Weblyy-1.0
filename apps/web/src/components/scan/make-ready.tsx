@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Audit } from "@/lib/audit";
 import type { Answers } from "@/lib/types";
-import { Arrow } from "../ui";
 import styles from "./make-ready.module.css";
 
 const STEPS = [
@@ -15,7 +14,7 @@ const STEPS = [
   { t: "Switching on automations", d: "Lead follow-up, booking requests, owner alerts" },
 ];
 
-/** Fired by the "Make My Business AI-Ready" button in the top corner of the report. */
+/** Fired by the "Make My Business AI-Ready" button in the top corner of the report; this component runs the flow. */
 export const MAKE_READY_EVENT = "weblyy:make-ready";
 
 export function MakeReady({ scanId, answers, audit, name }: { scanId: string; answers: Answers | null; audit: Audit; name: string }) {
@@ -66,24 +65,12 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
   }, []);
 
   return (
-    <section className={styles.panel} aria-labelledby="ready-h">
-      <div className={styles.copy}>
-        <p className="kicker">Next step</p>
-        <h2 id="ready-h">
-          Make {name} <span className="em">AI-ready.</span>
-        </h2>
-        <p className="muted">
-          One click switches on all five: website, AI assistant, AI search, Lead Center and automations. Manage it all from one place.
-        </p>
-        {error && (
-          <div className="err" role="alert">
-            {error}
-          </div>
-        )}
-        <button className={`btn btn-primary ${styles.cta}`} onClick={start} disabled={phase !== "idle"}>
-          Make My Business AI-Ready <Arrow />
-        </button>
-      </div>
+    <>
+      {error && (
+        <div className="err" role="alert">
+          {error}
+        </div>
+      )}
 
       <AnimatePresence>
         {phase !== "idle" && (
@@ -112,6 +99,6 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </>
   );
 }

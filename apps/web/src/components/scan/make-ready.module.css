@@ -1,36 +1,3 @@
-.panel {
-  position: relative;
-  padding: clamp(28px, 5vw, 56px);
-  border-radius: 24px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  scroll-margin-top: 90px;
-}
-.copy {
-  display: grid;
-  gap: 16px;
-  max-width: 640px;
-}
-.copy h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-variation-settings: "opsz" 72;
-  font-size: clamp(1.9rem, 3.8vw, 2.8rem);
-  letter-spacing: -0.035em;
-  line-height: 1.08;
-}
-.copy p {
-  margin: 0;
-  max-width: 52ch;
-}
-.cta {
-  justify-self: start;
-  margin-top: 8px;
-  height: 52px;
-  padding: 0 26px;
-  font-size: 1rem;
-}
 .overlay {
   position: fixed;
   inset: 0;
@@ -131,7 +98,4 @@
 }
 .score small {
   color: var(--muted);
-}
-.copy h2 :global(.em) {
-  white-space: nowrap;
 }
