@@ -1277,3 +1277,56 @@
   content: "→";
   color: var(--ok);
 }
+
+/* ------------------------------------------------ at-a-glance results view */
+.afterChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 4px auto 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+.afterChip b {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+.afterGain {
+  font-weight: 600;
+  color: var(--ok);
+}
+.quick {
+  display: grid;
+  gap: 18px;
+}
+.more {
+  justify-self: start;
+}
+.reportToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 24px;
+  border-radius: 20px;
+  border: 1px dashed var(--line-strong);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.reportToggle:hover {
+  border-color: var(--accent);
+}
+.reportToggle > span:first-child {
+  display: grid;
+  gap: 4px;
+}
+.reportToggle small {
+  color: var(--faint);
+}

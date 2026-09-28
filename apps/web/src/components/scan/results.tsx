@@ -6,7 +6,9 @@ import { CHANNEL_NAME } from "../radar";
 import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
 import { MakeReady } from "./make-ready";
+import { BeforeAfterChart, StatTiles, TopFixes } from "./before-after";
 import { SiteReport } from "./site-report";
+import { WebPresencePanel } from "./web-presence";
 import type { Deployment } from "./live-console";
 import { useReducedSafe } from "../use-reduced";
 import styles from "./scan.module.css";
@@ -121,12 +123,15 @@ export function Results({
   onDeployed: (d: Deployment) => void;
 }) {
   const [roast, setRoast] = useState(false);
+  const [allFindings, setAllFindings] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [selected, setSelected] = useState<Workflow | null>(null);
   const bpRef = useRef<HTMLDivElement>(null);
   const k = scan.knowledge;
   const s = analysis.subScores;
   const audit = analysis.audit;
   const score = audit?.score ?? analysis.readiness;
+  const after = analysis.auditAfter;
 
   const open = (w: Workflow) => {
     setSelected(w);
@@ -142,14 +147,20 @@ export function Results({
             AI readiness score: {score} out of 100
           </h1>
           <Gauge value={score} />
+          {after && after.score > score && (
+            <p className={styles.afterChip}>
+              <span aria-hidden="true">→</span> <b>{after.score}</b> with Weblyy <span className={styles.afterGain}>+{after.score - score}</span>
+            </p>
+          )}
         </div>
 
         <div className={styles.scoreRight}>
           <p className={styles.summary}>
-            We analyzed {k.url.includes("instagram.com") ? `@${k.instagram?.handle ?? "the profile"} on Instagram` : `${k.pages.length} page${k.pages.length === 1 ? "" : "s"} of ${k.name}`} across
-            five areas that decide whether a business is ready for AI-era customers.
+            5 areas checked on {k.url.includes("instagram.com") ? `@${k.instagram?.handle ?? "the profile"}` : `${k.pages.length} page${k.pages.length === 1 ? "" : "s"}`}.
           </p>
-          {audit ? (
+          {audit && after ? (
+            <BeforeAfterChart before={audit} after={after} />
+          ) : audit ? (
             <ul className={styles.cats}>
               {audit.categories.map((c, i) => (
                 <motion.li key={c.key} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}>
@@ -195,7 +206,23 @@ export function Results({
         </div>
       </section>
 
-      {audit && (
+      {audit && after ? (
+        <section className={styles.quick} aria-labelledby="fix-h">
+          <h2 id="fix-h" className={styles.h2}>
+            Biggest wins
+          </h2>
+          <TopFixes before={audit} after={after} />
+          <StatTiles
+            items={[
+              { label: "problems found", to: audit.problems.length, tone: "bad" },
+              { label: "hours back every week", to: analysis.hoursPerWeek, decimals: 1, suffix: "hrs" },
+              { label: "staff time saved", to: analysis.rupeesPerMonth, prefix: "₹", suffix: "/mo" },
+              ...(scan.presence?.searched ? [{ label: "places you're listed online", to: scan.presence.listings.length, tone: scan.presence.listings.length ? ("ok" as const) : ("bad" as const) }] : []),
+            ]}
+          />
+        </section>
+      ) : (
+        audit && (
         <section className={styles.probs} aria-label="Problems and opportunities">
           <div className={styles.probCol}>
             <h2 className={styles.h2}>Detected problems</h2>
@@ -234,6 +261,7 @@ export function Results({
             </div>
           </div>
         </section>
+        )
       )}
 
       {audit && <MakeReady scanId={scanId} answers={answers} audit={audit} name={k.name} />}
@@ -261,7 +289,7 @@ export function Results({
             </motion.ul>
           ) : (
             <motion.ul key="plain" className={styles.findList} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              {analysis.findings.map((f, i) => (
+              {(allFindings ? analysis.findings : analysis.findings.slice(0, 3)).map((f, i) => (
                 <motion.li key={f} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
                   {f}
                 </motion.li>
@@ -269,9 +297,28 @@ export function Results({
             </motion.ul>
           )}
         </AnimatePresence>
+        {!roast && analysis.findings.length > 3 && (
+          <button className={`btn btn-ghost btn-sm ${styles.more}`} onClick={() => setAllFindings(!allFindings)} aria-expanded={allFindings}>
+            {allFindings ? "Show less" : `Show all ${analysis.findings.length} findings`}
+          </button>
+        )}
       </section>
 
-      <SiteReport scan={scan} analysis={analysis} />
+      {scan.presence && <WebPresencePanel presence={scan.presence} />}
+
+      {showReport ? (
+        <SiteReport scan={scan} analysis={analysis} />
+      ) : (
+        <button className={styles.reportToggle} onClick={() => setShowReport(true)} aria-expanded={false}>
+          <span>
+            <b>Everything we read on {k.name}</b>
+            <small>
+              {k.pages.length} page{k.pages.length === 1 ? "" : "s"} · {k.prices.length} prices · {k.faqs.length} FAQs · {k.phones.length + k.whatsapp.length + k.emails.length} contacts
+            </small>
+          </span>
+          <span className="btn btn-ghost btn-sm">Open full report</span>
+        </button>
+      )}
 
       <section aria-labelledby="board-h" className={styles.boardWrap}>
         <div className={styles.findHead}>

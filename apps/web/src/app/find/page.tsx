@@ -1,7 +1,7 @@
 import { FindResults } from "@/components/find-results";
 import { Nav } from "@/components/ui";
 
-export const metadata = { title: "Find a business | FlowScout" };
+export const metadata = { title: "Find a business | Weblyy" };
 
 export default async function FindPage({ searchParams }: PageProps<"/find">) {
   const { q } = await searchParams;

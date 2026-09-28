@@ -57,7 +57,7 @@ export default async function TransformedSite({ params }: PageProps<"/site/[id]"
     return (
       <main style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: 24, textAlign: "center" }}>
         <p>
-          This website isn&apos;t live anymore. <Link href="/">Go to FlowScout</Link>
+          This website isn&apos;t live anymore. <Link href="/">Go to Weblyy</Link>
         </p>
       </main>
     );
@@ -265,7 +265,7 @@ export default async function TransformedSite({ params }: PageProps<"/site/[id]"
               </span>
             ))}
           </span>
-          <span className={styles.made}>AI-ready website by FlowScout{k.url.includes("kesar-beauty.demo") ? " · demo business, fictional" : ""}</span>
+          <span className={styles.made}>AI-ready website by Weblyy{k.url.includes("kesar-beauty.demo") ? " · demo business, fictional" : ""}</span>
         </div>
       </footer>
 

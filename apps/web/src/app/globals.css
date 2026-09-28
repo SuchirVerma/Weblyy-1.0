@@ -548,6 +548,27 @@ body.paused *::after {
   white-space: pre-wrap;
   word-break: break-all;
 }
+.codeblock pre[data-folded] {
+  overflow: hidden;
+  box-sizing: content-box;
+  -webkit-mask-image: linear-gradient(#000 55%, transparent);
+  mask-image: linear-gradient(#000 55%, transparent);
+}
+.codeblock-more {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: #93c5fd;
+  font: 500 0.78rem var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+}
+.codeblock-more:hover {
+  color: #ffffff;
+}
 
 /* AI-ready website: keep the chat bubble above the mobile action bar */
 @media (max-width: 760px) {

@@ -1,8 +1,8 @@
-# FlowScout: the AI-Ready Business Platform
+# Weblyy: the AI-Ready Business Platform
 
 > **We don't just build websites. We transform existing businesses into AI-ready businesses.**
 
-Give us your existing website. FlowScout audits it, transforms it into an AI-ready website, adds an AI Customer Agent, improves AI search readiness, captures and qualifies leads, and runs the follow-up automations, all from one AI Business Command Center.
+Give us your existing website. Weblyy audits it, transforms it into an AI-ready website, adds an AI Customer Agent, improves AI search readiness, captures and qualifies leads, and runs the follow-up automations, all from one AI Business Command Center.
 
 ```
 Existing website → AI Business Audit → AI Readiness Score → Website Transformation

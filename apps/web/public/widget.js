@@ -1,14 +1,14 @@
 /*!
- * FlowScout chat widget. Add to any website:
- *   <script src="https://YOUR-FLOWSCOUT-URL/widget.js" data-agent="AGENT_ID" async></script>
+ * Weblyy chat widget. Add to any website:
+ *   <script src="https://YOUR-WEBLYY-URL/widget.js" data-agent="AGENT_ID" async></script>
  * Optional: data-color="#2563eb" data-label="Chat with us"
  */
 (function () {
   var script = document.currentScript;
-  if (!script || window.__flowscoutWidget) return;
+  if (!script || window.__weblyyWidget) return;
   var agent = script.getAttribute("data-agent");
   if (!agent || !/^[a-f0-9]{6,32}$/i.test(agent)) return;
-  window.__flowscoutWidget = true;
+  window.__weblyyWidget = true;
 
   var origin = new URL(script.src, location.href).origin;
   var color = script.getAttribute("data-color") || "#2563eb";
@@ -74,8 +74,8 @@
     toggle(false);
   });
 
-  // Let the host page open the chat from its own buttons: window.FlowScoutWidget.open()
-  window.FlowScoutWidget = {
+  // Let the host page open the chat from its own buttons: window.WeblyyWidget.open()
+  window.WeblyyWidget = {
     open: function () {
       isOpen = true;
       toggle(true);

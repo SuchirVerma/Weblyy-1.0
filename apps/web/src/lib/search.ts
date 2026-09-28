@@ -103,7 +103,7 @@ async function duckduckgoBrowser(q: string): Promise<SearchResult[]> {
 }
 
 /** Try engines in order until one answers. Free engines rate-limit, so each is a fallback for the last. */
-async function webSearch(q: string): Promise<SearchResult[]> {
+export async function webSearch(q: string): Promise<SearchResult[]> {
   for (const engine of [brave, duckduckgo, duckduckgoBrowser]) {
     const r = await engine(q).catch(() => [] as SearchResult[]);
     if (r.length >= 2) return r;

@@ -1,0 +1,361 @@
+.intro {
+  position: relative;
+  height: 460vh;
+  height: 460svh;
+  background: #fff;
+}
+.intro[data-mode="still"] {
+  height: 100vh;
+  height: 100svh;
+}
+.stage {
+  --p: 0;
+  --title: 0;
+  --bars: 1;
+  --start: 1;
+  --end: 0;
+  --veil: 0;
+  --word-size: clamp(3.6rem, 16vw, 11rem);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  color: #111;
+  background: #fff;
+}
+
+/* -------------------------------------------------------- poster (instant) */
+/* Painted immediately with CSS, so the first frame is never empty while the 3D scene loads. */
+.poster {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: opacity 1.2s var(--ease-out);
+}
+.intro[data-mode="live"] .poster {
+  opacity: 0;
+}
+.posterSpark {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #111;
+  box-shadow: 0 0 18px 6px rgba(20, 20, 26, 0.35), 0 0 70px 24px rgba(20, 20, 26, 0.08);
+  animation: breathe 3.2s ease-in-out infinite;
+}
+.posterFlare {
+  position: absolute;
+  width: min(80vw, 900px);
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(40, 40, 50, 0.15) 30%, rgba(15, 15, 20, 0.7) 50%, rgba(40, 40, 50, 0.15) 70%, transparent);
+  filter: blur(1px);
+  animation: breathe 3.2s ease-in-out infinite;
+}
+.intro[data-mode="still"] .posterSpark,
+.intro[data-mode="still"] .posterFlare {
+  top: 34%;
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.7;
+    transform: scale(0.94);
+  }
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-out);
+}
+.intro[data-mode="live"] .canvas,
+.intro[data-mode="still"] .canvas {
+  opacity: 1;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: none;
+}
+/* Film grain: one small noise tile, stepped around (cheap, no per-frame filters). */
+.grain {
+  position: absolute;
+  inset: -100px;
+  pointer-events: none;
+  opacity: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(4) infinite;
+}
+@keyframes grain {
+  25% {
+    transform: translate(-30px, 20px);
+  }
+  50% {
+    transform: translate(40px, -30px);
+  }
+  75% {
+    transform: translate(-20px, -40px);
+  }
+}
+
+/* ------------------------------------------------------------------ title */
+.title {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.tagline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + var(--word-size) * 0.62);
+  margin: 0;
+  padding: 0 20px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #52525b;
+  opacity: calc(var(--title) * var(--title));
+  transform: translateY(calc((1 - var(--title)) * 14px));
+  pointer-events: none;
+}
+.tagline b {
+  font-weight: 600;
+  color: #0b0b0f;
+}
+@media (max-width: 560px) {
+  .tagline b {
+    display: block;
+  }
+}
+.intro[data-mode="still"] .tagline {
+  opacity: 1;
+  transform: none;
+  top: calc(50% + clamp(3.6rem, 16vw, 11rem) * 0.62);
+}
+.word {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variation-settings: "opsz" 96;
+  /* Matches the size of the word the particles form (set from the 3D scene). */
+  font-size: var(--word-size);
+  line-height: 1;
+  letter-spacing: calc((1 - var(--title)) * 0.25em - 0.02em);
+  white-space: nowrap;
+  color: #0b0b0f;
+  text-shadow: none;
+  opacity: var(--title);
+  filter: blur(calc((1 - var(--title)) * 14px));
+  transform: scale(calc(1.06 - var(--title) * 0.06));
+  will-change: opacity, filter, transform;
+}
+.intro[data-mode="still"] .word {
+  opacity: 1;
+  filter: none;
+  transform: none;
+  letter-spacing: -0.02em;
+  font-size: clamp(3.6rem, 16vw, 11rem);
+}
+
+/* ------------------------------------------------------------ letterbox */
+.bars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.bars i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 11vh;
+  background: #fff;
+  display: none;
+}
+.bars i:first-child {
+  top: 0;
+  transform: translateY(calc((var(--bars) - 1) * 100%));
+}
+.bars i:last-child {
+  bottom: 0;
+  transform: translateY(calc((1 - var(--bars)) * 100%));
+}
+
+/* ------------------------------------------------------------------- cues */
+.cue {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: calc(11vh * var(--bars) + clamp(18px, 4vh, 40px));
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.cueStart {
+  flex-direction: column;
+  padding: 8px 16px;
+  background: transparent;
+  color: #3f3f46;
+  font-size: 0.74rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  opacity: var(--start);
+  pointer-events: none;
+  animation: fadeUp 1.2s var(--ease-out) 1.2s both;
+}
+.cueEnd {
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: #111;
+  border: 1px solid #111;
+  color: #fff;
+  font-size: 1rem;
+  backdrop-filter: blur(6px);
+  opacity: var(--end);
+  pointer-events: none;
+  transition: background-color 0.25s var(--ease-out);
+}
+.stage[data-start] .cueStart {
+  pointer-events: auto;
+}
+.cueEnd:hover {
+  background: #333;
+}
+.stage[data-end] .cueEnd,
+.intro[data-mode="still"] .cueEnd {
+  pointer-events: auto;
+}
+.intro[data-mode="still"] .cueEnd {
+  opacity: 1;
+}
+.intro[data-mode="still"] .cueStart {
+  display: none;
+}
+.cue:focus-visible,
+.skip:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 4px;
+}
+.mouse {
+  position: relative;
+  width: 24px;
+  height: 38px;
+  border-radius: 13px;
+  border: 1.5px solid currentColor;
+}
+.mouse i {
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 3px;
+  height: 7px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  animation: wheel 1.8s var(--ease-in-out) infinite;
+}
+@keyframes wheel {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  25% {
+    opacity: 1;
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: translateY(13px);
+  }
+}
+.skip {
+  position: absolute;
+  z-index: 4;
+  right: clamp(14px, 3vw, 32px);
+  top: calc(11vh * var(--bars) + 14px);
+  padding: 8px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  color: #52525b;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  cursor: pointer;
+  opacity: calc(1 - var(--end));
+  animation: fadeUp 1s var(--ease-out) 1.6s both;
+}
+.skip:hover {
+  color: #000;
+}
+.intro[data-mode="still"] .skip {
+  display: none;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: var(--bg);
+  opacity: var(--veil);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+}
+.skip {
+  animation-name: fadeIn;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .intro {
+    height: 400vh;
+    height: 400svh;
+  }
+  .bars i {
+    height: 7vh;
+  }
+  .cue {
+    bottom: calc(7vh * var(--bars) + 22px);
+  }
+  .skip {
+    top: calc(7vh * var(--bars) + 12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .posterSpark,
+  .posterFlare,
+  .mouse i {
+    animation: none !important;
+  }
+}

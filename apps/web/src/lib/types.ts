@@ -107,6 +107,8 @@ export interface SubScores {
 export interface Analysis {
   /** The five-category AI readiness audit */
   audit?: import("./audit").Audit;
+  /** The same audit with everything Weblyy adds switched on, for the before/after view */
+  auditAfter?: import("./audit").Audit;
   readiness: number;
   subScores: SubScores;
   workflows: Workflow[];
@@ -118,10 +120,20 @@ export interface Analysis {
   engine: "ai" | "rules";
 }
 
+export interface WebPresence {
+  query: string;
+  /** False when every search engine failed, so "nothing found" isn't a real result. */
+  searched: boolean;
+  ownSiteFound: boolean;
+  listings: { platform: string; url: string; title: string; rating?: number; reviews?: number }[];
+  mentions: number;
+}
+
 export interface ScanResult {
   knowledge: SiteKnowledge;
   touchpoints: Touchpoint[];
   gaps: string[];
+  presence?: WebPresence | null;
 }
 
 export type ScanEvent =

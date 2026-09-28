@@ -50,7 +50,6 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
     }
   };
 
-  const weak = audit.categories.filter((c) => c.level !== "good");
 
   return (
     <section className={styles.panel} aria-labelledby="ready-h">
@@ -60,8 +59,7 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
           Make {name} <span className="em">AI-ready.</span>
         </h2>
         <p className="muted">
-          One click switches on everything your score is missing{weak.length ? `: ${weak.map((c) => c.label).join(", ")}` : ""}. You get an AI-ready website, an
-          AI Customer Agent, AI search improvements, a Lead Center and automations, all managed from one Command Center.
+          One click switches on all five. Manage everything from one Command Center.
         </p>
         <ul className={styles.list}>
           {["AI-ready website", "AI Customer Agent", "AI Search Optimization", "Lead Center", "Automations"].map((x) => (

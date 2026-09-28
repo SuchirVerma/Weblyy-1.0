@@ -129,7 +129,7 @@ export function Scanning({
             <i />
             <i />
             <i />
-            <span>flowscout scan {host}</span>
+            <span>weblyy scan {host}</span>
           </div>
           <AnimatePresence initial={false}>
             {lines.map((l) => (

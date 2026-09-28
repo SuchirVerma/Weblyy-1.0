@@ -1,0 +1,239 @@
+/* ------------------------------------------------------- before/after chart */
+.chart {
+  display: grid;
+  gap: 10px;
+}
+.legend {
+  display: flex;
+  gap: 18px;
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend i {
+  width: 14px;
+  height: 8px;
+  border-radius: 4px;
+}
+.legend i[data-k="now"] {
+  background: var(--warn);
+}
+.legend i[data-k="after"] {
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent);
+}
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.rows details {
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.rows summary {
+  display: grid;
+  grid-template-columns: minmax(120px, 170px) 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.rows summary::-webkit-details-marker {
+  display: none;
+}
+.label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.track {
+  position: relative;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.06);
+  overflow: hidden;
+}
+.after,
+.now {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+}
+.after {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.now {
+  background: var(--warn);
+}
+.now[data-level="good"] {
+  background: var(--ok);
+}
+.now[data-level="bad"] {
+  background: var(--bad);
+}
+.nums {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.95rem;
+  color: var(--faint);
+  min-width: 84px;
+  justify-content: flex-end;
+}
+.nums b {
+  font-weight: 600;
+  color: var(--warn);
+}
+.nums b[data-level="good"] {
+  color: var(--ok);
+}
+.nums b[data-level="bad"] {
+  color: var(--bad);
+}
+.nums .up {
+  color: var(--accent);
+}
+.checks {
+  list-style: none;
+  margin: 0;
+  padding: 0 16px 14px;
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+}
+.checks li {
+  position: relative;
+  padding-left: 18px;
+}
+.checks li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bad);
+}
+.checks li[data-ok="yes"]::before {
+  background: var(--ok);
+}
+.checks li[data-ok="partial"]::before {
+  background: var(--warn);
+}
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+
+/* ---------------------------------------------------------------- top fixes */
+.fixes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.fixes li {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 20px 20px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.fixNum {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+.gain {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+.gain::after {
+  content: " pts";
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--faint);
+}
+.fixLabel {
+  font-weight: 600;
+}
+.fixes small {
+  color: var(--faint);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------- stat tiles */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.tiles > div {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.tiles b {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.tiles b small {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--faint);
+  margin-left: 3px;
+}
+.tileLabel {
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+.tiles > div[data-tone="bad"] b {
+  color: var(--bad);
+}
+.tiles > div[data-tone="ok"] b {
+  color: var(--ok);
+}
+
+@media (max-width: 560px) {
+  .rows summary {
+    grid-template-columns: 1fr auto;
+  }
+  .track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

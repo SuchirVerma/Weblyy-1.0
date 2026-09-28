@@ -12,7 +12,7 @@ const MAX_BYTES = 2_500_000;
 const MAX_EXTRA_PAGES = 5;
 const FETCH_TIMEOUT_MS = 10_000;
 const UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 FlowScout/1.0";
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36 Weblyy/1.0";
 
 export const DEMO_URL = "https://kesar-beauty.demo/";
 const DEMO_HOST = "kesar-beauty.demo";

@@ -5,6 +5,7 @@ import type { Audit, AuditCategory } from "@/lib/audit";
 import { CodeBlock } from "../code-block";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
+import { QrCard } from "../qr-card";
 import type { TabKey } from "./command-center";
 import { ago, type CCData, type CCLead } from "./types";
 import styles from "./cc.module.css";
@@ -254,9 +255,8 @@ export function WebsiteTab({ data }: { data: CCData }) {
         </a>
       </Head>
       <p className="lede">
-        Built from {data.business.url.includes("instagram.com") ? "the Instagram profile" : `the existing site (${data.business.pages} pages read)`}: same business, same
-        prices and details, now with a clear headline, mobile-first layout, Book / Call / Chat buttons, FAQs, an enquiry form wired to the Lead Center, and the AI
-        Customer Agent built in.
+        Same business and prices as {data.business.url.includes("instagram.com") ? "your Instagram" : "your current site"}, rebuilt for phones with Book, Call and Chat
+        on every screen.
       </p>
 
       <section className={styles.preview}>
@@ -367,6 +367,10 @@ export function AgentTab({ data, ownerKey }: { data: CCData; ownerKey: string })
               </li>
             </ul>
           </section>
+          <section className={styles.panel}>
+            <h2>QR code</h2>
+            <QrCard chatPath={data.links.chatPath} name={k.name} />
+          </section>
         </div>
       </div>
       <OwnerInbox agentId={data.id} ownerKey={ownerKey} />
@@ -385,8 +389,7 @@ export function SearchTab({ data }: { data: CCData }) {
     <div className={styles.stack}>
       <Head kicker="AI Search Optimization" title={<>Easier to understand for <span className="em">AI-powered search.</span></>} />
       <p className="lede">
-        AI assistants and search engines answer questions like &ldquo;best {data.business.type} near me, open now&rdquo; from clear, structured facts. These
-        improvements raise your readiness for AI search and discovery. No ranking is guaranteed.
+        Clear facts help AI answer &ldquo;best {data.business.type} near me&rdquo; with you. No ranking is guaranteed.
       </p>
 
       <section className={styles.hero}>

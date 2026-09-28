@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: PageProps<"/chat/[id]">) {
   const { id } = await params;
   const agent = await getAgent(id);
-  return { title: agent ? `Chat with ${agent.knowledge.name}` : "Chat not found | FlowScout" };
+  return { title: agent ? `Chat with ${agent.knowledge.name}` : "Chat not found | Weblyy" };
 }
 
 export default async function ChatPage({ params, searchParams }: PageProps<"/chat/[id]">) {
@@ -26,7 +26,7 @@ export default async function ChatPage({ params, searchParams }: PageProps<"/cha
             The agent may have been switched off. Ask the presenter for a fresh QR code.
           </p>
           <Link href="/" className="btn btn-ghost">
-            What is FlowScout?
+            What is Weblyy?
           </Link>
         </div>
       </main>

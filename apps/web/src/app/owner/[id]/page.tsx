@@ -3,7 +3,7 @@ import { OwnerInbox } from "@/components/owner-inbox";
 import { getAgent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Owner inbox | FlowScout", robots: { index: false } };
+export const metadata = { title: "Owner inbox | Weblyy", robots: { index: false } };
 
 export default async function OwnerPage({ params, searchParams }: PageProps<"/owner/[id]">) {
   const { id } = await params;
@@ -20,7 +20,7 @@ export default async function OwnerPage({ params, searchParams }: PageProps<"/ow
             Open the owner link from the live console again. It includes a private key.
           </p>
           <Link href="/" className="btn btn-ghost">
-            Go to FlowScout
+            Go to Weblyy
           </Link>
         </div>
       </main>

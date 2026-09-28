@@ -2,7 +2,7 @@ import Link from "next/link";
 import { OwnerDemo } from "@/components/owner-demo";
 import { Arrow, Nav } from "@/components/ui";
 
-export const metadata = { title: "The owner's side | FlowScout" };
+export const metadata = { title: "The owner's side | Weblyy" };
 
 export default function OwnerDemoPage() {
   return (

@@ -1,5 +1,6 @@
 import { FormulaPlayground } from "@/components/formula";
 import { HeroVisual } from "@/components/hero-visual";
+import { CinematicIntro } from "@/components/intro/cinematic-intro";
 import { OwnerDemo } from "@/components/owner-demo";
 import { SaturdayReplay } from "@/components/saturday-replay";
 import { Steps } from "@/components/steps";
@@ -10,6 +11,8 @@ import styles from "@/components/landing.module.css";
 export default function Home() {
   return (
     <>
+      <CinematicIntro nextId="product" />
+      <div id="product" style={{ scrollMarginTop: 0 }} />
       <Nav />
       <main id="main" tabIndex={-1}>
         <section className={`wrap ${styles.hero}`}>
@@ -19,8 +22,7 @@ export default function Home() {
               Make your business <span className="em">AI-ready.</span>
             </h1>
             <p className="lede">
-              Transform your existing website into an AI-powered customer acquisition system. We audit your site, rebuild it to convert, add an AI Customer
-              Agent, improve your readiness for AI search, and turn every conversation into a qualified lead.
+              Paste your website. Get your AI score, an agent that answers customers 24/7, and every chat turned into a lead.
             </p>
             <ScanBar />
             <a href="#how" className={styles.secondary}>
@@ -109,8 +111,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={100}>
               <p className="lede">
-                Price questions never reach you. Bookings need one tap. Complaints arrive as an urgent alert, and your reply goes straight to the customer.
-                Watch one evening play out.
+                Prices answered for you. Bookings in one tap. Complaints come to you first.
               </p>
             </Reveal>
           </div>
@@ -160,8 +161,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={100}>
               <p className="lede">
-                No black box. Four factors, each between 0 and 1, multiplied together. Drag them and see why price questions get automated and complaints
-                never do.
+                Four factors multiplied together. Drag them to see why complaints never get automated.
               </p>
             </Reveal>
           </div>
@@ -213,7 +213,7 @@ export default function Home() {
         </section>
       </main>
       <footer className={`wrap ${styles.footer}`}>
-        <span>FlowScout · a B.Tech project</span>
+        <span>Weblyy · a B.Tech project</span>
         <span className="muted">The demo salon is a fictional business.</span>
       </footer>
     </>

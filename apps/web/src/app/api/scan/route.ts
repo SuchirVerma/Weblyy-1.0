@@ -1,9 +1,10 @@
 import { crawl, CrawlError } from "@/lib/crawl";
 
 import { detectTouchpoints, findGaps } from "@/lib/detect";
+import { findWebPresence } from "@/lib/presence";
 import { allow, clientIp } from "@/lib/ratelimit";
 import { saveScan } from "@/lib/store";
-import type { ScanEvent } from "@/lib/types";
+import type { ScanEvent, WebPresence } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -75,7 +76,25 @@ export async function POST(req: Request) {
         }
         if (touchpoints.length === 0) send({ type: "log", level: "warn", text: "No customer touchpoints found. The site may load its content with JavaScript." });
 
-        const result = { knowledge, touchpoints, gaps };
+        // Web search: where else does this business show up? Capped so a slow engine can't stall the scan.
+        const presence = await Promise.race([
+          findWebPresence(knowledge, (text) => send({ type: "log", level: "info", text })).catch(() => null),
+          pause(20_000).then(() => null as WebPresence | null),
+        ]);
+        if (!presence) {
+          if (!/\.demo$/.test(new URL(knowledge.url).hostname)) send({ type: "log", level: "warn", text: "Web search didn't answer in time. Skipping it." });
+        } else if (!presence.searched) {
+          send({ type: "log", level: "warn", text: "Search engines didn't respond. Web presence not checked." });
+        } else {
+          send({ type: "log", level: presence.ownSiteFound ? "ok" : "warn", text: presence.ownSiteFound ? "Your website shows up when people search your name" : "Your website doesn't show up when people search your name" });
+          for (const l of presence.listings.slice(0, 6)) {
+            send({ type: "log", level: "ok", text: `Found on ${l.platform}${l.rating ? `: ${l.rating}★${l.reviews ? ` (${l.reviews} reviews)` : ""}` : ""}` });
+            await pause(90);
+          }
+          if (!presence.listings.length) send({ type: "log", level: "warn", text: "Not found on Google Maps, Justdial or other directories" });
+        }
+
+        const result = { knowledge, touchpoints, gaps, presence };
         send({ type: "stage", stage: "done" });
         send({ type: "result", scanId: saveScan(result), result });
       } catch (e) {

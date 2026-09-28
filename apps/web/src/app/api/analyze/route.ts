@@ -4,6 +4,8 @@ import { parseAnswers } from "@/lib/answers";
 import { buildAnalysis, ruleWorkflows } from "@/lib/score";
 import { getScan } from "@/lib/store";
 
+const ALL_ON = { agent: true, website: true, search: true, leadCenter: true, automations: true };
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -26,7 +28,7 @@ export async function POST(req: Request) {
       if (refined) {
         const a = buildAnalysis(scan, answers, refined.workflows, { summary: refined.summary, roast: refined.roast });
         const audit = auditBusiness(scan, answers);
-        return Response.json({ ...a, audit, readiness: audit.score });
+        return Response.json({ ...a, audit, auditAfter: auditBusiness(scan, answers, ALL_ON), readiness: audit.score });
       }
     } catch (e) {
       console.error("[analyze] AI failed, using rules engine:", e instanceof Error ? e.message : e);
@@ -34,5 +36,5 @@ export async function POST(req: Request) {
   }
   const a = buildAnalysis(scan, answers, draft);
   const audit = auditBusiness(scan, answers);
-  return Response.json({ ...a, audit, readiness: audit.score });
+  return Response.json({ ...a, audit, auditAfter: auditBusiness(scan, answers, ALL_ON), readiness: audit.score });
 }

@@ -130,7 +130,7 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
     const blob = new Blob([JSON.stringify(deployment.n8n, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `flowscout-${k.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-n8n.json`;
+    a.download = `weblyy-${k.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-n8n.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };

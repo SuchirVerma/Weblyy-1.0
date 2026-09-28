@@ -91,7 +91,7 @@ export function SaturdayReplay() {
       </div>
 
       <div className={styles.replayGrid}>
-        <Phone title="Without FlowScout" subtitle="The owner replies between clients" badge={waiting > 0 ? `${waiting} unread` : "all caught up"} tone="bad" count={arrived.length + ownerAnswered}>
+        <Phone title="Without Weblyy" subtitle="The owner replies between clients" badge={waiting > 0 ? `${waiting} unread` : "all caught up"} tone="bad" count={arrived.length + ownerAnswered}>
           {arrived.map((m) => {
             const answered = m.ownerDelay >= 0 && m.t + m.ownerDelay <= now;
             return (
@@ -99,7 +99,7 @@ export function SaturdayReplay() {
             );
           })}
         </Phone>
-        <Phone title="With FlowScout" subtitle="The agent answers from the website" badge={`${arrived.length} answered`} tone="ok" count={arrived.length}>
+        <Phone title="With Weblyy" subtitle="The agent answers from the website" badge={`${arrived.length} answered`} tone="ok" count={arrived.length}>
           {arrived.map((m) => (
             <Row key={m.t} text={m.text} time={clock(m.t)} reply={m.reply} replyTime="3 sec later" />
           ))}

@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 
-/** A copyable code block. `{ORIGIN}` is replaced with this app's address. */
-export function CodeBlock({ code, label }: { code: string; label?: string }) {
-  const [origin, setOrigin] = useState("https://your-flowscout-url");
+/** A copyable code block. `{ORIGIN}` is replaced with this app's address. Long code starts folded to a few lines. */
+export function CodeBlock({ code, label, fold = 6 }: { code: string; label?: string; fold?: number }) {
+  const [origin, setOrigin] = useState("https://your-weblyy-url");
   const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     fetch("/api/status")
       .then((r) => r.json())
@@ -12,6 +13,7 @@ export function CodeBlock({ code, label }: { code: string; label?: string }) {
       .catch(() => setOrigin(window.location.origin));
   }, []);
   const text = code.replaceAll("{ORIGIN}", origin);
+  const long = text.split("\n").length > fold || text.length > fold * 90;
   return (
     <div className="codeblock">
       <div className="codeblock-head">
@@ -31,9 +33,14 @@ export function CodeBlock({ code, label }: { code: string; label?: string }) {
           {copied ? "Copied ✓" : "Copy"}
         </button>
       </div>
-      <pre>
+      <pre data-folded={long && !open ? "" : undefined} style={long && !open ? { maxHeight: `${fold * 1.6}em` } : undefined}>
         <code>{text}</code>
       </pre>
+      {long && (
+        <button type="button" className="codeblock-more" onClick={() => setOpen(!open)} aria-expanded={open}>
+          {open ? "Collapse" : `Expand (${text.split("\n").length} lines)`}
+        </button>
+      )}
     </div>
   );
 }

@@ -22,7 +22,7 @@ const pathOf = (u: string) => {
 export function reportMarkdown(scan: ScanResult, a: Analysis): string {
   const k = scan.knowledge;
   const lines = [
-    `# ${k.name}: FlowScout report`,
+    `# ${k.name}: Weblyy report`,
     ``,
     `Website: ${k.url}`,
     `Type: ${k.businessType}`,
@@ -76,7 +76,7 @@ export function SiteReport({ scan, analysis }: { scan: ScanResult; analysis: Ana
     const blob = new Blob([reportMarkdown(scan, analysis)], { type: "text/markdown" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `${k.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-flowscout-report.md`;
+    a.download = `${k.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-weblyy-report.md`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };

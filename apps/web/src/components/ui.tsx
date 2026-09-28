@@ -36,9 +36,9 @@ export function Nav({ right }: { right?: ReactNode }) {
   return (
     <header className="nav">
       <div className="wrap nav-inner">
-        <Link href="/" className="brand" aria-label="FlowScout home">
+        <Link href="/" className="brand" aria-label="Weblyy home">
           <Logo />
-          FlowScout
+          Weblyy
         </Link>
         <nav className="nav-links" aria-label="Main">
           <Link href="/#platform" className="hide-sm">

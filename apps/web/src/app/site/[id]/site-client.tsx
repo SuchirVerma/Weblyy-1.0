@@ -4,13 +4,13 @@ import styles from "./site.module.css";
 
 declare global {
   interface Window {
-    FlowScoutWidget?: { open: () => void };
+    WeblyyWidget?: { open: () => void };
   }
 }
 
 export function ChatButton({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <button type="button" className={className} onClick={() => window.FlowScoutWidget?.open()}>
+    <button type="button" className={className} onClick={() => window.WeblyyWidget?.open()}>
       {children}
     </button>
   );

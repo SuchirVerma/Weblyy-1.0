@@ -1,6 +1,6 @@
 import "server-only";
 
-const buckets = ((globalThis as unknown as { __flowscoutRl?: Map<string, number[]> }).__flowscoutRl ??= new Map<string, number[]>());
+const buckets = ((globalThis as unknown as { __weblyyRl?: Map<string, number[]> }).__weblyyRl ??= new Map<string, number[]>());
 
 /** Sliding-window limiter: true when the key has made fewer than `max` calls in `windowMs`. */
 export function allow(key: string, max: number, windowMs: number): boolean {

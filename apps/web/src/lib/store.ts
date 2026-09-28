@@ -105,8 +105,8 @@ const DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
 const FILE = path.join(DIR, "agents.json");
 const MAX_AGENTS = 50;
 
-const g = globalThis as unknown as { __flowscoutAgents?: Map<string, DeployedAgent>; __flowscoutLoaded?: Promise<void> };
-const agents: Map<string, DeployedAgent> = (g.__flowscoutAgents ??= new Map<string, DeployedAgent>());
+const g = globalThis as unknown as { __weblyyAgents?: Map<string, DeployedAgent>; __weblyyLoaded?: Promise<void> };
+const agents: Map<string, DeployedAgent> = (g.__weblyyAgents ??= new Map<string, DeployedAgent>());
 
 async function load() {
   try {
@@ -123,7 +123,7 @@ async function load() {
     /* first run: nothing saved yet */
   }
 }
-const ready = () => (g.__flowscoutLoaded ??= load());
+const ready = () => (g.__weblyyLoaded ??= load());
 
 let saveTimer: NodeJS.Timeout | null = null;
 function persist() {
@@ -140,7 +140,7 @@ function persist() {
 }
 
 /* Scans live in memory only; they are cheap to redo. */
-const scanStore = ((globalThis as unknown as { __flowscoutScans?: Map<string, ScanResult> }).__flowscoutScans ??= new Map<string, ScanResult>());
+const scanStore = ((globalThis as unknown as { __weblyyScans?: Map<string, ScanResult> }).__weblyyScans ??= new Map<string, ScanResult>());
 
 export function saveScan(scan: ScanResult): string {
   const id = randomBytes(6).toString("hex");

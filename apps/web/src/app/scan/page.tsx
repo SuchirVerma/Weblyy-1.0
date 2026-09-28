@@ -1,7 +1,7 @@
 import { ScanApp } from "@/components/scan/scan-app";
 import { Nav } from "@/components/ui";
 
-export const metadata = { title: "Scanning… | FlowScout" };
+export const metadata = { title: "Scanning… | Weblyy" };
 
 export default async function ScanPage({ searchParams }: PageProps<"/scan">) {
   const { url } = await searchParams;

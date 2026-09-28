@@ -8,7 +8,7 @@ const body = Albert_Sans({ variable: "--font-body", subsets: ["latin"], weight: 
 const mono = DM_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {
-  title: "FlowScout: Make your business AI-ready",
+  title: "Weblyy: Make your business AI-ready",
   description:
     "Turn your existing website into an AI-powered customer acquisition system: AI readiness audit, website transformation, AI Customer Agent, AI search readiness, Lead Center and automations.",
   icons: {

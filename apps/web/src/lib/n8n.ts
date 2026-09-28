@@ -1,11 +1,11 @@
 import type { Workflow } from "./types";
 
-/** An importable n8n workflow: Twilio WhatsApp webhook -> FlowScout agent -> reply, with an escalation branch. */
+/** An importable n8n workflow: Twilio WhatsApp webhook -> Weblyy agent -> reply, with an escalation branch. */
 export function n8nWorkflow(opts: { businessName: string; workflow: Workflow; agentId: string; appUrl: string }) {
   const { businessName, workflow, agentId, appUrl } = opts;
   const endpoint = `${appUrl.replace(/\/$/, "")}/api/agent`;
   return {
-    name: `${businessName}: ${workflow.name} (FlowScout)`,
+    name: `${businessName}: ${workflow.name} (Weblyy)`,
     nodes: [
       {
         id: "a1",
@@ -13,12 +13,12 @@ export function n8nWorkflow(opts: { businessName: string; workflow: Workflow; ag
         type: "n8n-nodes-base.webhook",
         typeVersion: 2,
         position: [0, 0],
-        webhookId: `flowscout-${agentId}`,
-        parameters: { httpMethod: "POST", path: `flowscout-${agentId}`, responseMode: "responseNode" },
+        webhookId: `weblyy-${agentId}`,
+        parameters: { httpMethod: "POST", path: `weblyy-${agentId}`, responseMode: "responseNode" },
       },
       {
         id: "a2",
-        name: "Ask FlowScout agent",
+        name: "Ask Weblyy agent",
         type: "n8n-nodes-base.httpRequest",
         typeVersion: 4.2,
         position: [260, 0],
@@ -55,7 +55,7 @@ export function n8nWorkflow(opts: { businessName: string; workflow: Workflow; ag
           from: "={{ $env.TWILIO_WHATSAPP_FROM }}",
           to: "={{ $env.OWNER_WHATSAPP }}",
           toWhatsapp: true,
-          message: `=FlowScout alert (${workflow.name}): {{ $('WhatsApp message in').item.json.body.From }} said "{{ $('WhatsApp message in').item.json.body.Body }}"`,
+          message: `=Weblyy alert (${workflow.name}): {{ $('WhatsApp message in').item.json.body.From }} said "{{ $('WhatsApp message in').item.json.body.Body }}"`,
         },
       },
       {
@@ -67,14 +67,14 @@ export function n8nWorkflow(opts: { businessName: string; workflow: Workflow; ag
         parameters: {
           respondWith: "text",
           responseBody:
-            "=<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>{{ $('Ask FlowScout agent').item.json.reply }}</Message></Response>",
+            "=<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>{{ $('Ask Weblyy agent').item.json.reply }}</Message></Response>",
           options: { responseHeaders: { entries: [{ name: "Content-Type", value: "text/xml" }] } },
         },
       },
     ],
     connections: {
-      "WhatsApp message in": { main: [[{ node: "Ask FlowScout agent", type: "main", index: 0 }]] },
-      "Ask FlowScout agent": { main: [[{ node: "Needs a human?", type: "main", index: 0 }]] },
+      "WhatsApp message in": { main: [[{ node: "Ask Weblyy agent", type: "main", index: 0 }]] },
+      "Ask Weblyy agent": { main: [[{ node: "Needs a human?", type: "main", index: 0 }]] },
       "Needs a human?": {
         main: [
           [{ node: "Alert owner", type: "main", index: 0 }],

@@ -1,4 +1,4 @@
-# FlowScout web app
+# Weblyy web app
 
 One Next.js app: the landing page, the scan → ask → score → deploy flow, the live agent console, the audience chat page, and every API route.
 
@@ -38,7 +38,7 @@ The original single-workflow path (blueprint → hold to deploy → live console
 
 ## What you can type
 
-- **A business name**, like "North Delhi Dental Clinic Model Town". FlowScout searches the web (Brave, then DuckDuckGo, then DuckDuckGo in a real browser; results cached for 6 hours) and lets you pick the right website or Instagram profile. Set `BRAVE_SEARCH_API_KEY` for the official Brave API.
+- **A business name**, like "North Delhi Dental Clinic Model Town". Weblyy searches the web (Brave, then DuckDuckGo, then DuckDuckGo in a real browser; results cached for 6 hours) and lets you pick the right website or Instagram profile. Set `BRAVE_SEARCH_API_KEY` for the official Brave API.
 - **A website**, like `northdelhidentalclinic.com`.
 - **An Instagram handle or link**, like `@naturalssalon`. It reads the public profile (name, followers, bio, contact numbers in the bio), then follows the link in bio to the website if there is one.
 
@@ -51,7 +51,7 @@ The original single-workflow path (blueprint → hold to deploy → live console
 ## Website chat bubble
 
 ```html
-<script src="https://YOUR-FLOWSCOUT-URL/widget.js" data-agent="AGENT_ID" async></script>
+<script src="https://YOUR-WEBLYY-URL/widget.js" data-agent="AGENT_ID" async></script>
 ```
 
 Optional `data-color` and `data-label`. The live console shows the snippet with the real agent ID.

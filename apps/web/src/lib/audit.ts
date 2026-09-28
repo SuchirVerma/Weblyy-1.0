@@ -26,7 +26,7 @@ export interface Audit {
   opportunities: string[];
 }
 
-/** What FlowScout has switched on for this business (after "Make my business AI-ready"). */
+/** What Weblyy has switched on for this business (after "Make my business AI-ready"). */
 export interface Upgrades {
   agent?: boolean;
   website?: boolean;
@@ -106,6 +106,7 @@ export function auditBusiness(scan: ScanResult, answers: Answers, up: Upgrades =
     { label: "Opening hours", ok: k.hours.length ? true : false, detail: k.hours[0] ?? "Not listed." },
     { label: "Services and prices", ok: k.prices.length >= 5 ? true : k.prices.length || k.services.length ? "partial" : false, detail: k.prices.length ? `${k.prices.length} priced services.` : "Services not clearly listed." },
     { label: "Contact details", ok: contactCount >= 2 ? true : contactCount ? "partial" : false, detail: `${contactCount} contact methods.` },
+    ...presenceChecks(scan.presence),
   ];
 
   // -------------------------------------------------------------- Automation
@@ -156,6 +157,19 @@ export function auditBusiness(scan: ScanResult, answers: Answers, up: Upgrades =
   return { score: total, categories: cats, problems, opportunities };
 }
 
+/** Web search checks. Skipped when the search didn't run, so a failed search never lowers the score. */
+function presenceChecks(p: ScanResult["presence"]): AuditCheck[] {
+  if (!p?.searched) return [];
+  const maps = p.listings.find((l) => l.platform === "Google Maps");
+  const dirs = p.listings.filter((l) => !["Instagram", "Facebook", "YouTube", "LinkedIn", "X", "Wikipedia", "Reddit", "Quora"].includes(l.platform));
+  const rated = p.listings.filter((l) => l.rating).sort((a, b) => (b.reviews ?? 0) - (a.reviews ?? 0));
+  return [
+    { label: "Found when searched by name", ok: p.ownSiteFound ? true : p.listings.length ? "partial" : false, detail: p.ownSiteFound ? `Your site shows up for “${p.query}”.` : p.listings.length ? `Only other sites show up for “${p.query}”.` : `Nothing about you shows up for “${p.query}”.` },
+    { label: "Listed on maps and directories", ok: dirs.length >= 3 ? true : dirs.length ? "partial" : false, detail: dirs.length ? `${dirs.map((d) => d.platform).join(", ")}${maps ? "" : ". Not seen on Google Maps"}.` : "Not found on Google Maps, Justdial or other directories." },
+    { label: "Ratings and reviews online", ok: rated.some((l) => (l.rating ?? 0) >= 4) ? true : rated.length ? "partial" : false, detail: rated.length ? rated.slice(0, 3).map((l) => `${l.rating}★ on ${l.platform}${l.reviews ? ` (${l.reviews})` : ""}`).join(", ") : "No ratings found in search results." },
+  ];
+}
+
 function mk(key: CategoryKey, label: string, checks: AuditCheck[], summaries: Record<Level, string>): AuditCategory {
   const s = score(checks);
   const lv = level(s);
@@ -187,6 +201,8 @@ function recommend(key: CategoryKey, checks: AuditCheck[]): string[] {
       if (missing("Meta description") || missing("Clear business description")) out.push("Write a clear one-paragraph business description and meta description.");
       if (missing("FAQ content")) out.push("Publish FAQs (with FAQ structured data) answering what customers ask most.");
       if (missing("Location") || missing("Opening hours")) out.push("Show your address and opening hours in plain text on the site.");
+      if (missing("Listed on maps and directories")) out.push("Claim your Google Business Profile and Justdial listing with the same name, address and phone as your site.");
+      if (missing("Ratings and reviews online")) out.push("Ask happy customers for Google reviews. The agent can send the review link after each visit.");
       break;
     case "automation":
       if (missing("Instant replies to common questions")) out.push("Automate replies to price, timing and location questions.");

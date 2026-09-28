@@ -4,7 +4,7 @@ import { getAgent } from "@/lib/store";
 import { workspaceView } from "@/lib/workspace-view";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "AI Business Command Center | FlowScout", robots: { index: false } };
+export const metadata = { title: "AI Business Command Center | Weblyy", robots: { index: false } };
 
 export default async function DashboardPage({ params, searchParams }: PageProps<"/dashboard/[id]">) {
   const { id } = await params;

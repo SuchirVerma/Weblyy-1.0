@@ -4,10 +4,10 @@ import { PhoneChat } from "./phone-chat";
 function visitorId(): string {
   const fresh = () => `guest-${Math.random().toString(36).slice(2, 10)}`;
   try {
-    let id = localStorage.getItem("flowscout-visitor");
+    let id = localStorage.getItem("weblyy-visitor");
     if (!id) {
       id = fresh();
-      localStorage.setItem("flowscout-visitor", id);
+      localStorage.setItem("weblyy-visitor", id);
     }
     return id;
   } catch {

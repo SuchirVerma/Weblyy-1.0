@@ -3,7 +3,7 @@ import { CodeBlock } from "@/components/code-block";
 import { Arrow, Nav } from "@/components/ui";
 import styles from "./integrate.module.css";
 
-export const metadata = { title: "Add it to your business | FlowScout" };
+export const metadata = { title: "Add it to your business | Weblyy" };
 
 const WIDGET = `<script src="{ORIGIN}/widget.js" data-agent="YOUR_AGENT_ID" async></script>`;
 const API = `curl -X POST {ORIGIN}/api/agent \\

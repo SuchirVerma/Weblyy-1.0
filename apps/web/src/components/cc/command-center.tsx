@@ -81,9 +81,9 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
   return (
     <div className={styles.shell}>
       <aside className={styles.side}>
-        <Link href="/" className={styles.brand} aria-label="FlowScout home">
+        <Link href="/" className={styles.brand} aria-label="Weblyy home">
           <Logo size={24} />
-          FlowScout
+          Weblyy
         </Link>
         <div className={styles.biz}>
           <span className={styles.bizMark}>{data?.business.name.slice(0, 1) ?? "·"}</span>
