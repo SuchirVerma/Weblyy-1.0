@@ -313,6 +313,7 @@ export function WebsiteTab({ data }: { data: CCData }) {
 
 export function AgentTab({ data, ownerKey }: { data: CCData; ownerKey: string }) {
   const origin = useOrigin();
+  const [info, setInfo] = useState<"does" | "where" | null>(null);
   const k = data.business;
   const caps = [
     ["Answers customer questions", "Prices, timings, location and services, in seconds."],
@@ -340,48 +341,57 @@ export function AgentTab({ data, ownerKey }: { data: CCData; ownerKey: string })
         </div>
         <div className={styles.stack}>
           <section className={styles.panel}>
-            <h2>What it does</h2>
-            <ul className={styles.caps}>
-              {caps.map(([t, d]) => (
-                <li key={t}>
-                  <span aria-hidden="true">✓</span>
-                  <div>
-                    <b>{t}</b>
-                    <small>{d}</small>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section className={styles.panel}>
-            <h2>Where customers reach it</h2>
-            <ul className={styles.caps}>
-              <li>
-                <span aria-hidden="true">▭</span>
-                <div>
-                  <b>AI-ready website</b>
-                  <small>Chat button on every page.</small>
-                </div>
-              </li>
-              <li>
-                <span aria-hidden="true">↗</span>
-                <div>
-                  <b>Chat link and QR code</b>
-                  <small>{origin ? `${origin}${data.links.chatPath}` : data.links.chatPath}</small>
-                </div>
-              </li>
-              <li>
-                <span aria-hidden="true">✆</span>
-                <div>
-                  <b>WhatsApp</b>
-                  <small>{data.integrations.twilio ? "Connected." : "Not connected yet. We connect your WhatsApp number during the free setup (Go live)."}</small>
-                </div>
-              </li>
-            </ul>
-          </section>
-          <section className={styles.panel}>
             <h2>QR code</h2>
             <QrCard chatPath={data.links.chatPath} name={k.name} />
+          </section>
+          <section className={styles.panel}>
+            <div className="chips" role="tablist" aria-label="About your assistant" style={{ marginBottom: 16 }}>
+              <button role="tab" className="chip" aria-selected={info === "does"} aria-pressed={info === "does"} onClick={() => setInfo(info === "does" ? null : "does")}>
+                What does it do?
+              </button>
+              <button role="tab" className="chip" aria-selected={info === "where"} aria-pressed={info === "where"} onClick={() => setInfo(info === "where" ? null : "where")}>
+                Where do customers reach it?
+              </button>
+            </div>
+            {info === null && <p className="muted" style={{ margin: 0 }}>Tap an option above to learn more.</p>}
+            {info === "does" && (
+              <ul className={styles.caps}>
+                {caps.map(([t, d]) => (
+                  <li key={t}>
+                    <span aria-hidden="true">✓</span>
+                    <div>
+                      <b>{t}</b>
+                      <small>{d}</small>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {info === "where" && (
+              <ul className={styles.caps}>
+                <li>
+                  <span aria-hidden="true">▭</span>
+                  <div>
+                    <b>AI-ready website</b>
+                    <small>Chat button on every page.</small>
+                  </div>
+                </li>
+                <li>
+                  <span aria-hidden="true">↗</span>
+                  <div>
+                    <b>Chat link and QR code</b>
+                    <small>{origin ? `${origin}${data.links.chatPath}` : data.links.chatPath}</small>
+                  </div>
+                </li>
+                <li>
+                  <span aria-hidden="true">✆</span>
+                  <div>
+                    <b>WhatsApp</b>
+                    <small>{data.integrations.twilio ? "Connected." : "Not connected yet. We connect your WhatsApp number during the free setup (Go live)."}</small>
+                  </div>
+                </li>
+              </ul>
+            )}
           </section>
         </div>
       </div>
