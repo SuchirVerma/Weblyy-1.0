@@ -1,53 +1,35 @@
 .panel {
   position: relative;
-  padding: clamp(24px, 4vw, 44px);
-  border-radius: 28px;
-  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--line));
-  background: radial-gradient(ellipse at 90% 0%, rgba(37, 99, 235, 0.12), transparent 55%), var(--surface);
-  box-shadow: 0 0 0 6px var(--accent-soft), var(--shadow);
+  padding: clamp(28px, 5vw, 56px);
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--surface);
   scroll-margin-top: 90px;
 }
 .copy {
   display: grid;
-  gap: 14px;
-  max-width: 760px;
+  gap: 16px;
+  max-width: 640px;
 }
 .copy h2 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   font-variation-settings: "opsz" 72;
-  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  font-size: clamp(1.9rem, 3.8vw, 2.8rem);
   letter-spacing: -0.035em;
-  line-height: 1.05;
+  line-height: 1.08;
 }
 .copy p {
   margin: 0;
-}
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.list li {
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 0.86rem;
-}
-.list li::before {
-  content: "✓ ";
+  max-width: 52ch;
 }
 .cta {
   justify-self: start;
-  height: 58px;
-  padding: 0 30px;
-  font-size: 1.05rem;
+  margin-top: 8px;
+  height: 52px;
+  padding: 0 26px;
+  font-size: 1rem;
 }
 .overlay {
   position: fixed;
@@ -149,4 +131,7 @@
 }
 .score small {
   color: var(--muted);
+}
+.copy h2 :global(.em) {
+  white-space: nowrap;
 }

@@ -59,13 +59,8 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
           Make {name} <span className="em">AI-ready.</span>
         </h2>
         <p className="muted">
-          One click switches on all five. Manage everything from one Command Center.
+          One click switches on all five: website, AI assistant, AI search, Lead Center and automations. Manage it all from one place.
         </p>
-        <ul className={styles.list}>
-          {["AI-ready website", "AI Customer Agent", "AI Search Optimization", "Lead Center", "Automations"].map((x) => (
-            <li key={x}>{x}</li>
-          ))}
-        </ul>
         {error && (
           <div className="err" role="alert">
             {error}

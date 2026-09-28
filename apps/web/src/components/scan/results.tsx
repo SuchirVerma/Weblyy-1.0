@@ -6,7 +6,7 @@ import { CHANNEL_NAME } from "../radar";
 import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
 import { MakeReady } from "./make-ready";
-import { BeforeAfterChart, StatTiles, TopFixes } from "./before-after";
+import { BeforeAfterChart, TopFixes } from "./before-after";
 import { SiteReport } from "./site-report";
 import { WebPresencePanel } from "./web-presence";
 import type { Deployment } from "./live-console";
@@ -40,7 +40,7 @@ function Gauge({ value }: { value: number }) {
           cy="100"
           r={r}
           className={styles.gaugeFill}
-          style={{ stroke: b.tone }}
+          style={{ stroke: "var(--text)" }}
           strokeDasharray={`${c * arc} ${c}`}
           transform="rotate(135 100 100)"
           initial={{ strokeDashoffset: c * arc }}
@@ -53,7 +53,9 @@ function Gauge({ value }: { value: number }) {
           <CountUp to={value} duration={1.6} />
         </b>
         <span className="mono">/ 100</span>
-        <em style={{ color: b.tone }}>{b.label}</em>
+        <em>
+          <i style={{ background: b.tone }} aria-hidden="true" /> {b.label}
+        </em>
       </div>
     </div>
   );
@@ -149,7 +151,7 @@ export function Results({
           <Gauge value={score} />
           {after && after.score > score && (
             <p className={styles.afterChip}>
-              <span aria-hidden="true">→</span> <b>{after.score}</b> with Weblyy <span className={styles.afterGain}>+{after.score - score}</span>
+              <span aria-hidden="true">→</span> <b>{after.score}</b> with Weblyy <span className={styles.afterGain}>(+{after.score - score})</span>
             </p>
           )}
         </div>
@@ -195,12 +197,9 @@ export function Results({
             </div>
           )}
           <div className={styles.scoreMeta}>
-            <span className="pill">
-              <span className={`dot ${analysis.engine === "rules" ? "warn" : ""}`} />
-              {analysis.engine === "ai" ? "Analyzed with AI" : "Instant analysis"}
-            </span>
-            <button className="btn btn-ghost btn-sm" onClick={onEditAnswers}>
-              Refine with 4 quick questions
+            <span>{analysis.engine === "ai" ? "Analyzed with AI" : "Instant analysis"}</span>
+            <button className={styles.textBtn} onClick={onEditAnswers}>
+              Refine with 4 quick questions →
             </button>
           </div>
         </div>
@@ -212,14 +211,22 @@ export function Results({
             Biggest wins
           </h2>
           <TopFixes before={audit} after={after} />
-          <StatTiles
-            items={[
-              { label: "problems found", to: audit.problems.length, tone: "bad" },
-              { label: "hours back every week", to: analysis.hoursPerWeek, decimals: 1, suffix: "hrs" },
-              { label: "staff time saved", to: analysis.rupeesPerMonth, prefix: "₹", suffix: "/mo" },
-              ...(scan.presence?.searched ? [{ label: "places you're listed online", to: scan.presence.listings.length, tone: scan.presence.listings.length ? ("ok" as const) : ("bad" as const) }] : []),
-            ]}
-          />
+          <p className={styles.statLine}>
+            <span>
+              <b>{audit.problems.length}</b> problems found
+            </span>
+            <span>
+              <b>{analysis.hoursPerWeek.toFixed(1)} hrs</b> back every week
+            </span>
+            <span>
+              <b>₹{analysis.rupeesPerMonth.toLocaleString("en-IN")}</b>/mo staff time saved
+            </span>
+            {scan.presence?.searched && (
+              <span>
+                listed in <b>{scan.presence.listings.length}</b> places online
+              </span>
+            )}
+          </p>
         </section>
       ) : (
         audit && (
@@ -269,8 +276,8 @@ export function Results({
       <details className={styles.detailsAll}>
         <summary>
           <span>
-            <b>See the detailed report</b>
-            <small>Optional: every finding, where you&apos;re listed online, everything we read, and individual automations</small>
+            <b>Detailed report</b>
+            <small>Every finding, online listings, and single automations</small>
           </span>
         </summary>
       <section className={styles.findings} aria-labelledby="find-h">

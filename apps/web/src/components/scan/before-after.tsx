@@ -76,7 +76,7 @@ export function TopFixes({ before, after }: { before: Audit; after: Audit }) {
     <ol className={styles.fixes}>
       {fixes.map(({ c, gain }, i) => (
         <motion.li key={c.key} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-          <span className={styles.fixNum}>{i + 1}</span>
+          <span className={styles.fixNum}>0{i + 1}</span>
           <b className={styles.gain}>+{gain}</b>
           <span className={styles.fixLabel}>{c.label}</span>
           {c.recommendations[0] && <small>{c.recommendations[0]}</small>}

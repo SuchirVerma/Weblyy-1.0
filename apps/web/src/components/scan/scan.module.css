@@ -327,7 +327,7 @@
 /* ---------------------------------------------------------------- results */
 .results {
   display: grid;
-  gap: 56px;
+  gap: 72px;
 }
 .scoreHero {
   display: grid;
@@ -348,7 +348,7 @@
 }
 .gauge {
   position: relative;
-  width: min(100%, 360px);
+  width: min(100%, 300px);
   aspect-ratio: 1;
 }
 .gauge svg {
@@ -358,7 +358,7 @@
 .gaugeTrack,
 .gaugeFill {
   fill: none;
-  stroke-width: 14;
+  stroke-width: 5;
   stroke-linecap: round;
 }
 .gaugeTrack {
@@ -387,9 +387,18 @@
   font-size: 0.85rem;
 }
 .gaugeText em {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-style: normal;
-  font-weight: 600;
-  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.gaugeText em i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 .scoreRight {
   display: grid;
@@ -469,6 +478,35 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+.textBtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+.textBtn:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.statLine {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.statLine b {
+  color: var(--text);
+  font-weight: 600;
 }
 
 /* --------------------------------------------------------------- findings */
@@ -1283,24 +1321,22 @@
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
-  margin: 4px auto 0;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  margin: -48px auto 0;
+  color: var(--muted);
   font-size: 0.95rem;
 }
 .afterChip b {
   font-family: var(--font-display);
   font-size: 1.3rem;
+  color: var(--accent);
 }
 .afterGain {
-  font-weight: 600;
-  color: var(--ok);
+  font-size: 0.85rem;
+  color: var(--faint);
 }
 .quick {
   display: grid;
-  gap: 18px;
+  gap: 24px;
 }
 .more {
   justify-self: start;
@@ -1342,10 +1378,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 22px;
-  border-radius: 18px;
-  border: 1px dashed var(--line-strong);
-  background: var(--surface);
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 .detailsAll > summary::-webkit-details-marker {
   display: none;
