@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Audit } from "@/lib/audit";
 import type { Answers } from "@/lib/types";
 import { Arrow } from "../ui";
@@ -14,6 +14,9 @@ const STEPS = [
   { t: "Opening your Lead Center", d: "Capture, qualify and follow up every interested customer" },
   { t: "Switching on automations", d: "Lead follow-up, booking requests, owner alerts" },
 ];
+
+/** Fired by the "Make My Business AI-Ready" button in the top corner of the report. */
+export const MAKE_READY_EVENT = "weblyy:make-ready";
 
 export function MakeReady({ scanId, answers, audit, name }: { scanId: string; answers: Answers | null; audit: Audit; name: string }) {
   const router = useRouter();
@@ -50,6 +53,17 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
     }
   };
 
+  const startRef = useRef(start);
+  startRef.current = start;
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  useEffect(() => {
+    const onTrigger = () => {
+      if (phaseRef.current === "idle") startRef.current();
+    };
+    window.addEventListener(MAKE_READY_EVENT, onTrigger);
+    return () => window.removeEventListener(MAKE_READY_EVENT, onTrigger);
+  }, []);
 
   return (
     <section className={styles.panel} aria-labelledby="ready-h">

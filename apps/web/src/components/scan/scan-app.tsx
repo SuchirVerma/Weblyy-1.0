@@ -4,6 +4,8 @@ import { useCallback, useState } from "react";
 import type { Analysis, Answers, ScanResult, Workflow } from "@/lib/types";
 import { LiveConsole, type Deployment } from "./live-console";
 import { DEFAULT_ANSWERS_UI, Questions } from "./questions";
+import { Arrow } from "../ui";
+import { MAKE_READY_EVENT } from "./make-ready";
 import { Results } from "./results";
 import { Scanning } from "./scanning";
 import styles from "./scan.module.css";
@@ -59,6 +61,7 @@ export function ScanApp({ url }: { url: string }) {
 
   return (
     <div className={`wrap ${styles.app}`}>
+      <div className={styles.topRow}>
       <ol className={styles.stepper} aria-label="Progress">
         {STAGES.map((s, i) => (
           <li key={s.key} data-state={i < current ? "done" : i === current ? "now" : "todo"} aria-current={i === current ? "step" : undefined}>
@@ -67,6 +70,12 @@ export function ScanApp({ url }: { url: string }) {
           </li>
         ))}
       </ol>
+      {stage === "score" && analysis?.audit && (
+        <button className={`btn btn-primary ${styles.topCta}`} onClick={() => window.dispatchEvent(new Event(MAKE_READY_EVENT))}>
+          Make My Business AI-Ready <Arrow />
+        </button>
+      )}
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div

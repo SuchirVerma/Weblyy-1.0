@@ -11,12 +11,29 @@
 }
 
 /* ---------------------------------------------------------------- stepper */
+.topRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 36px;
+}
+.topCta {
+  flex: none;
+}
+@media (max-width: 560px) {
+  .topCta {
+    width: 100%;
+    justify-content: center;
+  }
+}
 .stepper {
   list-style: none;
   display: flex;
   gap: 6px;
   padding: 6px;
-  margin: 0 0 36px;
+  margin: 0;
   width: fit-content;
   max-width: 100%;
   overflow-x: auto;
