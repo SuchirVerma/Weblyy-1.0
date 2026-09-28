@@ -62,8 +62,23 @@ export function MyDashboards() {
         <span className={styles.emptyIcon} aria-hidden="true">
           ▤
         </span>
-        <h1>No dashboard yet</h1>
-        <p>Check your website first. When you click &ldquo;Make My Business AI-Ready&rdquo;, your dashboard is created and saved here.</p>
+        <h1>First, find your business</h1>
+        <p>Your dashboard is made from your website. Go to the homepage and enter your website URL, or search your business name and select it.</p>
+        <ol className={styles.steps}>
+          <li>
+            <span>1</span>Enter your URL or search your business
+          </li>
+          <li>
+            <span>2</span>See your AI readiness report
+          </li>
+          <li>
+            <span>3</span>Click &ldquo;Make My Business AI-Ready&rdquo;
+          </li>
+        </ol>
+        <Link href="/#product" className="btn btn-primary">
+          Go to the homepage →
+        </Link>
+        <p className={styles.or}>or start right here</p>
         <div className={styles.search}>
           <ScanBar compact />
         </div>
@@ -109,7 +124,7 @@ export function MyDashboards() {
           ))}
         </ul>
       )}
-      <p className={styles.note}>Saved on this device only. Your private dashboard links stay with you.</p>
+      <p className={styles.note}>Only businesses you opened during this visit are shown. Your private dashboard link is the way back later.</p>
     </section>
   );
 }
