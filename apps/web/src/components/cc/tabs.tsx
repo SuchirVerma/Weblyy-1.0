@@ -6,6 +6,7 @@ import { CodeBlock } from "../code-block";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
 import { QrCard } from "../qr-card";
+import { BeforeAfterChart } from "../scan/before-after";
 import type { TabKey } from "./command-center";
 import { ago, type CCData, type CCLead } from "./types";
 import styles from "./cc.module.css";
@@ -288,23 +289,36 @@ export function WebsiteTab({ data }: { data: CCData }) {
         </div>
       </section>
 
-      <div className={styles.two}>
+      {data.workspace && (
         <section className={styles.panel}>
-          <h2>
-            Before <Status level={before?.level ?? "bad"}>{before?.score ?? 0}/100</Status>
-          </h2>
-          {before && <CheckList cat={before} />}
-          <p className="muted" style={{ marginTop: 12, fontSize: ".85rem" }}>
-            Original: <a href={data.business.url} target="_blank" rel="noreferrer">{data.business.url}</a>
+          <h2>Before and after Weblyy</h2>
+          <p className="muted" style={{ margin: "0 0 16px" }}>
+            Your business score in each area: your old website on its own, and with Weblyy switched on. Tap a row to see why.
           </p>
+          <BeforeAfterChart before={data.workspace.auditBefore} after={data.workspace.auditAfter} />
         </section>
-        <section className={styles.panel}>
-          <h2>
-            After <Status level={after?.level ?? "good"}>{after?.score ?? 0}/100</Status>
-          </h2>
-          {after && <CheckList cat={after} />}
-        </section>
-      </div>
+      )}
+
+      <details className={`${styles.panel} ${styles.dev}`} style={{ paddingTop: 20 }}>
+        <summary>See the website checklist (old vs new)</summary>
+        <div className={styles.two}>
+          <section>
+            <h2>
+              Old website <Status level={before?.level ?? "bad"}>{before?.score ?? 0}/100</Status>
+            </h2>
+            {before && <CheckList cat={before} />}
+            <p className="muted" style={{ marginTop: 12, fontSize: ".85rem" }}>
+              Original: <a href={data.business.url} target="_blank" rel="noreferrer">{data.business.url}</a>
+            </p>
+          </section>
+          <section>
+            <h2>
+              New website <Status level={after?.level ?? "good"}>{after?.score ?? 0}/100</Status>
+            </h2>
+            {after && <CheckList cat={after} />}
+          </section>
+        </div>
+      </details>
     </div>
   );
 }
