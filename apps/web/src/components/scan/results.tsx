@@ -7,6 +7,7 @@ import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
 import { MakeReady } from "./make-ready";
 import { BeforeAfterChart, TopFixes } from "./before-after";
+import { ScoreReveal } from "./score-reveal";
 import { SiteReport } from "./site-report";
 import { WebPresencePanel } from "./web-presence";
 import type { Deployment } from "./live-console";
@@ -18,48 +19,6 @@ const VERDICT = {
   assist: { label: "Assist", tone: "var(--warn)" },
   human: { label: "Human only", tone: "var(--bad)" },
 } as const;
-
-function band(score: number) {
-  if (score < 40) return { label: "Leaking customers", tone: "var(--bad)" };
-  if (score < 65) return { label: "Getting there", tone: "var(--warn)" };
-  return { label: "Well set up", tone: "var(--ok)" };
-}
-
-function Gauge({ value }: { value: number }) {
-  const reduce = useReducedSafe();
-  const r = 84;
-  const c = 2 * Math.PI * r;
-  const arc = 0.75;
-  const b = band(value);
-  return (
-    <div className={styles.gauge}>
-      <svg viewBox="0 0 200 200" aria-hidden="true">
-        <circle cx="100" cy="100" r={r} className={styles.gaugeTrack} strokeDasharray={`${c * arc} ${c}`} transform="rotate(135 100 100)" />
-        <motion.circle
-          cx="100"
-          cy="100"
-          r={r}
-          className={styles.gaugeFill}
-          style={{ stroke: "var(--text)" }}
-          strokeDasharray={`${c * arc} ${c}`}
-          transform="rotate(135 100 100)"
-          initial={{ strokeDashoffset: c * arc }}
-          animate={{ strokeDashoffset: c * arc * (1 - value / 100) }}
-          transition={{ duration: reduce ? 0 : 1.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-        />
-      </svg>
-      <div className={styles.gaugeText}>
-        <b>
-          <CountUp to={value} duration={1.6} />
-        </b>
-        <span className="mono">/ 100</span>
-        <em>
-          <i style={{ background: b.tone }} aria-hidden="true" /> {b.label}
-        </em>
-      </div>
-    </div>
-  );
-}
 
 function Bar({ label, value, invert, hint }: { label: string; value: number; invert?: boolean; hint: string }) {
   const good = invert ? 100 - value : value;
@@ -148,12 +107,7 @@ export function Results({
           <h1 id="score-h" className="sr-only">
             AI readiness score: {score} out of 100
           </h1>
-          <Gauge value={score} />
-          {after && after.score > score && (
-            <p className={styles.afterChip}>
-              <span aria-hidden="true">→</span> <b>{after.score}</b> with Weblyy <span className={styles.afterGain}>(+{after.score - score})</span>
-            </p>
-          )}
+          <ScoreReveal score={score} after={after?.score} />
         </div>
 
         <div className={styles.scoreRight}>
@@ -271,7 +225,7 @@ export function Results({
         )
       )}
 
-      {audit && <MakeReady scanId={scanId} answers={answers} audit={audit} name={k.name} />}
+      {audit && <MakeReady scanId={scanId} answers={answers} name={k.name} />}
 
       <details className={styles.detailsAll}>
         <summary>

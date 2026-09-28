@@ -2,7 +2,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import type { Audit } from "@/lib/audit";
 import type { Answers } from "@/lib/types";
 import styles from "./make-ready.module.css";
 
@@ -17,7 +16,7 @@ const STEPS = [
 /** Fired by the "Make My Business AI-Ready" button in the top corner of the report; this component runs the flow. */
 export const MAKE_READY_EVENT = "weblyy:make-ready";
 
-export function MakeReady({ scanId, answers, audit, name }: { scanId: string; answers: Answers | null; audit: Audit; name: string }) {
+export function MakeReady({ scanId, answers, name }: { scanId: string; answers: Answers | null; name: string }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"idle" | "working" | "done">("idle");
   const [step, setStep] = useState(0);
@@ -53,9 +52,11 @@ export function MakeReady({ scanId, answers, audit, name }: { scanId: string; an
   };
 
   const startRef = useRef(start);
-  startRef.current = start;
   const phaseRef = useRef(phase);
-  phaseRef.current = phase;
+  useEffect(() => {
+    startRef.current = start;
+    phaseRef.current = phase;
+  });
   useEffect(() => {
     const onTrigger = () => {
       if (phaseRef.current === "idle") startRef.current();
