@@ -21,6 +21,15 @@ const CHOICES = [
   { key: "helper" as const, icon: "✉", title: "Send to your web person", line: "We write the message. You press send.", tag: "" },
 ];
 
+const GOALS = [
+  "Put the AI assistant on my website",
+  "Reply to customers on WhatsApp",
+  "Get more customers from Google",
+  "Build me a new website",
+  "Set up everything for me",
+  "Something else (I'll explain on the call)",
+];
+
 const PLATFORMS = ["WordPress", "Wix", "Shopify", "GoDaddy", "Google Sites", "Someone else made it", "I don't have a website", "Not sure"];
 
 /** Getting Weblyy onto the business, in plain words. No code for the owner, ever. */
@@ -203,6 +212,7 @@ function DoneForYou({ data, ownerKey }: { data: CCData; ownerKey: string }) {
           key: ownerKey,
           name: f.get("name"),
           phone: f.get("phone"),
+          goal: f.get("goal"),
           platform: f.get("platform"),
           bestTime: f.get("bestTime"),
           note: f.get("note"),
@@ -247,6 +257,17 @@ function DoneForYou({ data, ownerKey }: { data: CCData; ownerKey: string }) {
               <input name="phone" required type="tel" inputMode="tel" maxLength={20} autoComplete="tel" placeholder="98765 43210" />
             </label>
           </div>
+          <label className={styles.field}>
+            <span>What do you need help with?</span>
+            <select name="goal" required defaultValue="">
+              <option value="" disabled>
+                Choose one
+              </option>
+              {GOALS.map((g) => (
+                <option key={g}>{g}</option>
+              ))}
+            </select>
+          </label>
           <div className={styles.row}>
             <label className={styles.field}>
               <span>Your website is made with</span>

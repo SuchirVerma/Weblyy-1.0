@@ -1,6 +1,7 @@
 import { ownerKeyOk } from "@/lib/owner-auth";
 import { allow, clientIp } from "@/lib/ratelimit";
 import { getAgent, newId, recordRun, savePersist } from "@/lib/store";
+import { enqueueSetupRequest } from "@/lib/outbox";
 import { sendWhatsApp } from "@/lib/twilio";
 
 export const runtime = "nodejs";
@@ -25,6 +26,8 @@ export async function POST(req: Request) {
   const phone = str(body.phone, 20);
   if (!name) return Response.json({ error: "Please add your name." }, { status: 400 });
   if (phone.replace(/\D/g, "").length < 10) return Response.json({ error: "Please add a 10-digit phone number so we can call you." }, { status: 400 });
+  const goal = str(body.goal, 80);
+  if (!goal) return Response.json({ error: "Please tell us what you need help with." }, { status: 400 });
 
   agent.setupRequest = {
     id: newId(),
@@ -34,14 +37,22 @@ export async function POST(req: Request) {
     name,
     phone,
     platform: str(body.platform, 40) || "Not sure",
-    goal: str(body.goal, 60) || "Put the AI agent on my website",
+    goal,
     bestTime: str(body.bestTime, 40) || "Any time",
     note: str(body.note, 400),
     status: "new",
   };
   recordRun(agent, "Done-for-you setup requested", ["Owner asks", "Weblyy team calls", "Team installs everything", "Business live"], `${name} (${phone}) · ${agent.setupRequest.platform}`);
   savePersist();
+
+  // SMS to the team and a row in the Google Sheet. Saved first and retried until delivered,
+  // so the owner always gets a success here even if a provider is briefly down.
+  const delivery = await enqueueSetupRequest({ ...agent.setupRequest, website: agent.knowledge.url }).catch((e) => {
+    console.error("[setup-request] could not queue delivery", e);
+    return null;
+  });
+
   const team = process.env.TEAM_WHATSAPP;
   if (team) await sendWhatsApp(team, `New setup request: ${agent.knowledge.name}, ${name} ${phone}, ${agent.setupRequest.platform}, call ${agent.setupRequest.bestTime}.`).catch(() => false);
-  return Response.json({ ok: true, request: agent.setupRequest });
+  return Response.json({ ok: true, request: agent.setupRequest, delivered: delivery });
 }
