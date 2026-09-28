@@ -30,6 +30,17 @@ function scanTarget(r: Result) {
   return r.kind === "website" ? new URL(r.url).origin : r.url;
 }
 
+/** "example.com › menu › prices", like a search engine shows it. */
+function displayUrl(url: string) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean).slice(0, 2);
+    return [u.host.replace(/^www\./, ""), ...parts.map((x) => decodeURIComponent(x))].join(" › ");
+  } catch {
+    return url;
+  }
+}
+
 export function FindResults({ q }: { q: string }) {
   const [state, setState] = useState<{ loading: boolean; error: string; results: Result[] }>({ loading: Boolean(q), error: "", results: [] });
 
@@ -75,7 +86,7 @@ export function FindResults({ q }: { q: string }) {
 
       {loading && (
         <ul className={styles.list} aria-busy="true" aria-label="Searching">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <li key={i} className={styles.skeleton} />
           ))}
         </ul>
@@ -100,29 +111,38 @@ export function FindResults({ q }: { q: string }) {
             return (
               <motion.li
                 key={r.url}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ delay: i * 0.04, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className={styles.item}
                 data-kind={r.kind}
                 data-best={r.best || undefined}
               >
-                <div className={styles.meta}>
-                  <span className={styles.kind} style={{ ["--tone" as string]: k.tone }}>
-                    {k.label}
-                  </span>
-                  <span className="mono muted">{r.kind === "instagram" ? scanTarget(r) : r.host}</span>
-                  {r.best && <span className={styles.best}>Best match</span>}
+                <div className={styles.body}>
+                  <div className={styles.source}>
+                    <span className={styles.icon} style={{ ["--tone" as string]: k.tone }} aria-hidden="true">
+                      {(r.kind === "instagram" ? "@" : r.host.replace(/^www\./, "")[0] || "?").toUpperCase()}
+                    </span>
+                    <span className={styles.sourceText}>
+                      <span>
+                        {k.label}
+                        {r.best && <b className={styles.best}> · Best match</b>}
+                      </span>
+                      <small>{r.kind === "instagram" ? scanTarget(r) : displayUrl(r.url)}</small>
+                    </span>
+                  </div>
+                  <Link className={styles.title} href={`/scan?url=${encodeURIComponent(scanTarget(r))}`}>
+                    {r.title || r.host}
+                  </Link>
+                  {r.snippet && <p className={styles.snippet}>{r.snippet}</p>}
+                  {r.kind === "directory" && <p className={styles.note}>Listing site, not the business&apos;s own page. Results may be thin.</p>}
                 </div>
-                <b className={styles.title}>{r.title || r.host}</b>
-                {r.snippet && <p className="muted">{r.snippet}</p>}
-                {r.kind === "directory" && <p className={styles.note}>This is a listing site, not the business&apos;s own page. Results may be thin or blocked.</p>}
                 <div className={styles.actions}>
-                  <Link className={`btn ${r.kind === "directory" || r.kind === "social" ? "btn-ghost" : "btn-primary"} btn-sm`} href={`/scan?url=${encodeURIComponent(scanTarget(r))}`}>
-                    Scan this <Arrow />
+                  <Link className={`btn ${r.best ? "btn-primary" : "btn-ghost"} btn-sm`} href={`/scan?url=${encodeURIComponent(scanTarget(r))}`}>
+                    Scan <Arrow />
                   </Link>
                   <a className={styles.visit} href={r.url} target="_blank" rel="noreferrer">
-                    Open
+                    Open site ↗
                   </a>
                 </div>
               </motion.li>
