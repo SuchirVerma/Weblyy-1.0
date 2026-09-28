@@ -650,73 +650,153 @@ export function LeadsTab({ data, act }: { data: CCData; act: Act }) {
 
 /* ------------------------------------------------------------ Automations */
 
+const JOB_ICON: Record<string, string> = { capture: "🙋", qualify: "🔥", booking: "📅", form: "📝", escalate: "🛟", whatsapp: "💬", n8n: "🧩" };
+const JOB_GROUPS = [
+  { title: "Win new customers", line: "Turn questions and form fills into people you can call.", keys: ["capture", "form"] },
+  { title: "Follow up and book", line: "Know who to call first and take appointments.", keys: ["qualify", "booking"] },
+  { title: "Keep you in control", line: "Tricky conversations always come to you.", keys: ["escalate"] },
+  { title: "More places to answer", line: "Optional extras our team can switch on.", keys: ["whatsapp", "n8n"] },
+];
+
 export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
   const [busy, setBusy] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const running = data.automations.filter((a) => a.on && !(a.requires === "twilio" && !a.ready) && a.requires !== "n8n");
+  const totalRuns = data.automations.reduce((n, a) => n + a.runs, 0);
+  const last = data.runs[0];
+  const byKey = new Map(data.automations.map((a) => [a.key, a]));
+  const keyOf = (name: string) => data.automations.find((a) => a.name === name)?.key;
+
   return (
     <div className={styles.stack}>
       <Head kicker="Autopilot" title={<>Jobs your assistant <span className="em">does for you.</span></>} />
-      <p className={styles.jobSummary}>
-        <b>
-          {data.automations.filter((a) => a.on && !(a.requires === "twilio" && !a.ready) && a.requires !== "n8n").length} of {data.automations.length}
-        </b>{" "}
-        jobs are switched on. A green switch means the job is on. Tap it to turn it off.
-      </p>
-      <ul className={styles.jobs}>
-        {data.automations.map((a) => {
-          const state = a.requires === "twilio" && !a.ready ? "setup" : a.requires === "n8n" ? "export" : a.on ? "on" : "off";
-          return (
-            <li key={a.key} className={styles.job} data-state={state}>
-              <div className={styles.jobMain}>
-                <h3>{a.name}</h3>
-                <p>{a.description}</p>
-                <details className={styles.jobHow}>
-                  <summary>
-                    How it works
-                    {a.runs > 0 && (
-                      <span>
-                        {" "}
-                        · ran {a.runs} time{a.runs === 1 ? "" : "s"}
-                        {a.lastRun ? `, last ${ago(a.lastRun)}` : ""}
-                      </span>
+
+      <section className={styles.apStats}>
+        <div>
+          <small>Jobs switched on</small>
+          <b>
+            {running.length}
+            <span> / {data.automations.length}</span>
+          </b>
+          <i className={styles.apMeter} aria-hidden="true">
+            <span style={{ width: `${(running.length / data.automations.length) * 100}%` }} />
+          </i>
+        </div>
+        <div>
+          <small>
+            Jobs done for you
+            <Tip>Every time a job ran by itself, like saving a customer or taking a booking.</Tip>
+          </small>
+          <b>{totalRuns}</b>
+          <span className={styles.apSub}>{totalRuns ? "since you went live" : "starts with your first chat"}</span>
+        </div>
+        <div>
+          <small>Last job</small>
+          <b className={styles.apLast}>{last ? last.automation : "Nothing yet"}</b>
+          <span className={styles.apSub}>{last ? ago(last.at) : "Share your chat link to begin"}</span>
+        </div>
+      </section>
+
+      {JOB_GROUPS.map((g) => (
+        <section key={g.title} className={styles.apGroup} aria-label={g.title}>
+          <header>
+            <h2>{g.title}</h2>
+            <p>{g.line}</p>
+          </header>
+          <div className={styles.apCards}>
+            {g.keys.map((key) => {
+              const a = byKey.get(key);
+              if (!a) return null;
+              const state = a.requires === "twilio" && !a.ready ? "setup" : a.requires === "n8n" ? "export" : a.on ? "on" : "off";
+              const label = state === "on" ? (a.toggleable ? "On" : "Always on") : state === "off" ? "Off" : state === "setup" ? "We set this up for you" : "Optional";
+              return (
+                <article key={a.key} className={styles.apCard} data-state={state}>
+                  <div className={styles.apTop}>
+                    <span className={styles.apIcon} aria-hidden="true">
+                      {JOB_ICON[a.key] ?? "⚙"}
+                    </span>
+                    <div className={styles.apTitle}>
+                      <h3>{a.name}</h3>
+                      <p>{a.description}</p>
+                    </div>
+                  </div>
+                  <details className={styles.apHow}>
+                    <summary>See the steps</summary>
+                    <ol>
+                      {a.steps.map((st, i) => (
+                        <li key={i}>
+                          <span>{i + 1}</span>
+                          {st}
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                  <footer className={styles.apFoot}>
+                    <span className={styles.apState} data-state={state}>
+                      <i aria-hidden="true" />
+                      {label}
+                      {a.runs > 0 && <small> · ran {a.runs}×{a.lastRun ? `, ${ago(a.lastRun)}` : ""}</small>}
+                    </span>
+                    {a.toggleable && state !== "setup" && (
+                      <button
+                        className={styles.toggle}
+                        role="switch"
+                        aria-checked={a.on}
+                        aria-label={`${a.name}: ${a.on ? "on" : "off"}`}
+                        disabled={busy === a.key}
+                        onClick={async () => {
+                          setBusy(a.key);
+                          try {
+                            await act({ action: "automation", automation: a.key, on: !a.on });
+                          } finally {
+                            setBusy("");
+                          }
+                        }}
+                      >
+                        <span />
+                      </button>
                     )}
-                  </summary>
-                  <ol>
-                    {a.steps.map((st, i) => (
-                      <li key={i}>{st}</li>
-                    ))}
-                  </ol>
-                </details>
-              </div>
-              {a.toggleable && state !== "setup" ? (
-                <button
-                  className={styles.toggle}
-                  role="switch"
-                  aria-checked={a.on}
-                  aria-label={`${a.name}: ${a.on ? "on" : "off"}`}
-                  disabled={busy === a.key}
-                  onClick={async () => {
-                    setBusy(a.key);
-                    try {
-                      await act({ action: "automation", automation: a.key, on: !a.on });
-                    } finally {
-                      setBusy("");
-                    }
-                  }}
-                >
-                  <span />
-                </button>
-              ) : (
-                <span className={styles.jobTag} data-tone={state === "setup" ? "warn" : "ok"}>
-                  {state === "setup" ? "We set this up for you" : state === "export" ? "Optional" : "Always on"}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      <section className={styles.panel}>
-        <h2>What your assistant did</h2>
-        <RunList runs={data.runs} />
+                  </footer>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+
+      <section className={styles.apGroup} aria-label="What your assistant did">
+        <header>
+          <h2>What your assistant did</h2>
+          <p>Newest first.</p>
+        </header>
+        {data.runs.length === 0 ? (
+          <div className={styles.empty}>
+            <b>Nothing yet</b>
+            <span>Jobs show up here the moment a customer chats with your assistant.</span>
+          </div>
+        ) : (
+          <>
+            <ol className={styles.timeline}>
+              {(showAll ? data.runs : data.runs.slice(0, 5)).map((r) => (
+                <li key={r.id}>
+                  <span className={styles.tlIcon} aria-hidden="true">
+                    {JOB_ICON[keyOf(r.automation) ?? ""] ?? "✓"}
+                  </span>
+                  <div>
+                    <b>{r.automation}</b>
+                    <span>{r.detail}</span>
+                  </div>
+                  <time>{ago(r.at)}</time>
+                </li>
+              ))}
+            </ol>
+            {data.runs.length > 5 && (
+              <button className={`btn btn-ghost btn-sm ${styles.tlMore}`} onClick={() => setShowAll(!showAll)} aria-expanded={showAll}>
+                {showAll ? "Show less" : `Show all ${data.runs.length}`}
+              </button>
+            )}
+          </>
+        )}
       </section>
     </div>
   );
