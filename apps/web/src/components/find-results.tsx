@@ -2,7 +2,7 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Arrow, ScanBar } from "./ui";
+import { ScanBar } from "./ui";
 import styles from "./find.module.css";
 
 interface Result {
@@ -77,7 +77,7 @@ export function FindResults({ q }: { q: string }) {
             </>
           )}
         </h1>
-        <p className="lede">Pick the business&apos;s own website if it has one. No website? Pick its Instagram profile and we&apos;ll scan that.</p>
+        <p className="lede">Click the business&apos;s name to check it. Pick its own website if it has one, or its Instagram profile if it doesn&apos;t.</p>
       </div>
 
       <div style={{ maxWidth: 640 }}>
@@ -138,9 +138,6 @@ export function FindResults({ q }: { q: string }) {
                   {r.kind === "directory" && <p className={styles.note}>Listing site, not the business&apos;s own page. Results may be thin.</p>}
                 </div>
                 <div className={styles.actions}>
-                  <Link className={`btn ${r.best ? "btn-primary" : "btn-ghost"} btn-sm`} href={`/scan?url=${encodeURIComponent(scanTarget(r))}`}>
-                    Scan <Arrow />
-                  </Link>
                   <a className={styles.visit} href={r.url} target="_blank" rel="noreferrer">
                     Open site ↗
                   </a>

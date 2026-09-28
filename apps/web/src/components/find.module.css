@@ -107,7 +107,7 @@
   display: grid;
   justify-items: end;
   gap: 8px;
-  padding-top: 34px;
+  padding-top: 4px;
 }
 .visit {
   font-size: 0.82rem;
