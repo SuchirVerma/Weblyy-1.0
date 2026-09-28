@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { Audit, AuditCategory } from "@/lib/audit";
 import { CodeBlock } from "../code-block";
@@ -651,153 +651,169 @@ export function LeadsTab({ data, act }: { data: CCData; act: Act }) {
 /* ------------------------------------------------------------ Automations */
 
 const JOB_ICON: Record<string, string> = { capture: "🙋", qualify: "🔥", booking: "📅", form: "📝", escalate: "🛟", whatsapp: "💬", n8n: "🧩" };
-const JOB_GROUPS = [
-  { title: "Win new customers", line: "Turn questions and form fills into people you can call.", keys: ["capture", "form"] },
-  { title: "Follow up and book", line: "Know who to call first and take appointments.", keys: ["qualify", "booking"] },
-  { title: "Keep you in control", line: "Tricky conversations always come to you.", keys: ["escalate"] },
-  { title: "More places to answer", line: "Optional extras our team can switch on.", keys: ["whatsapp", "n8n"] },
+const JOB_SHORT: Record<string, string> = {
+  capture: "Save customers",
+  form: "Website enquiries",
+  qualify: "Who to call first",
+  booking: "Bookings",
+  escalate: "Difficult chats",
+  whatsapp: "WhatsApp",
+  n8n: "Other apps",
+};
+const JOURNEY = ["capture", "form", "qualify", "booking"];
+const SIDE = [
+  { title: "Always protecting you", keys: ["escalate"] },
+  { title: "Extras", keys: ["whatsapp", "n8n"] },
 ];
+
+type Job = CCData["automations"][number];
+const jobState = (a: Job) => (a.requires === "twilio" && !a.ready ? "setup" : a.requires === "n8n" ? "export" : a.on ? "on" : "off");
 
 export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
   const [busy, setBusy] = useState("");
-  const [showAll, setShowAll] = useState(false);
-  const running = data.automations.filter((a) => a.on && !(a.requires === "twilio" && !a.ready) && a.requires !== "n8n");
+  const [sel, setSel] = useState("capture");
+  const running = data.automations.filter((a) => jobState(a) === "on");
   const totalRuns = data.automations.reduce((n, a) => n + a.runs, 0);
-  const last = data.runs[0];
   const byKey = new Map(data.automations.map((a) => [a.key, a]));
   const keyOf = (name: string) => data.automations.find((a) => a.name === name)?.key;
+  const job = byKey.get(sel);
+
+  const Node = ({ k, small }: { k: string; small?: boolean }) => {
+    const a = byKey.get(k);
+    if (!a) return null;
+    return (
+      <button
+        className={small ? styles.jnSmall : styles.jn}
+        data-state={jobState(a)}
+        aria-pressed={sel === k}
+        onClick={() => setSel(k)}
+      >
+        <span className={styles.jnIcon} aria-hidden="true">
+          {JOB_ICON[k]}
+          <i />
+        </span>
+        <span className={styles.jnName}>{JOB_SHORT[k] ?? a.name}</span>
+      </button>
+    );
+  };
 
   return (
     <div className={styles.stack}>
-      <Head kicker="Autopilot" title={<>Jobs your assistant <span className="em">does for you.</span></>} />
+      <Head kicker="Autopilot" title={<>Jobs your assistant <span className="em">does for you.</span></>}>
+        <span className={styles.apPill}>
+          <i aria-hidden="true" /> {running.length} of {data.automations.length} on
+        </span>
+        <span className={styles.apPill} data-tone="plain">
+          {totalRuns} done for you
+        </span>
+      </Head>
 
-      <section className={styles.apStats}>
-        <div>
-          <small>Jobs switched on</small>
-          <b>
-            {running.length}
-            <span> / {data.automations.length}</span>
-          </b>
-          <i className={styles.apMeter} aria-hidden="true">
-            <span style={{ width: `${(running.length / data.automations.length) * 100}%` }} />
-          </i>
+      <section className={styles.journey2} aria-label="Your customer's journey">
+        <p className={styles.jLabel}>Your customer&apos;s journey · tap a step</p>
+        <div className={styles.jTrack}>
+          {JOURNEY.map((k) => (
+            <Node key={k} k={k} />
+          ))}
         </div>
-        <div>
-          <small>
-            Jobs done for you
-            <Tip>Every time a job ran by itself, like saving a customer or taking a booking.</Tip>
-          </small>
-          <b>{totalRuns}</b>
-          <span className={styles.apSub}>{totalRuns ? "since you went live" : "starts with your first chat"}</span>
-        </div>
-        <div>
-          <small>Last job</small>
-          <b className={styles.apLast}>{last ? last.automation : "Nothing yet"}</b>
-          <span className={styles.apSub}>{last ? ago(last.at) : "Share your chat link to begin"}</span>
+        <div className={styles.jSide}>
+          {SIDE.map((g) => (
+            <div key={g.title}>
+              <p className={styles.jLabel}>{g.title}</p>
+              <div className={styles.jSideRow}>
+                {g.keys.map((k) => (
+                  <Node key={k} k={k} small />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {JOB_GROUPS.map((g) => (
-        <section key={g.title} className={styles.apGroup} aria-label={g.title}>
-          <header>
-            <h2>{g.title}</h2>
-            <p>{g.line}</p>
-          </header>
-          <div className={styles.apCards}>
-            {g.keys.map((key) => {
-              const a = byKey.get(key);
-              if (!a) return null;
-              const state = a.requires === "twilio" && !a.ready ? "setup" : a.requires === "n8n" ? "export" : a.on ? "on" : "off";
-              const label = state === "on" ? (a.toggleable ? "On" : "Always on") : state === "off" ? "Off" : state === "setup" ? "We set this up for you" : "Optional";
-              return (
-                <article key={a.key} className={styles.apCard} data-state={state}>
-                  <div className={styles.apTop}>
-                    <span className={styles.apIcon} aria-hidden="true">
-                      {JOB_ICON[a.key] ?? "⚙"}
-                    </span>
-                    <div className={styles.apTitle}>
-                      <h3>{a.name}</h3>
-                      <p>{a.description}</p>
-                    </div>
-                  </div>
-                  <details className={styles.apHow}>
-                    <summary>See the steps</summary>
-                    <ol>
-                      {a.steps.map((st, i) => (
-                        <li key={i}>
-                          <span>{i + 1}</span>
-                          {st}
-                        </li>
-                      ))}
-                    </ol>
-                  </details>
-                  <footer className={styles.apFoot}>
-                    <span className={styles.apState} data-state={state}>
-                      <i aria-hidden="true" />
-                      {label}
-                      {a.runs > 0 && <small> · ran {a.runs}×{a.lastRun ? `, ${ago(a.lastRun)}` : ""}</small>}
-                    </span>
-                    {a.toggleable && state !== "setup" && (
-                      <button
-                        className={styles.toggle}
-                        role="switch"
-                        aria-checked={a.on}
-                        aria-label={`${a.name}: ${a.on ? "on" : "off"}`}
-                        disabled={busy === a.key}
-                        onClick={async () => {
-                          setBusy(a.key);
-                          try {
-                            await act({ action: "automation", automation: a.key, on: !a.on });
-                          } finally {
-                            setBusy("");
-                          }
-                        }}
-                      >
-                        <span />
-                      </button>
-                    )}
-                  </footer>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      ))}
-
-      <section className={styles.apGroup} aria-label="What your assistant did">
-        <header>
-          <h2>What your assistant did</h2>
-          <p>Newest first.</p>
-        </header>
-        {data.runs.length === 0 ? (
-          <div className={styles.empty}>
-            <b>Nothing yet</b>
-            <span>Jobs show up here the moment a customer chats with your assistant.</span>
-          </div>
-        ) : (
-          <>
-            <ol className={styles.timeline}>
-              {(showAll ? data.runs : data.runs.slice(0, 5)).map((r) => (
-                <li key={r.id}>
-                  <span className={styles.tlIcon} aria-hidden="true">
-                    {JOB_ICON[keyOf(r.automation) ?? ""] ?? "✓"}
-                  </span>
-                  <div>
-                    <b>{r.automation}</b>
-                    <span>{r.detail}</span>
-                  </div>
-                  <time>{ago(r.at)}</time>
+      <AnimatePresence mode="wait">
+        {job && (
+          <motion.section
+            key={job.key}
+            className={styles.jDetail}
+            data-state={jobState(job)}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            aria-live="polite"
+          >
+            <div className={styles.jdHead}>
+              <span className={styles.jdIcon} aria-hidden="true">
+                {JOB_ICON[job.key]}
+              </span>
+              <div>
+                <h2>{job.name}</h2>
+                <p>{job.description}</p>
+              </div>
+              {job.toggleable && jobState(job) !== "setup" ? (
+                <label className={styles.jdSwitch}>
+                  <span>{job.on ? "On" : "Off"}</span>
+                  <button
+                    className={styles.toggle}
+                    role="switch"
+                    aria-checked={job.on}
+                    aria-label={`${job.name}: ${job.on ? "on" : "off"}`}
+                    disabled={busy === job.key}
+                    onClick={async () => {
+                      setBusy(job.key);
+                      try {
+                        await act({ action: "automation", automation: job.key, on: !job.on });
+                      } finally {
+                        setBusy("");
+                      }
+                    }}
+                  >
+                    <span />
+                  </button>
+                </label>
+              ) : (
+                <span className={styles.apState} data-state={jobState(job)}>
+                  <i aria-hidden="true" />
+                  {jobState(job) === "setup" ? "We set this up for you" : jobState(job) === "export" ? "Optional" : "Always on"}
+                </span>
+              )}
+            </div>
+            <ol className={styles.jdSteps}>
+              {job.steps.map((st, i) => (
+                <li key={i}>
+                  <span>{i + 1}</span>
+                  {st}
                 </li>
               ))}
             </ol>
-            {data.runs.length > 5 && (
-              <button className={`btn btn-ghost btn-sm ${styles.tlMore}`} onClick={() => setShowAll(!showAll)} aria-expanded={showAll}>
-                {showAll ? "Show less" : `Show all ${data.runs.length}`}
-              </button>
-            )}
-          </>
+            <p className={styles.jdMeta}>
+              {job.runs > 0 ? `Done ${job.runs} time${job.runs === 1 ? "" : "s"} · last ${job.lastRun ? ago(job.lastRun) : ""}` : "Hasn't run yet. It starts with your first customer chat."}
+            </p>
+          </motion.section>
         )}
-      </section>
+      </AnimatePresence>
+
+      <Fold icon="🕘" title="What your assistant did" summary="Every job it did by itself, newest first." badge={`${data.runs.length} ${data.runs.length === 1 ? "job" : "jobs"}`}>
+        {data.runs.length === 0 ? (
+          <p className="muted" style={{ margin: 0 }}>
+            Nothing yet. Jobs show up here the moment a customer chats with your assistant.
+          </p>
+        ) : (
+          <ol className={styles.timeline}>
+            {data.runs.map((r) => (
+              <li key={r.id}>
+                <span className={styles.tlIcon} aria-hidden="true">
+                  {JOB_ICON[keyOf(r.automation) ?? ""] ?? "✓"}
+                </span>
+                <div>
+                  <b>{r.automation}</b>
+                  <span>{r.detail}</span>
+                </div>
+                <time>{ago(r.at)}</time>
+              </li>
+            ))}
+          </ol>
+        )}
+      </Fold>
     </div>
   );
 }
