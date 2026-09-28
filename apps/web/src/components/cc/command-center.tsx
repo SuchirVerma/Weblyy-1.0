@@ -5,6 +5,7 @@ import { BackButton, Logo } from "../ui";
 import { GoLive } from "./go-live";
 import { AgentTab, AnalyticsTab, AutomationsTab, LeadsTab, OverviewTab, SearchTab, SettingsTab, WebsiteTab } from "./tabs";
 import type { CCData } from "./types";
+import { rememberDashboard } from "@/lib/my-dashboards";
 import styles from "./cc.module.css";
 
 const TABS = [
@@ -78,6 +79,13 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
     },
     [id, ownerKey, load],
   );
+
+  // Remember this dashboard in this browser, so the "Dashboard" menu link comes straight back here.
+  const bizName = data?.business.name;
+  const bizType = data?.business.type;
+  useEffect(() => {
+    if (bizName) rememberDashboard({ id, key: ownerKey, name: bizName, type: bizType ?? "" });
+  }, [id, ownerKey, bizName, bizType]);
 
   const newLeads = data?.leads.filter((l) => l.status === "new" || l.status === "qualified").length ?? 0;
 

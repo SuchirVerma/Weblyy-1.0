@@ -68,11 +68,14 @@ export function Nav({ right }: { right?: ReactNode }) {
           <Link href="/how" className="hide-sm">
             How it works
           </Link>
-          <Link href="/owner-demo" className="hide-sm">
+          <Link href="/owner-demo" className="hide-sm nav-demo">
             See a demo
           </Link>
           <Link href="/setup" className="hide-sm">
             We set it up
+          </Link>
+          <Link href="/dashboard" className="nav-dash" aria-current={path.startsWith("/dashboard") ? "page" : undefined}>
+            <span aria-hidden="true">▤</span> Dashboard
           </Link>
           {right ?? (
             <Link href="/#product" className="btn btn-primary btn-sm">
