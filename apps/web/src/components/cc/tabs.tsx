@@ -6,7 +6,7 @@ import { CodeBlock } from "../code-block";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
 import { QrCard } from "../qr-card";
-import { BeforeAfterChart } from "../scan/before-after";
+import { ScoreColumns } from "./score-columns";
 import type { TabKey } from "./command-center";
 import { ago, type CCData, type CCLead } from "./types";
 import styles from "./cc.module.css";
@@ -293,9 +293,9 @@ export function WebsiteTab({ data }: { data: CCData }) {
         <section className={styles.panel}>
           <h2>Before and after Weblyy</h2>
           <p className="muted" style={{ margin: "0 0 16px" }}>
-            Your business score in each area: your old website on its own, and with Weblyy switched on. Tap a row to see why.
+            Your score out of 100 in each area: your website today, and with Weblyy switched on.
           </p>
-          <BeforeAfterChart before={data.workspace.auditBefore} after={data.workspace.auditAfter} />
+          <ScoreColumns before={data.workspace.auditBefore} after={data.workspace.auditAfter} />
         </section>
       )}
 
