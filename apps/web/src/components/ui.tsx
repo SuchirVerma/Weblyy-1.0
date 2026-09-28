@@ -166,3 +166,50 @@ export function CountUp({ to, duration = 1.4, prefix = "", suffix = "", decimals
   }, [inView, to, duration, reduce, mv]);
   return <motion.span ref={ref}>{text}</motion.span>;
 }
+
+/** A section that shows only its title and a one-line summary until clicked. */
+export function Fold({
+  title,
+  summary,
+  badge,
+  icon,
+  open,
+  children,
+}: {
+  title: ReactNode;
+  summary?: ReactNode;
+  badge?: ReactNode;
+  icon?: ReactNode;
+  open?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details className="fold" open={open}>
+      <summary>
+        {icon && (
+          <span className="fold-icon" aria-hidden="true">
+            {icon}
+          </span>
+        )}
+        <span className="fold-text">
+          <b>{title}</b>
+          {summary && <small>{summary}</small>}
+        </span>
+        {badge && <span className="fold-badge">{badge}</span>}
+        <span className="fold-chev" aria-hidden="true" />
+      </summary>
+      <div className="fold-body">{children}</div>
+    </details>
+  );
+}
+
+/** A small "?" that explains a term on hover, tap or keyboard focus. */
+export function Tip({ children, label = "What does this mean?" }: { children: ReactNode; label?: string }) {
+  return (
+    <span className="tip" tabIndex={0} role="button" aria-label={label}>
+      ?<span className="tip-pop" role="tooltip">
+        {children}
+      </span>
+    </span>
+  );
+}

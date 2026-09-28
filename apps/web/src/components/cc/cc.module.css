@@ -370,11 +370,12 @@ button.stat:hover {
   border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
 }
 .stat small {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--faint);
+  display: flex;
+  align-items: center;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
 }
 .stat b {
   font-family: var(--font-display);
@@ -1140,4 +1141,18 @@ button.tr:hover {
 }
 .frameWrap iframe {
   max-width: 100%;
+}
+
+.empty {
+  display: grid;
+  gap: 4px;
+  padding: 28px 24px;
+  border-radius: 20px;
+  border: 1px dashed var(--line-strong);
+  text-align: center;
+  color: var(--muted);
+}
+.empty b {
+  color: var(--text);
+  font-size: 1.05rem;
 }

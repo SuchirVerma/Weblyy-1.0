@@ -118,7 +118,7 @@ export interface DeployedAgent {
 
 const DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
 const FILE = path.join(DIR, "agents.json");
-const MAX_AGENTS = 50;
+const MAX_AGENTS = 300;
 
 const g = globalThis as unknown as { __weblyyAgents?: Map<string, DeployedAgent>; __weblyyLoaded?: Promise<void> };
 const agents: Map<string, DeployedAgent> = (g.__weblyyAgents ??= new Map<string, DeployedAgent>());
@@ -186,8 +186,11 @@ export async function createAgent(knowledge: SiteKnowledge, workflowName: string
   };
   agents.set(id, agent);
   if (agents.size > MAX_AGENTS) {
-    const oldest = [...agents.values()].sort((a, b) => a.createdAt - b.createdAt)[0];
-    agents.delete(oldest.id);
+    // Drop the oldest unused one first, so a business that has customers or asked for setup is never lost to a pile of test scans.
+    const used = (a: DeployedAgent) => a.leads.length > 0 || Object.keys(a.conversations).length > 0 || Boolean(a.setupRequest);
+    const byAge = [...agents.values()].filter((a) => a.id !== id).sort((a, b) => a.createdAt - b.createdAt);
+    const victim = byAge.find((a) => !used(a)) ?? byAge[0];
+    if (victim) agents.delete(victim.id);
   }
   persist();
   return agent;

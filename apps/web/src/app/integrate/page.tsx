@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
-import { Arrow, Nav } from "@/components/ui";
+import { Arrow, Fold, Nav } from "@/components/ui";
 import styles from "./integrate.module.css";
 
 export const metadata = { title: "Add it to your business | Weblyy" };
@@ -70,15 +70,8 @@ export default function IntegratePage() {
               <h2>Connect your channels</h2>
               <p className="muted">Pick any. They all talk to the same agent and the same inbox.</p>
 
-              <div className={styles.cards}>
-                <article className={styles.card}>
-                  <div className={styles.cardHead}>
-                    <h3>Website chat bubble</h3>
-                    <span className={styles.badge} data-s="ready">
-                      Ready
-                    </span>
-                  </div>
-                  <p className="muted">A chat button in the corner of your site. One line of code, works on any website builder.</p>
+              <div className="folds">
+                <Fold icon="💬" title="Website chat bubble" summary="A chat button in the corner of your website. One line of code." badge="Ready">
                   <CodeBlock code={WIDGET} label="Paste before </body>" />
                   <ul className={styles.platforms}>
                     {PLATFORMS.map(([p, how]) => (
@@ -92,19 +85,12 @@ export default function IntegratePage() {
                     Your agent ID is shown in the live console after you switch the agent on. Optional: <code>data-color=&quot;#16a34a&quot;</code> and{" "}
                     <code>data-label=&quot;Book on chat&quot;</code>.
                   </p>
-                  <a className="btn btn-ghost btn-sm" href="/api/demo-agent" target="_blank" rel="noreferrer">
+                  <a className="btn btn-ghost btn-sm" href="/api/demo-agent" target="_blank" rel="noreferrer" style={{ justifySelf: "start" }}>
                     Preview it on the demo salon&apos;s website
                   </a>
-                </article>
+                </Fold>
 
-                <article className={styles.card}>
-                  <div className={styles.cardHead}>
-                    <h3>WhatsApp number</h3>
-                    <span className={styles.badge} data-s="setup">
-                      Needs Twilio
-                    </span>
-                  </div>
-                  <p className="muted">Customers message your WhatsApp number as usual. The agent replies, and your inbox replies go out on WhatsApp too.</p>
+                <Fold icon="✆" title="WhatsApp number" summary="Customers message your usual WhatsApp number and the assistant replies." badge="Needs Twilio">
                   <ol className={styles.steps}>
                     <li>
                       <b>Test today (free, ~10 min):</b> create a Twilio account, open Messaging → Try WhatsApp, and join the sandbox from your phone.
@@ -121,47 +107,26 @@ export default function IntegratePage() {
                       which usually takes 1 to 3 days. The number must not be in use on the regular WhatsApp app.
                     </li>
                   </ol>
-                </article>
+                </Fold>
 
-                <article className={styles.card}>
-                  <div className={styles.cardHead}>
-                    <h3>QR code at the counter</h3>
-                    <span className={styles.badge} data-s="ready">
-                      Ready
-                    </span>
-                  </div>
-                  <p className="muted">
+                <Fold icon="▦" title="QR code at the counter" summary="Customers scan it and chat in their phone's browser. Nothing to install." badge="Ready">
+                  <p className="muted" style={{ margin: 0 }}>
                     Print the QR code from your live console on the counter, menu, visiting cards or posters: &ldquo;Scan to ask us anything, we reply
-                    instantly.&rdquo; It opens the chat in the phone&apos;s browser. Nothing to install.
+                    instantly.&rdquo;
                   </p>
-                </article>
+                </Fold>
 
-                <article className={styles.card}>
-                  <div className={styles.cardHead}>
-                    <h3>Instagram &amp; Google profile</h3>
-                    <span className={styles.badge} data-s="ready">
-                      Link ready
-                    </span>
-                  </div>
-                  <p className="muted">
-                    Put your chat link in your Instagram bio and as the website or booking link on your Google Business Profile. Replying to Instagram DMs
-                    directly needs a Meta-approved app, which is on our roadmap.
+                <Fold icon="@" title="Instagram & Google profile" summary="Put your chat link in your Instagram bio and Google listing." badge="Link ready">
+                  <p className="muted" style={{ margin: 0 }}>
+                    Use it as the website or booking link on your Google Business Profile too. Replying to Instagram DMs directly needs a Meta-approved app, which
+                    is on our roadmap.
                   </p>
                   <CodeBlock code={`{ORIGIN}/chat/YOUR_AGENT_ID`} label="Your chat link" />
-                </article>
+                </Fold>
 
-                <article className={styles.card}>
-                  <div className={styles.cardHead}>
-                    <h3>Your own tools</h3>
-                    <span className={styles.badge} data-s="dev">
-                      For developers
-                    </span>
-                  </div>
-                  <p className="muted">
-                    Download the ready-made n8n workflow from the live console, or call the agent from any system with one HTTP request.
-                  </p>
+                <Fold icon="⌘" title="Your own tools" summary="An n8n workflow or one HTTP request, for developers." badge="For developers">
                   <CodeBlock code={API} label="HTTP API" />
-                </article>
+                </Fold>
               </div>
             </div>
           </li>

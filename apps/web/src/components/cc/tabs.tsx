@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { Audit, AuditCategory } from "@/lib/audit";
 import { CodeBlock } from "../code-block";
+import { Fold, Tip } from "../ui";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
 import { QrCard } from "../qr-card";
@@ -104,7 +105,6 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
   const after = ws?.auditAfter;
   const qualified = data.leads.filter((l) => l.status === "qualified" || l.temperature === "hot").length;
   const activeAutos = data.automations.filter((a) => a.on && a.ready && !a.requires).length;
-  const chatLeads = data.leads.filter((l) => l.source !== "Website form").length;
   const steps = [
     { done: true, label: "Website checked", hint: `Scored ${before?.score ?? "–"} / 100` },
     { done: true, label: "Your new website is ready", hint: "Live now", tab: "website" as TabKey },
@@ -171,36 +171,22 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
       </section>
 
       <section className={styles.cards}>
-        <button className={styles.stat} onClick={() => go("website")}>
-          <small>Website</small>
-          <b>Active</b>
-          <Status level="good">AI-ready site live</Status>
-        </button>
-        <button className={styles.stat} onClick={() => go("agent")}>
-          <small>Your assistant</small>
-          <b>Active</b>
-          <Status level="good">{data.stats.messages} messages answered</Status>
-        </button>
-        <button className={styles.stat} onClick={() => go("search")}>
-          <small>Found online</small>
-          <b>{catOf(after, "search")?.score ?? 0}/100</b>
-          <Status level="good">Optimized</Status>
-        </button>
-        <button className={styles.stat} onClick={() => go("leads")}>
-          <small>Customers</small>
-          <b>{data.leads.length}</b>
-          <Status level={data.leads.length ? "good" : "off"}>{chatLeads} from chats</Status>
-        </button>
-        <button className={styles.stat} onClick={() => go("leads")}>
-          <small>Serious buyers</small>
-          <b>{qualified}</b>
-          <Status level={qualified ? "good" : "off"}>Ready to buy</Status>
-        </button>
-        <button className={styles.stat} onClick={() => go("automations")}>
-          <small>Autopilot</small>
-          <b>{activeAutos} jobs on</b>
-          <Status level="good">{data.runs.length} runs</Status>
-        </button>
+        {[
+          { tab: "website" as TabKey, label: "Website", value: "Live", tip: "Your new AI-ready website is online. Click to see it." },
+          { tab: "agent" as TabKey, label: "Messages answered", value: String(data.stats.messages), tip: "How many customer messages your assistant has replied to." },
+          { tab: "search" as TabKey, label: "Found online", value: `${catOf(after, "search")?.score ?? 0}/100`, tip: "How easy it is for Google and AI apps to understand your business." },
+          { tab: "leads" as TabKey, label: "Customers saved", value: String(data.leads.length), tip: "People who shared their name or number with your assistant." },
+          { tab: "leads" as TabKey, label: "Ready to buy", value: String(qualified), tip: "Customers marked Hot: they asked about price or booking. Call them first." },
+          { tab: "automations" as TabKey, label: "Jobs switched on", value: String(activeAutos), tip: "Tasks your assistant does by itself, like saving customers and taking bookings." },
+        ].map((t) => (
+          <button key={t.label} className={styles.stat} onClick={() => go(t.tab)}>
+            <small>
+              {t.label}
+              <Tip>{t.tip}</Tip>
+            </small>
+            <b>{t.value}</b>
+          </button>
+        ))}
       </section>
 
       <div className={styles.two}>
@@ -294,8 +280,7 @@ export function WebsiteTab({ data }: { data: CCData }) {
         </section>
       )}
 
-      <details className={`${styles.panel} ${styles.dev}`} style={{ paddingTop: 20 }}>
-        <summary>See the website checklist (old vs new)</summary>
+      <Fold icon="✓" title="Website checklist" summary="What we checked on your old website, and what the new one fixes." badge={`${before?.score ?? 0} → ${after?.score ?? 0}`}>
         <div className={styles.two}>
           <section>
             <h2>
@@ -313,7 +298,7 @@ export function WebsiteTab({ data }: { data: CCData }) {
             {after && <CheckList cat={after} />}
           </section>
         </div>
-      </details>
+      </Fold>
     </div>
   );
 }
@@ -419,9 +404,6 @@ export function SearchTab({ data }: { data: CCData }) {
   return (
     <div className={styles.stack}>
       <Head kicker="Get found online" title={<>Help Google and AI assistants <span className="em">understand your business.</span></>} />
-      <p className="lede">
-        Clear facts help AI answer &ldquo;best {data.business.type} near me&rdquo; with you. No ranking is guaranteed.
-      </p>
 
       <section className={styles.hero}>
         <div className={styles.heroScore}>
@@ -439,7 +421,10 @@ export function SearchTab({ data }: { data: CCData }) {
           </div>
         </div>
         <div>
-          <h2 className={styles.h2}>What AI sees about you</h2>
+          <h2 className={styles.h2}>
+            What AI sees about you
+            <Tip>When someone asks Google or ChatGPT for the best {data.business.type} near them, these are the facts it can read about you.</Tip>
+          </h2>
           <dl className={styles.entities}>
             {s.entities.map((e) => (
               <div key={e.label} data-missing={e.value === "Missing" || undefined}>
@@ -451,13 +436,23 @@ export function SearchTab({ data }: { data: CCData }) {
         </div>
       </section>
 
-      <div className={styles.two}>
-        <section className={styles.panel}>
-          <h2>Readiness checks (original site)</h2>
-          {before && <CheckList cat={before} />}
-        </section>
-        <section className={styles.panel}>
-          <h2>Recommendations</h2>
+      <div className="folds">
+        {before && (
+          <Fold
+            icon="✓"
+            title="Checks on your old website"
+            summary="What Google and AI apps could already find about you."
+            badge={`${before.checks.filter((c) => c.ok === true).length} of ${before.checks.length} passed`}
+          >
+            <CheckList cat={before} />
+          </Fold>
+        )}
+        <Fold
+          icon="↑"
+          title="How to get found even more"
+          summary="Small things you can do yourself."
+          badge={(() => { const n = (before?.recommendations.length ? before.recommendations.length : 1) + s.missingInfo.length; return `${n} tip${n === 1 ? "" : "s"}`; })()}
+        >
           <ul className={styles.recs}>
             {(before?.recommendations.length ? before.recommendations : ["Your site already covers the basics. Keep prices, hours and FAQs up to date."]).map((r) => (
               <li key={r}>{r}</li>
@@ -466,38 +461,27 @@ export function SearchTab({ data }: { data: CCData }) {
               <li key={m}>Add to your site: {m}</li>
             ))}
           </ul>
-        </section>
+        </Fold>
+        <Fold icon="?" title="Questions and answers we wrote for you" summary="Already on your new website, so AI apps can quote them." badge={`${s.faqs.length} answers`}>
+          <div className={styles.faqs}>
+            {s.faqs.map((f) => (
+              <details key={f.q}>
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </Fold>
+        <Fold icon="⌘" title="Technical details" summary="Only for your web developer. Nothing here for you to do." badge="Optional">
+          <div className={styles.gen}>
+            <CodeBlock label="Meta title" code={s.metaTitle} />
+            <CodeBlock label="Meta description" code={s.metaDescription} />
+            <CodeBlock label="Business summary (for your About section)" code={s.summary} />
+            <CodeBlock label="Structured data (JSON-LD), paste in <head>" code={s.jsonLd.map((j) => `<script type="application/ld+json">\n${JSON.stringify(j, null, 2)}\n</script>`).join("\n")} />
+            <CodeBlock label="llms.txt (plain-text summary for AI crawlers)" code={s.llmsTxt} />
+          </div>
+        </Fold>
       </div>
-
-      <section className={styles.panel}>
-        <h2>Already done for you</h2>
-        <p className="muted" style={{ margin: "0 0 14px" }}>
-          Your new Weblyy website already includes all of this. Nothing for you to do. If you keep your old website too, ask for the free setup in
-          &ldquo;Go live&rdquo; and our team will add it there.
-        </p>
-        <details className={styles.dev}>
-          <summary>Technical details (for your web developer)</summary>
-        <div className={styles.gen}>
-          <CodeBlock label="Meta title" code={s.metaTitle} />
-          <CodeBlock label="Meta description" code={s.metaDescription} />
-          <CodeBlock label="Business summary (for your About section)" code={s.summary} />
-          <CodeBlock label="Structured data (JSON-LD), paste in <head>" code={s.jsonLd.map((j) => `<script type="application/ld+json">\n${JSON.stringify(j, null, 2)}\n</script>`).join("\n")} />
-          <CodeBlock label="llms.txt (plain-text summary for AI crawlers)" code={s.llmsTxt} />
-        </div>
-        </details>
-      </section>
-
-      <section className={styles.panel}>
-        <h2>FAQs to publish ({s.faqs.length})</h2>
-        <div className={styles.faqs}>
-          {s.faqs.map((f) => (
-            <details key={f.q}>
-              <summary>{f.q}</summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
@@ -782,45 +766,41 @@ export function AnalyticsTab({ data }: { data: CCData }) {
     <div className={styles.stack}>
       <Head kicker="Results" title={<>What your assistant <span className="em">did for you.</span></>} />
       <section className={styles.cards}>
-        <div className={styles.stat}>
-          <small>Conversations</small>
-          <b>{s.conversations}</b>
-        </div>
-        <div className={styles.stat}>
-          <small>Messages answered</small>
-          <b>{s.messages}</b>
-        </div>
-        <div className={styles.stat}>
-          <small>Handled by the agent</small>
-          <b>{agentShare}%</b>
-        </div>
-        <div className={styles.stat}>
-          <small>Sent to the owner</small>
-          <b>{s.escalations}</b>
-        </div>
-        <div className={styles.stat}>
-          <small>Typing time saved</small>
-          <b>{s.minutesSaved} min</b>
-        </div>
-        <div className={styles.stat}>
-          <small>Leads</small>
-          <b>{leads}</b>
-        </div>
+        {[
+          { label: "Chats", value: String(s.conversations), tip: "Different customers who chatted with your assistant." },
+          { label: "Messages answered", value: String(s.messages), tip: "Every reply your assistant sent." },
+          { label: "Answered without you", value: `${agentShare}%`, tip: "Share of messages your assistant handled alone. The rest came to you." },
+          { label: "Sent to you", value: String(s.escalations), tip: "Complaints, refunds, medical questions and anything it wasn't sure about." },
+          { label: "Time saved", value: `${s.minutesSaved} min`, tip: "Roughly how long you'd have spent typing these replies yourself." },
+          { label: "Customers saved", value: String(leads), tip: "People who shared their name or number." },
+        ].map((t) => (
+          <div key={t.label} className={styles.stat}>
+            <small>
+              {t.label}
+              <Tip>{t.tip}</Tip>
+            </small>
+            <b>{t.value}</b>
+          </div>
+        ))}
       </section>
-      <div className={styles.two}>
-        <section className={styles.panel}>
-          <h2>Conversion funnel</h2>
-          <Bars rows={[["Conversations", s.conversations], ["Leads captured", leads], ["Qualified", qualified], ["Booked / converted", booked]]} />
+      {s.conversations === 0 ? (
+        <section className={styles.empty}>
+          <b>No chats yet</b>
+          <span>Charts appear here after your first customer chats. Share your chat link or QR code from Go live to get started.</span>
         </section>
-        <section className={styles.panel}>
-          <h2>What customers ask</h2>
-          <Bars rows={Object.entries(data.analytics.intents).map(([k, v]) => [INTENT_LABEL[k] ?? k, v] as [string, number]).sort((a, b) => b[1] - a[1])} />
-        </section>
-      </div>
-      <section className={styles.panel}>
-        <h2>Leads by source</h2>
-        <Bars rows={Object.entries(data.analytics.bySource).sort((a, b) => b[1] - a[1])} />
-      </section>
+      ) : (
+        <div className="folds">
+          <Fold icon="▤" title="From chat to booking" summary="How many chats turned into saved customers and bookings." badge={`${booked} booked`} open>
+            <Bars rows={[["Chats", s.conversations], ["Customers saved", leads], ["Interested", qualified], ["Booked", booked]]} />
+          </Fold>
+          <Fold icon="?" title="What customers ask about" summary="The topics that come up most.">
+            <Bars rows={Object.entries(data.analytics.intents).map(([k, v]) => [INTENT_LABEL[k] ?? k, v] as [string, number]).sort((a, b) => b[1] - a[1])} />
+          </Fold>
+          <Fold icon="↗" title="Where customers come from" summary="Website chat, QR code, WhatsApp and more.">
+            <Bars rows={Object.entries(data.analytics.bySource).sort((a, b) => b[1] - a[1])} />
+          </Fold>
+        </div>
+      )}
     </div>
   );
 }
@@ -904,22 +884,15 @@ export function SettingsTab({ data, ownerKey }: { data: CCData; ownerKey: string
           </ul>
         </section>
       </div>
-      <section className={styles.panel}>
-        <h2>Put the assistant on your old website too</h2>
-        <p className="muted" style={{ margin: "0 0 14px" }}>
-          Don&apos;t worry about this part. Use &ldquo;Go live&rdquo; and we&apos;ll set it up for you, or send it to your web person in one tap.
-        </p>
-        <details className={styles.dev}>
-          <summary>Technical details (for your web developer)</summary>
+      <Fold icon="⌘" title="Put the assistant on your old website too" summary="Use Go live and we'll do it for you. The codes below are only for your web developer." badge="Optional">
         <div className={styles.gen}>
           <CodeBlock label="Website chat bubble (paste before </body>)" code={`<script src="{ORIGIN}/widget.js" data-agent="${data.id}" async></script>`} />
           <CodeBlock label="Chat link (Instagram bio, Google profile, QR code)" code={`{ORIGIN}${data.links.chatPath}`} />
           <CodeBlock label="WhatsApp webhook (Twilio sandbox: When a message comes in)" code={`{ORIGIN}${data.links.whatsappWebhookPath}`} />
           <CodeBlock label="Command Center link (keep it private)" code={`{ORIGIN}/dashboard/${data.id}?key=${ownerKey}`} />
         </div>
-        </details>
-        {!origin && null}
-      </section>
+      </Fold>
+      {!origin && null}
     </div>
   );
 }

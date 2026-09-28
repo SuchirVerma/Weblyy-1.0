@@ -15,6 +15,12 @@ function useOrigin() {
   return origin;
 }
 
+const CHOICES = [
+  { key: "us" as const, icon: "☎", title: "We set it up for you", line: "Our team calls you and does everything. Free.", tag: "Recommended" },
+  { key: "share" as const, icon: "🔗", title: "Share your links", line: "Links and a QR code for Instagram, Google and your shop.", tag: "1 minute" },
+  { key: "helper" as const, icon: "✉", title: "Send to your web person", line: "We write the message. You press send.", tag: "" },
+];
+
 const PLATFORMS = ["WordPress", "Wix", "Shopify", "GoDaddy", "Google Sites", "Someone else made it", "I don't have a website", "Not sure"];
 
 /** Getting Weblyy onto the business, in plain words. No code for the owner, ever. */
@@ -26,6 +32,7 @@ export function GoLive({ data, ownerKey }: { data: CCData; ownerKey: string }) {
   const snippet = `<script src="${origin}/widget.js" data-agent="${data.id}" async></script>`;
   const [copied, setCopied] = useState("");
   const [helper, setHelper] = useState("");
+  const [pick, setPick] = useState<"us" | "share" | "helper">(data.setupRequest ? "share" : "us");
 
   const copy = async (label: string, text: string) => {
     try {
@@ -65,21 +72,33 @@ Thank you!`;
         <h1>
           Put your AI assistant to work. <span className="em">No coding needed.</span>
         </h1>
-        <p className="lede">Pick whichever is easiest for you. You can do more than one.</p>
+        <p className="lede">Choose one way to start. You can come back and do the others later.</p>
       </header>
 
+      <div className={styles.choices} role="tablist" aria-label="Ways to go live">
+        {CHOICES.map((c) => (
+          <button key={c.key} role="tab" aria-selected={pick === c.key} className={styles.choice} onClick={() => setPick(c.key)}>
+            <span className={styles.choiceIcon} aria-hidden="true">
+              {c.icon}
+            </span>
+            <b>{c.title}</b>
+            <small>{c.line}</small>
+            {c.key === "us" && data.setupRequest ? <em>✓ Requested</em> : c.tag ? <em>{c.tag}</em> : null}
+          </button>
+        ))}
+      </div>
+
       {/* ---------------------------------------------------- 1. done for you */}
-      <DoneForYou data={data} ownerKey={ownerKey} />
+      {pick === "us" && <DoneForYou data={data} ownerKey={ownerKey} />}
 
       {/* ------------------------------------------------- 2. share the link */}
+      {pick === "share" && (
       <section className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.num}>2</span>
           <div>
             <h2>Share your links yourself</h2>
             <p className="muted">Takes 1 minute. Works even if you have no website.</p>
           </div>
-          <span className={styles.badge}>Easiest</span>
         </div>
         <div className={styles.links}>
           <div className={styles.linkRow}>
@@ -116,6 +135,8 @@ Thank you!`;
             </div>
           </div>
         </div>
+        <details className={styles.more}>
+          <summary>Where should I put these links?</summary>
         <ul className={styles.tips}>
           <li>
             <b>Instagram:</b> Edit profile → Links → paste the chat link.
@@ -127,13 +148,15 @@ Thank you!`;
             <b>Shop counter:</b> print the QR poster below and stick it near the billing desk.
           </li>
         </ul>
+        </details>
         <QrCard chatPath={data.links.chatPath} name={k.name} />
       </section>
+      )}
 
       {/* ------------------------------------------------ 3. send to helper */}
+      {pick === "helper" && (
       <section className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.num}>3</span>
           <div>
             <h2>Send it to the person who made your website</h2>
             <p className="muted">We write the message for them. You just press send.</p>
@@ -156,6 +179,7 @@ Thank you!`;
           <pre>{helperMessage}</pre>
         </details>
       </section>
+      )}
     </div>
   );
 }
@@ -197,14 +221,10 @@ function DoneForYou({ data, ownerKey }: { data: CCData; ownerKey: string }) {
   return (
     <section className={`${styles.card} ${styles.featured}`}>
       <div className={styles.cardHead}>
-        <span className={styles.num}>1</span>
         <div>
           <h2>Let us set it up for you</h2>
           <p className="muted">Our team calls you, connects everything to your website and WhatsApp, and checks it works. You don&apos;t touch any code.</p>
         </div>
-        <span className={styles.badge} data-tone="accent">
-          Recommended
-        </span>
       </div>
 
       {sent ? (
