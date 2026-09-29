@@ -263,6 +263,13 @@ async function measure(ctxFactory: () => Promise<BrowserContext>, url: string, d
     const { metrics, brand } = await page.evaluate(inPage);
     let shot: string | undefined;
     if (file) {
+      // Measured already; now pin sticky headers where they sit, so a full-page shot doesn't draw them mid-page.
+      await page
+        .evaluate(() => {
+          window.scrollTo(0, 0);
+          for (const el of Array.from(document.querySelectorAll("body *"))) if (getComputedStyle(el).position === "sticky") (el as HTMLElement).style.position = "relative";
+        })
+        .catch(() => {});
       const h = Math.min(metrics.heightPx, MAX_SHOT_H[device]);
       const width = DEVICES[device].viewport.width;
       let buf = await page.screenshot({ type: "jpeg", quality: device === "mobile" ? 62 : 72, fullPage: true, clip: { x: 0, y: 0, width, height: h } }).catch(() => null);

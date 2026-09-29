@@ -11,6 +11,24 @@ import { isPublicHost } from "./net";
 const g = globalThis as unknown as { __fsBrowser?: Promise<Browser | null>; __fsBrowserIdle?: NodeJS.Timeout; __fsActive?: number };
 const IDLE_MS = 90_000;
 
+/**
+ * The serverless Chromium ships a few fonts without the ₹ sign, so screenshots showed "60" for ₹60.
+ * Noto Sans has it; it goes into the folder that Chromium's fonts were unpacked to. Once per instance.
+ */
+let rupeeFont: Promise<void> | null = null;
+function addRupeeFont() {
+  rupeeFont ??= (async () => {
+    const { existsSync } = await import("node:fs");
+    const { writeFile } = await import("node:fs/promises");
+    const path = await import("node:path");
+    const file = path.join(process.env.FONTCONFIG_PATH || "/tmp/fonts", "NotoSans.ttf");
+    if (existsSync(file)) return;
+    const res = await fetch("https://github.com/google/fonts/raw/main/ofl/notosans/NotoSans%5Bwdth,wght%5D.ttf", { signal: AbortSignal.timeout(8000) });
+    if (res.ok) await writeFile(file, Buffer.from(await res.arrayBuffer()));
+  })().catch((e) => console.warn("[browser] couldn't add the ₹ font:", e instanceof Error ? e.message : e));
+  return rupeeFont;
+}
+
 async function launch(): Promise<Browser | null> {
   if (process.env.DISABLE_BROWSER === "1") return null;
   try {
@@ -19,7 +37,9 @@ async function launch(): Promise<Browser | null> {
       // Serverless: no Chrome installed, so use the Chromium build made for AWS Lambda-style functions.
       const serverless = (await import("@sparticuz/chromium")).default;
       // Its flags include --single-process, which the function sandbox needs; that's also why each job gets a fresh browser.
-      const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args: serverless.args });
+      const executablePath = await serverless.executablePath();
+      await addRupeeFont();
+      const browser = await chromium.launch({ headless: true, executablePath, args: serverless.args });
       return browser;
     }
     const opts = { headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] };
