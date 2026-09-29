@@ -278,7 +278,7 @@ export function WebsiteTab({ data, act }) {
         details, and your AI agent built in. Happy with it? Deploy it and get your link.
       </p>
 
-      <SiteCompare agentId={data.id} host={siteHost(data.business.url)} fallbackPath={data.links.sitePath} design={data.design} />
+      <SiteCompare agentId={data.id} host={siteHost(data.business.url)} fallbackPath={data.links.sitePath} />
       <DeployCard data={data} act={act} />
 
       {data.workspace && (

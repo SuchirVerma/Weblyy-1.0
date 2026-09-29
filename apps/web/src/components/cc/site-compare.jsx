@@ -27,7 +27,7 @@ const mmss = (ms) => {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
 /** "Your current website" next to "With Weblyy": the business's real site, and the same site with the add-ons written in. */
-export function SiteCompare({ agentId, host, fallbackPath, design }) {
+export function SiteCompare({ agentId, host, fallbackPath }) {
   const reduce = useReducedSafe();
   const [view, setView] = useState("original");
   const [device, setDevice] = useState("desktop");
@@ -154,7 +154,6 @@ export function SiteCompare({ agentId, host, fallbackPath, design }) {
     setView(v);
     if (v === "enhanced" || v === "redesign") setReveal((n) => n + 1);
   };
-  const scene = design?.key ?? "flow";
   const redesignSrc = fallbackPath;
   const path = view === "original" ? (summary?.originalPath ?? "/") : view === "enhanced" ? (summary?.enhancedPath ?? "/") : "/";
   const addressPath = path.replace(/^\/mirror\/[^/]+\/(original|enhanced)\//, "/");
@@ -204,16 +203,6 @@ export function SiteCompare({ agentId, host, fallbackPath, design }) {
         <span className={styles.swPill} data-side={view} aria-hidden="true" />
       </div>
 
-      {view === "redesign" && design && (
-        <div className={styles.designBar}>
-          <span className={styles.designPick}>
-            <b>◆ 3D design: {design.name}</b>
-            <small>
-              Weblyy picked this for your business because {design.reason}.
-            </small>
-          </span>
-        </div>
-      )}
       <div className={styles.browser}>
         <div className={styles.bar}>
           <span className={styles.dots} aria-hidden="true">
@@ -268,7 +257,7 @@ export function SiteCompare({ agentId, host, fallbackPath, design }) {
 
           {view === "redesign" && (
             <motion.div
-              key={`redesign-${reveal}-${scene}`}
+              key={`redesign-${reveal}`}
               className={styles.enhancedLayer}
               initial={reduce ? false : { clipPath: "inset(0 100% 0 0)" }}
               animate={{ clipPath: "inset(0 0% 0 0)" }}
