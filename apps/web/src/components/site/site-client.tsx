@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import styles from "./site.module.css";
 
 declare global {
@@ -8,19 +8,37 @@ declare global {
   }
 }
 
-export function ChatButton({ children, className }: { children: React.ReactNode; className?: string }) {
+export function ChatButton({ children, className, preview }: { children: React.ReactNode; className?: string; preview?: boolean }) {
+  const [note, setNote] = useState(false);
   return (
-    <button type="button" className={className} onClick={() => window.WeblyyWidget?.open()}>
-      {children}
-    </button>
+    <>
+      <button
+        type="button"
+        className={className}
+        data-weblyy-chat=""
+        onClick={() => (preview ? setNote(true) : window.WeblyyWidget?.open())}
+      >
+        {children}
+      </button>
+      {preview && note && (
+        <span className={styles.chatNote} role="status">
+          The AI assistant answers here once the site goes live.
+        </span>
+      )}
+    </>
   );
 }
 
-export function LeadForm({ agentId, services }: { agentId: string; services: string[] }) {
+export function LeadForm({ agentId, services, cta }: { agentId: string | null; services: string[]; cta: string }) {
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [msg, setMsg] = useState("");
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!agentId) {
+      setMsg("This is a preview. The form starts sending enquiries once the site goes live.");
+      setState("error");
+      return;
+    }
     const f = new FormData(e.currentTarget);
     setState("sending");
     try {
@@ -83,15 +101,40 @@ export function LeadForm({ agentId, services }: { agentId: string; services: str
         <span>Message</span>
         <textarea name="message" rows={3} maxLength={500} placeholder="Preferred day and time, questions…" />
       </label>
-      <input name="website" tabIndex={-1} autoComplete="off" className={styles.hp} aria-hidden="true" />
+      <input name="website" tabIndex={-1} autoComplete="off" className={styles.hp} aria-hidden="true" aria-label="Leave this empty" />
       {state === "error" && (
         <p className={styles.formErr} role="alert">
           {msg}
         </p>
       )}
       <button className={styles.primary} type="submit" disabled={state === "sending"}>
-        {state === "sending" ? "Sending…" : "Request a call back"}
+        {state === "sending" ? "Sending…" : cta}
       </button>
     </form>
+  );
+}
+
+/** A photo from the original site. If the host refuses to serve it, the image disappears (the CSS hides its empty frame) instead of showing broken. */
+export function SafeImg({ src, alt, className, priority, fallback = null }: { src: string; alt: string; className?: string; priority?: boolean; fallback?: React.ReactNode }) {
+  const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
+  // An image that failed before the page became interactive never fires onError for React; catch it here.
+  useEffect(() => {
+    const img = ref.current;
+    if (img?.complete && img.naturalWidth === 0) setFailed(true);
+  }, []);
+  if (failed) return <>{fallback}</>;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      ref={ref}
+      src={src}
+      alt={alt}
+      className={className}
+      referrerPolicy="no-referrer"
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : undefined}
+      onError={() => setFailed(true)}
+    />
   );
 }

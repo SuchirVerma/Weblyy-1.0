@@ -2,6 +2,7 @@ import { buildSearchPack } from "@/lib/aisearch";
 import { parseAnswers } from "@/lib/answers";
 import { auditBusiness } from "@/lib/audit";
 import { allow, clientIp } from "@/lib/ratelimit";
+import { ensureMakeover, internalOrigin } from "@/lib/makeover-run";
 import { createAgent, getScan, recordRun, savePersist } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -19,6 +20,8 @@ export async function POST(req: Request) {
   const scan = typeof body.scanId === "string" ? getScan(body.scanId) : null;
   if (!scan) return Response.json({ error: "This scan expired. Please analyze the website again." }, { status: 404 });
   const answers = parseAnswers(body.answers);
+  // Usually ready already (the report builds it); don't hold up going live if it isn't.
+  const makeover = await Promise.race([ensureMakeover(body.scanId as string, scan, internalOrigin(req)).catch(() => undefined), new Promise<undefined>((r) => setTimeout(r, 30_000))]);
 
   const agent = await createAgent(scan.knowledge, "AI Customer Agent");
   const origin = process.env.APP_URL || new URL(req.url).origin;
@@ -30,6 +33,7 @@ export async function POST(req: Request) {
     auditBefore: auditBusiness(scan, answers),
     auditAfter: auditBusiness(scan, answers, { agent: true, website: true, search: true, leadCenter: true, automations: true }),
     search: buildSearchPack(scan.knowledge, `${origin}${sitePath}`),
+    makeover,
   };
   recordRun(agent, "Your business went live", ["Audit", "AI-ready website", "AI Customer Agent", "AI Search", "Lead Center", "Automations"], `${scan.knowledge.name} is live`);
   savePersist();

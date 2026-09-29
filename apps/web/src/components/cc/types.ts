@@ -1,3 +1,4 @@
+import type { StoredMakeover } from "@/lib/store";
 import type { Audit } from "@/lib/audit";
 import type { SearchPack } from "@/lib/aisearch";
 import type { AutomationDef } from "@/lib/automations";
@@ -49,7 +50,7 @@ export interface CCData {
     pages: number;
     instagram: { handle: string; followers: string } | null;
   };
-  workspace: { createdAt: number; sourceUrl: string; auditBefore: Audit; auditAfter: Audit; search: SearchPack } | null;
+  workspace: { createdAt: number; sourceUrl: string; auditBefore: Audit; auditAfter: Audit; search: SearchPack; makeover?: StoredMakeover } | null;
   stats: { messages: number; escalations: number; customers: number; conversations: number; handledByAgent: number; minutesSaved: number };
   leads: CCLead[];
   runs: CCRun[];

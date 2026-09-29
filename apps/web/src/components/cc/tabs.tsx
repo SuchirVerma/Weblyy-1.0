@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { Audit, AuditCategory } from "@/lib/audit";
 import { CodeBlock } from "../code-block";
+import { Makeover } from "../scan/makeover";
 import { Fold, Tip } from "../ui";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
@@ -249,8 +250,8 @@ export function WebsiteTab({ data }: { data: CCData }) {
         </a>
       </Head>
       <p className="lede">
-        Same business and prices as {data.business.url.includes("instagram.com") ? "your Instagram" : "your current site"}, rebuilt for phones with Book, Call and Chat
-        on every screen.
+        Same business, words, prices and brand as {data.business.url.includes("instagram.com") ? "your Instagram" : "your current site"}, rebuilt for phones with Call, WhatsApp
+        and Chat on every screen. Nothing on it is made up.
       </p>
 
       <section className={styles.preview}>
@@ -279,6 +280,8 @@ export function WebsiteTab({ data }: { data: CCData }) {
           <ScoreColumns before={data.workspace.auditBefore} after={data.workspace.auditAfter} />
         </section>
       )}
+
+      {data.workspace?.makeover && <Makeover data={data.workspace.makeover} name={data.business.name} siteHref={data.links.sitePath} />}
 
       <Fold icon="✓" title="Website checklist" summary="What we checked on your old website, and what the new one fixes." badge={`${before?.score ?? 0} → ${after?.score ?? 0}`}>
         <div className={styles.two}>

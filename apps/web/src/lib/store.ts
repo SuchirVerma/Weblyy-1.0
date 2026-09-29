@@ -4,7 +4,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Audit } from "./audit";
 import type { SearchPack } from "./aisearch";
-import type { Answers, ChatTurn, ScanResult, SiteKnowledge } from "./types";
+import type { MakeoverPlan, SiteAudit, SiteBrand } from "./makeover";
+import type { Answers, Capture, ChatTurn, ScanResult, SiteKnowledge } from "./types";
 
 export interface LogEntry {
   at: number;
@@ -98,6 +99,16 @@ export interface Workspace {
   auditBefore: Audit;
   auditAfter: Audit;
   search: SearchPack;
+  makeover?: StoredMakeover;
+}
+
+/** The website analysis, plan and screenshots, kept with the workspace so the dashboard can show before and after. */
+export interface StoredMakeover {
+  brand: SiteBrand;
+  before: SiteAudit;
+  after: SiteAudit;
+  plan: MakeoverPlan;
+  shots: { before: Capture["shots"]; after: Capture["shots"] };
 }
 
 export interface DeployedAgent {

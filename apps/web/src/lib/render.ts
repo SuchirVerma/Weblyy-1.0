@@ -100,3 +100,18 @@ async function renderOnce(url: string, timeoutMs: number): Promise<{ url: string
     await ctx?.close().catch(() => {});
   }
 }
+
+/** Runs `fn` with the shared Chrome, keeping it alive meanwhile. Null when no browser is available or `fn` fails. */
+export async function withBrowser<T>(fn: (browser: Browser) => Promise<T>): Promise<T | null> {
+  const browser = await getBrowser();
+  if (!browser) return null;
+  g.__fsActive = (g.__fsActive ?? 0) + 1;
+  try {
+    return await fn(browser);
+  } catch (e) {
+    console.error("[browser]", e instanceof Error ? e.message : e);
+    return null;
+  } finally {
+    g.__fsActive = Math.max(0, (g.__fsActive ?? 1) - 1);
+  }
+}

@@ -1,4 +1,6 @@
-import { crawl, CrawlError } from "@/lib/crawl";
+import { capturePage } from "@/lib/capture";
+import { crawl, CrawlError, DEMO_URL } from "@/lib/crawl";
+import { internalOrigin } from "@/lib/makeover-run";
 
 import { detectTouchpoints, findGaps } from "@/lib/detect";
 import { findWebPresence } from "@/lib/presence";
@@ -53,6 +55,16 @@ export async function POST(req: Request) {
           send({ type: "log", level, text });
         }).finally(() => clearInterval(hb));
 
+        // Open the site like a customer would, on a laptop and a phone, while the rest of the scan carries on.
+        const own = internalOrigin(req);
+        const isDemo = knowledge.url === DEMO_URL;
+        const capturing = /instagram\.com/.test(knowledge.url)
+          ? Promise.resolve(null)
+          : Promise.race([
+              capturePage(isDemo ? `${own}/demo/kesar/index.html` : knowledge.url, { allowOrigin: isDemo ? own : undefined }).catch(() => null),
+              pause(40_000).then(() => null),
+            ]);
+
         send({ type: "stage", stage: "extract" });
         await pause(250);
         send({ type: "log", level: "ok", text: `Business identified: ${knowledge.name} (${knowledge.businessType})` });
@@ -94,9 +106,17 @@ export async function POST(req: Request) {
           if (!presence.listings.length) send({ type: "log", level: "warn", text: "Not found on Google Maps, Justdial or other directories" });
         }
 
-        const result = { knowledge, touchpoints, gaps, presence };
+        const capture = await capturing;
+        if (capture) {
+          send({ type: "log", level: "ok", text: `Screenshots taken on a laptop and a phone` });
+          if (capture.mobile?.overflowX) send({ type: "log", level: "warn", text: "On a phone the page scrolls sideways" });
+          if (capture.desktop) send({ type: "log", level: capture.desktop.loadMs < 3000 ? "ok" : "warn", text: `Homepage loaded in ${(capture.desktop.loadMs / 1000).toFixed(1)} s` });
+          if (capture.brand.colors[0]) send({ type: "log", level: "ok", text: `Brand colour ${capture.brand.colors[0]}${capture.brand.headingFont ? `, font ${capture.brand.headingFont}` : ""}` });
+        }
+        const result = { knowledge, touchpoints, gaps, presence, capture };
         send({ type: "stage", stage: "done" });
-        send({ type: "result", scanId: saveScan(result), result });
+        // The rendered HTML stays on the server; the browser only needs the measurements.
+        send({ type: "result", scanId: saveScan(result), result: { ...result, capture: capture && { ...capture, html: "" } } });
       } catch (e) {
         const message = e instanceof CrawlError ? e.message : "Something went wrong while scanning. Try again or use the demo.";
         if (!(e instanceof CrawlError)) console.error("[scan]", e);

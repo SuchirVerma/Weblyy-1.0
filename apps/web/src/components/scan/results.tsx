@@ -6,6 +6,7 @@ import { CHANNEL_NAME } from "../radar";
 import { CountUp } from "../ui";
 import { Blueprint } from "./blueprint";
 import { MakeReady } from "./make-ready";
+import { Makeover } from "./makeover";
 import { BeforeAfterChart, TopFixes } from "./before-after";
 import { ChangeList } from "./changes";
 import { ScoreReveal } from "./score-reveal";
@@ -159,6 +160,8 @@ export function Results({
           </div>
         </div>
       </section>
+
+      {!/instagram\.com/.test(k.url) && <Makeover scanId={scanId} name={k.name} />}
 
       {audit && after ? (
         <section className={styles.quick} aria-labelledby="fix-h">

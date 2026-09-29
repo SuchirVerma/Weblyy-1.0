@@ -6,7 +6,7 @@ import * as cheerio from "cheerio";
 import { isPublicHost } from "./net";
 import { instagramHandle, LINK_HUBS, NOT_A_WEBSITE, readInstagram } from "./instagram";
 import { renderPage } from "./render";
-import type { BusinessType, FaqItem, FormInfo, PriceItem, SiteKnowledge, SiteSignals } from "./types";
+import type { BusinessType, FaqItem, FormInfo, PriceItem, SiteContent, SiteKnowledge, SiteSignals } from "./types";
 
 const MAX_BYTES = 2_500_000;
 const MAX_EXTRA_PAGES = 5;
@@ -192,7 +192,7 @@ function whatsappNumber(href: string): string | null {
   return null;
 }
 
-interface PageData {
+export interface PageData {
   url: string;
   title: string;
   links: string[];
@@ -215,6 +215,143 @@ interface PageData {
   siteName: string;
   description: string;
   signals: SiteSignals;
+  content: SiteContent;
+}
+
+const CTA_RE = /book|appointment|call now|whatsapp|chat|enquir|inquir|contact us|get a quote|order|reserve|schedule|register|enrol|sign up/i;
+const JUNK_IMG = /icon|logo|sprite|pixel|avatar|placeholder|loader|spinner|whatsapp|payment|badge|flag|arrow|emoji|gravatar|\.svg(\?|$)|data:image/i;
+
+function absUrl(src: string | undefined, base: URL) {
+  if (!src) return "";
+  try {
+    const u = new URL(src.trim().split(/\s+/)[0], base);
+    return u.protocol === "http:" || u.protocol === "https:" ? u.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+/** Words and brand marks copied from the page as-is, for a redesign that keeps them. */
+function extractContent($: cheerio.CheerioAPI, url: URL, jsonLd: Record<string, unknown>[]): SiteContent {
+  const text = (el: cheerio.Cheerio<never>) => clean(el.text());
+  $("h1 br, h2 br, h3 br, p br").replaceWith(" ");
+  const h1 = $("h1").first() as cheerio.Cheerio<never>;
+  const headline = text(h1).slice(0, 140);
+
+  let subheadline = "";
+  if (h1.length) {
+    const near = h1.nextAll("p").first().length ? h1.nextAll("p").first() : h1.parent().find("p").first();
+    const t = text(near as cheerio.Cheerio<never>);
+    if (t.length >= 25 && t.length <= 320) subheadline = t;
+  }
+
+  const inChrome = (el: cheerio.Cheerio<never>) => el.closest("header, nav, footer, form").length > 0;
+  const paras = (scope: cheerio.Cheerio<never>) =>
+    scope
+      .find("p")
+      .map((_, p) => clean($(p).text()))
+      .get()
+      .filter((t) => t.length >= 60 && t.length <= 700 && !/cookie|copyright|all rights reserved|©/i.test(t));
+
+  const isAboutPage = /about|story|who-we-are|our-team/i.test(url.pathname);
+  let about: string[] = [];
+  if (isAboutPage) about = paras($("main").length ? ($("main") as cheerio.Cheerio<never>) : ($("body") as cheerio.Cheerio<never>)).slice(0, 4);
+  else {
+    $("h2, h3").each((_, h) => {
+      if (about.length || !/about|who we are|our story|welcome|why choose/i.test($(h).text())) return;
+      const sec = $(h).closest("section").length ? $(h).closest("section") : $(h).parent();
+      about = paras(sec as cheerio.Cheerio<never>).slice(0, 3);
+    });
+  }
+
+  const sections: SiteContent["sections"] = [];
+  $("h2, h3").each((_, h) => {
+    const el = $(h) as cheerio.Cheerio<never>;
+    const heading = text(el);
+    if (inChrome(el) || heading.length < 3 || heading.length > 80 || heading.endsWith("?")) return;
+    const next = clean(el.nextAll("p").first().text() || el.parent().find("p").first().text());
+    if (next.length >= 40 && next.length <= 500 && !sections.some((s) => s.text === next)) sections.push({ heading, text: next, page: url.pathname || "/" });
+  });
+
+  const testimonials: SiteContent["testimonials"] = [];
+  // A testimonial is a box holding exactly one longish quote (a card), not a section holding several.
+  const quoteText = (q: cheerio.Cheerio<never>) => clean(q.text()).replace(/^[“"']|[”"']$/g, "");
+  $('[class*="testimonial" i], [id*="testimonial" i], [class*="review" i], blockquote').each((_, el) => {
+    const box = $(el) as cheerio.Cheerio<never>;
+    // Whole words only: "preview" or "reviewed-by" widgets aren't reviews.
+    if (!box.is("blockquote") && !/(^|[\s_-])(reviews?|testimonials?)([\s_-]|$)|^(reviews?|testimonials?)|(review|testimonial)(card|item|box|text|slide)/i.test(`${box.attr("class") ?? ""} ${box.attr("id") ?? ""}`)) return;
+    const quotes = (box.is("p, blockquote") ? box : (box.find("blockquote, p") as cheerio.Cheerio<never>)).filter((_, q) => quoteText($(q) as cheerio.Cheerio<never>).length >= 30);
+    if (quotes.length !== 1) return;
+    const quote = quoteText(quotes.first() as cheerio.Cheerio<never>);
+    if (quote.length > 450 || PRICE_RE.test(quote) || testimonials.some((t) => t.quote === quote)) return;
+    const author = clean(box.find('cite, [class*="name" i], [class*="author" i], strong, h4, h5').first().text()).replace(/^[—–-]\s*/, "");
+    testimonials.push({ quote, author: author.length <= 60 && author !== quote ? author : "" });
+  });
+
+  const nav = [
+    ...new Set(
+      $("header nav a, nav a, header a")
+        .map((_, a) => clean($(a).text()))
+        .get()
+        .filter((t) => t.length > 1 && t.length <= 28),
+    ),
+  ].slice(0, 12);
+  const ctas = [
+    ...new Set(
+      $("a, button")
+        .map((_, el) => clean($(el).text()))
+        .get()
+        .filter((t) => t.length > 1 && t.length <= 40 && CTA_RE.test(t)),
+    ),
+  ].slice(0, 8);
+
+  const ldLogo = jsonLd.map((j) => j.logo).find(Boolean);
+  const logoEl = $('header img, [class*="logo" i] img, img[class*="logo" i], img[id*="logo" i], img[alt*="logo" i], img[src*="logo" i]').first();
+  const logo =
+    absUrl(logoEl.attr("src") ?? logoEl.attr("data-src"), url) ||
+    absUrl(typeof ldLogo === "string" ? ldLogo : typeof ldLogo === "object" ? String((ldLogo as { url?: string }).url ?? "") : "", url);
+
+  const images: SiteContent["images"] = [];
+  $("img").each((_, img) => {
+    const el = $(img);
+    const src = absUrl(el.attr("src") ?? el.attr("data-src") ?? el.attr("data-lazy-src") ?? el.attr("srcset"), url);
+    const w = Number(el.attr("width") ?? 0);
+    if (!src || JUNK_IMG.test(src) || (w && w < 240) || el.closest("header, nav, footer").length) return;
+    if (!images.some((i) => i.src === src)) images.push({ src, alt: clean(el.attr("alt") ?? "").slice(0, 120) });
+  });
+
+  return {
+    headline,
+    subheadline,
+    about,
+    sections: sections.slice(0, 10),
+    testimonials: testimonials.slice(0, 8),
+    nav,
+    ctas,
+    logo,
+    favicon: absUrl($('link[rel="apple-touch-icon"]').attr("href") ?? $('link[rel~="icon"]').attr("href"), url),
+    ogImage: absUrl($('meta[property="og:image"]').attr("content"), url),
+    themeColor: clean($('meta[name="theme-color"]').attr("content") ?? ""),
+    images: images.slice(0, 12),
+  };
+}
+
+function pageStructure($: cheerio.CheerioAPI) {
+  const levels = $("h1, h2, h3, h4, h5, h6").map((_, h) => Number(h.tagName.slice(1))).get();
+  let headingSkips = 0;
+  levels.reduce((prev, l) => {
+    if (l > prev + 1) headingSkips++;
+    return l;
+  }, 0);
+  return {
+    h1Count: $("h1").length,
+    headingSkips,
+    lang: $("html").attr("lang") ?? "",
+    canonical: $('link[rel="canonical"]').length > 0,
+    ogTitle: $('meta[property="og:title"]').length > 0,
+    navCount: new Set($("nav a, header a").map((_, a) => clean($(a).text()).toLowerCase()).get().filter((t) => t.length > 1)).size,
+    contactLinks: $('a[href^="tel:"], a[href*="wa.me"], a[href*="whatsapp.com"], a[href^="mailto:"]').length,
+  };
 }
 
 function fieldLabel($: cheerio.CheerioAPI, el: cheerio.Cheerio<never>): string {
@@ -232,7 +369,7 @@ function formPurpose(text: string, fields: string[]): string {
   return "enquiry";
 }
 
-function extractPage(url: URL, html: string): PageData {
+export function extractPage(url: URL, html: string): PageData {
   const $ = cheerio.load(html);
   const jsonLd: Record<string, unknown>[] = [];
   $('script[type="application/ld+json"]').each((_, el) => {
@@ -291,6 +428,7 @@ function extractPage(url: URL, html: string): PageData {
     }
   });
 
+  if ($("[data-weblyy-chat]").length) embeds.add("AI chat assistant");
   const linkBlob = links.join(" ");
   for (const [re, name] of EMBEDS) if (re.test(scriptBlob) || re.test(iframeBlob) || re.test(linkBlob)) embeds.add(name);
 
@@ -322,7 +460,7 @@ function extractPage(url: URL, html: string): PageData {
     $('meta[name="description"]').attr("content") ?? $('meta[property="og:description"]').attr("content") ?? "";
   const title = clean($("title").first().text());
   const ctaCount = $("a, button")
-    .filter((_, el) => /book|appointment|call now|whatsapp|chat|enquir|inquir|contact us|get a quote|order|reserve|schedule|register|enrol|sign up/i.test($(el).text()))
+    .filter((_, el) => CTA_RE.test($(el).text()))
     .length;
   const signalsBase = {
     https: url.protocol === "https:",
@@ -340,8 +478,10 @@ function extractPage(url: URL, html: string): PageData {
     ],
     ctaCount,
     ogImage: $('meta[property="og:image"]').length > 0,
+    ...pageStructure($),
   };
 
+  const content = extractContent($, url, jsonLd);
   $("script, style, noscript, svg, template, iframe").remove();
 
   // Prices: leaf-ish blocks containing a currency amount.
@@ -447,6 +587,7 @@ function extractPage(url: URL, html: string): PageData {
     siteName: clean(siteName),
     description: clean(description),
     signals: { ...signalsBase, wordCount: bodyText.split(/\s+/).length },
+    content,
   };
 }
 
@@ -516,11 +657,19 @@ function fromJsonLd(items: Record<string, unknown>[]) {
   return out;
 }
 
+/** Template leftovers like "Best Cosmetic Dentistry in , " aren't a business name. */
+const brokenName = (n: string) => !n.trim() || /\s,|,\s*$|\bin\s*,|\{\{|%s|undefined|null/i.test(n) || n.trim().length < 2;
+
 function guessName(home: PageData, host: string): string {
-  if (home.siteName) return home.siteName;
-  const fromTitle = home.title.split(/\s[|\-–—]\s|\s?[|:]\s/)[0]?.trim();
-  if (fromTitle && fromTitle.length <= 50) return fromTitle;
-  return host.replace(/^www\./, "").split(".")[0].replace(/^\w/, (c) => c.toUpperCase());
+  if (home.siteName && !brokenName(home.siteName)) return home.siteName;
+  const root = host.replace(/^www\./, "").split(".")[0].toLowerCase();
+  const parts = home.title.split(/\s[|\-–—]\s|\s?[|:]\s/).map((p) => p.trim()).filter(Boolean);
+  // "Best Dental Clinic in India | Apollo Dental": the part that matches the domain is the name.
+  const squash = (p: string) => p.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const byHost = parts.find((p) => p.length <= 50 && squash(p).length >= 3 && (root.includes(squash(p)) || squash(p).includes(root)));
+  if (byHost) return byHost;
+  if (parts[0] && parts[0].length <= 50 && !/^(best|top|no\.?\s?1|leading)\b/i.test(parts[0])) return parts[0];
+  return root.replace(/^\w/, (c) => c.toUpperCase());
 }
 
 const MAX_RENDERS = 3;
@@ -679,7 +828,7 @@ async function crawlSite(input: string, log: Log): Promise<SiteKnowledge> {
 
   return {
     url: base.toString(),
-    name: ld.name || guessName(pages[0], base.hostname),
+    name: (!brokenName(ld.name) && ld.name) || guessName(pages[0], base.hostname),
     description: pages.map((p) => p.description).find(Boolean) ?? "",
     businessType: detectBusinessType(fullText),
     pages: unique.map((p) => ({ url: p.url, title: p.title })),
@@ -698,7 +847,31 @@ async function crawlSite(input: string, log: Log): Promise<SiteKnowledge> {
     rendered: renders > 0,
     signals: mergeSignals(pages.filter((p) => p.url === pages[0].url || p.url === base.toString()).map((p) => p.signals)),
     services,
+    content: mergeContent(unique, base),
     text: fullText.slice(0, 24000),
+  };
+}
+
+/** The homepage leads (headline, logo, brand); every page adds sections, reviews and photos. */
+function mergeContent(pages: PageData[], base: URL): SiteContent {
+  const home = pages.find((p) => p.url === base.toString()) ?? pages[0];
+  const h = home.content;
+  const aboutPage = pages.find((p) => /about|story|who-we-are|our-team/i.test(new URL(p.url).pathname) && p.content.about.length);
+  const firstOf = <T,>(pick: (c: SiteContent) => T, ok: (v: T) => boolean) => [h, ...pages.map((p) => p.content)].map(pick).find(ok);
+  const uniqBy = <T,>(xs: T[], key: (x: T) => string) => xs.filter((x, i) => xs.findIndex((y) => key(y) === key(x)) === i);
+  return {
+    headline: h.headline,
+    subheadline: h.subheadline,
+    about: (aboutPage?.content.about.length ? aboutPage.content.about : h.about).slice(0, 4),
+    sections: uniqBy([h, ...pages.filter((p) => p !== home).map((p) => p.content)].flatMap((c) => c.sections), (s) => s.heading.toLowerCase()).slice(0, 12),
+    testimonials: uniqBy(pages.flatMap((p) => p.content.testimonials), (t) => t.quote).slice(0, 8),
+    nav: h.nav,
+    ctas: h.ctas,
+    logo: firstOf((c) => c.logo, Boolean) ?? "",
+    favicon: firstOf((c) => c.favicon, Boolean) ?? "",
+    ogImage: firstOf((c) => c.ogImage, Boolean) ?? "",
+    themeColor: firstOf((c) => c.themeColor, Boolean) ?? "",
+    images: uniqBy([h, ...pages.map((p) => p.content)].flatMap((c) => c.images), (i) => i.src).slice(0, 16),
   };
 }
 
@@ -708,6 +881,7 @@ function hoursKey(h: string) {
     .toLowerCase()
     .replace(/\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b/g, "$1")
     .replace(/\b(open|opening|hours|timings?|daily|we are)\b/g, "")
+    .replace(/([a-z])\s*:/g, "$1")
     .replace(/\s*(?:to|–|-|—)\s*/g, "-")
     .replace(/(\d)(?::00)?\s*(am|pm)/g, "$1$2")
     .replace(/[^a-z0-9:-]/g, "");
@@ -727,9 +901,12 @@ function dedupeParts(addr: string) {
 }
 
 function mergeSignals(list: SiteSignals[]): SiteSignals {
-  const first = list[0];
+  // Page structure comes from the fullest copy (the browser one, for JavaScript-built sites).
+  const first = [...list].sort((a, b) => b.wordCount - a.wordCount)[0];
   return list.reduce(
     (acc, s) => ({
+      ...acc,
+      contactLinks: Math.max(acc.contactLinks ?? 0, s.contactLinks ?? 0),
       https: acc.https || s.https,
       viewport: acc.viewport || s.viewport,
       title: acc.title || s.title,

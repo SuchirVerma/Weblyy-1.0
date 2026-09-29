@@ -94,7 +94,7 @@ export function buildSearchPack(k: SiteKnowledge, publicUrl?: string): SearchPac
     faqs.push({ q: `How much do services cost at ${k.name}?`, a: `Some of our prices: ${sample}. See the full price list on our website.` });
   }
   if ((k.whatsapp.length || k.phones.length) && !has(/book|appointment|reserve/i))
-    faqs.push({ q: `How do I book at ${k.name}?`, a: `Chat with us on the website or WhatsApp${phone(k) ? ` (${phone(k)})` : ""} and we'll confirm your slot.` });
+    faqs.push({ q: `How do I get in touch with ${k.name}?`, a: `${k.whatsapp.some((w) => /\d{8,}/.test(w)) ? "Message us on WhatsApp" : "Call us"}${phone(k) ? ` at ${phone(k)}` : ""}, or leave your details on the website and we'll get back to you.` });
 
   const missingInfo: string[] = [];
   if (!k.address) missingInfo.push("Full address (street, area, city, PIN code)");

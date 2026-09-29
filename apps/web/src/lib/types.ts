@@ -50,8 +50,28 @@ export interface SiteKnowledge {
   /** Technical and content signals from the homepage, used by the AI readiness audit */
   signals?: SiteSignals;
   services: string[];
+  /** Words, images and brand marks taken verbatim from the site, so a redesign can keep them */
+  content?: SiteContent;
   /** Trimmed visible text of the crawled pages, for the agent's context */
   text: string;
+}
+
+/** Everything here is copied from the original site as-is. Nothing is written by Weblyy. */
+export interface SiteContent {
+  /** The homepage's main headline (H1) */
+  headline: string;
+  /** The first real paragraph under the headline */
+  subheadline: string;
+  about: string[];
+  sections: { heading: string; text: string; page: string }[];
+  testimonials: { quote: string; author: string }[];
+  nav: string[];
+  ctas: string[];
+  logo: string;
+  favicon: string;
+  ogImage: string;
+  themeColor: string;
+  images: { src: string; alt: string }[];
 }
 
 export interface SiteSignals {
@@ -64,6 +84,15 @@ export interface SiteSignals {
   ctaCount: number;
   ogImage: boolean;
   wordCount: number;
+  h1Count?: number;
+  /** Times a heading level is skipped (H1 straight to H4 and so on) */
+  headingSkips?: number;
+  lang?: string;
+  canonical?: boolean;
+  ogTitle?: boolean;
+  navCount?: number;
+  /** tel:, WhatsApp and mailto links on the page */
+  contactLinks?: number;
 }
 
 export type BusinessType = "salon" | "clinic" | "restaurant" | "education" | "retail" | "fitness" | "services";
@@ -134,6 +163,38 @@ export interface ScanResult {
   touchpoints: Touchpoint[];
   gaps: string[];
   presence?: WebPresence | null;
+  /** The homepage measured in a real browser, with screenshots. Missing when no browser is available. */
+  capture?: Capture | null;
+}
+
+/** One device's measurements of a page, taken in a real browser. */
+export interface PageMetrics {
+  loadMs: number;
+  bytes: number;
+  requests: number;
+  heightPx: number;
+  overflowX: boolean;
+  smallText: number;
+  smallTargets: number;
+  ctaAboveFold: string[];
+  images: number;
+  imagesNoAlt: number;
+  brokenImages: number;
+  unlabeledInputs: number;
+  vagueLinks: number;
+  fonts: string[];
+  stickyContact: boolean;
+}
+
+export interface Capture {
+  url: string;
+  desktop: PageMetrics | null;
+  mobile: PageMetrics | null;
+  /** Screenshot file names, served by /api/shot */
+  shots: { desktop?: string; mobile?: string };
+  brand: { colors: string[]; headingFont: string; bodyFont: string; images: { src: string; alt: string; w: number; h: number }[]; logo: string };
+  /** The rendered homepage HTML, so the same checks can read it */
+  html: string;
 }
 
 export type ScanEvent =
