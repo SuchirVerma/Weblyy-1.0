@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { Audit, AuditCategory } from "@/lib/audit";
 import { CodeBlock } from "../code-block";
-import { Makeover } from "../scan/makeover";
 import { Fold, Tip } from "../ui";
 import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
@@ -270,7 +269,6 @@ export function WebsiteTab({ data }: { data: CCData }) {
         </section>
       )}
 
-      {data.workspace?.makeover && <Makeover data={data.workspace.makeover} name={data.business.name} siteHref={data.links.sitePath} />}
 
       <Fold icon="✓" title="Website checklist" summary="What we checked on your old website, and what the new one fixes." badge={`${before?.score ?? 0} → ${after?.score ?? 0}`}>
         <div className={styles.two}>
