@@ -217,6 +217,7 @@ export class WebScene {
   private textScale = 1;
   private raf = 0;
   private running = false;
+  private auto = false;
   private progress = 0;
   private target = 0;
   private t0 = performance.now();
@@ -417,6 +418,26 @@ export class WebScene {
     this.draw();
   }
 
+  /**
+   * Plays the formation on its own, forever: one dot blooms into the web, the web breathes and turns,
+   * folds back into the dot, and blooms again. The title is HTML, so the loop never forms the word.
+   */
+  autoplay(on = true) {
+    this.auto = on;
+    this.t0 = performance.now();
+    this.progress = this.target = 0;
+  }
+
+  private loopTarget(time: number) {
+    const L = 17; // seconds per cycle
+    const t = time % L;
+    const top = 0.37; // the whole globe in view, camera at its widest
+    if (t < 4.5) return 0.015 + (top - 0.015) * smooth(0, 4.5, t);
+    if (t < 12.5) return top + 0.02 * Math.sin(((t - 4.5) / 8) * Math.PI * 2);
+    if (t < 15.5) return top - (top - 0.015) * smooth(12.5, 15.5, t);
+    return 0.015;
+  }
+
   setProgress(p: number) {
     this.target = Math.min(1, Math.max(0, p));
     if (!this.running) this.draw();
@@ -446,8 +467,9 @@ export class WebScene {
 
   private draw(frozen = false) {
     const time = frozen ? 8 : (performance.now() - this.t0) / 1000;
-    // Ease toward the scroll position so fast flicks still glide.
-    if (!frozen) this.progress += (this.target - this.progress) * 0.085;
+    if (this.auto && !frozen) this.target = this.loopTarget(time);
+    // Ease toward the target so every change glides.
+    if (!frozen) this.progress += (this.target - this.progress) * (this.auto ? 0.06 : 0.085);
     const p = this.progress;
     const ignite = frozen ? 1 : smooth(0.1, 1.4, time);
 
@@ -516,7 +538,8 @@ export class WebScene {
       return a * 0.55 * (1 - smooth(0, 0.35, textT));
     });
     this.fillLines(this.textLines, this.textPairs, () => smooth(0.6, 1, textT) * 0.5 * handoff);
-    const spokeA = smooth(0.05, 0.2, p) * (1 - smooth(0.4, 0.58, p));
+    // In the loop, the rays only flash while the web is forming, then leave the globe clean.
+    const spokeA = smooth(0.05, 0.2, p) * (1 - smooth(0.4, 0.58, p)) * (this.auto ? 1 - smooth(0.22, 0.33, p) : 1);
     this.fillLines(this.spokes, this.spokePairs, () => spokeA * 0.9);
 
     for (const m of this.lineMats) m.uniforms.uTime.value = time;
@@ -532,7 +555,9 @@ export class WebScene {
     // Camera
     this.mouse.x += (this.mouse.tx - this.mouse.x) * 0.05;
     this.mouse.y += (this.mouse.ty - this.mouse.y) * 0.05;
-    const z = camZ(p);
+    let z = camZ(p);
+    // Tall phone screens: step back so the whole globe fits the width, not just the height.
+    if (this.auto && this.camera.aspect < 1) z *= Math.min(1.6, 0.72 / this.camera.aspect);
     const drift = 1 - textT * 0.8;
     this.camera.position.set(this.mouse.x * 0.9 * drift + Math.sin(time * 0.2) * 0.08 * drift, -this.mouse.y * 0.6 * drift, z);
     this.camera.lookAt(0, 0, 0);

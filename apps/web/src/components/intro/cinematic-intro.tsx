@@ -5,15 +5,10 @@ import styles from "./intro.module.css";
 
 const NAME = "Weblyy";
 
-const smooth = (a: number, b: number, x: number) => {
-  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-  return t * t * (3 - 2 * t);
-};
-
 /**
- * The opening title sequence: one spark becomes a web, and the web becomes the name.
- * A tall section with a sticky stage; scroll position drives the scene (forward and backward).
- * Without WebGL, or with reduced motion, it shows a still title card instead.
+ * The landing screen: the name and tagline, with the 3D web playing behind them on a loop.
+ * One dot blooms into a web, breathes, folds back into the dot and blooms again, from the moment the page opens.
+ * Without WebGL, or with reduced motion, it shows one still frame of the web instead.
  */
 export function CinematicIntro({ nextId }: { nextId: string }) {
   const section = useRef<HTMLElement>(null);
@@ -27,7 +22,32 @@ export function CinematicIntro({ nextId }: { nextId: string }) {
     const st = stage.current;
     if (!el || !cv || !st) return;
 
+    // The title card is always the finished state: name and tagline on, no letterbox, no scroll cue.
+    st.style.setProperty("--bars", "0");
+    st.style.setProperty("--start", "0");
+    st.style.setProperty("--veil", "0");
+    st.style.setProperty("--end", "1");
+    st.setAttribute("data-end", "");
+
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let entrance = 0;
+    const showTitle = (instant: boolean) => {
+      if (instant) {
+        st.style.setProperty("--title", "1");
+        return;
+      }
+      const t0 = performance.now() + 350;
+      const step = (now: number) => {
+        const k = Math.min(1, Math.max(0, (now - t0) / 1600));
+        st.style.setProperty("--title", (k * k * (3 - 2 * k)).toFixed(3));
+        if (k < 1) entrance = requestAnimationFrame(step);
+      };
+      entrance = requestAnimationFrame(step);
+    };
+
+    // The name appears straight away; it never waits for the 3D scene to load.
+    showTitle(reduce);
+
     const gl = (() => {
       try {
         const c = document.createElement("canvas");
@@ -38,37 +58,12 @@ export function CinematicIntro({ nextId }: { nextId: string }) {
     })();
     if (!gl) {
       queueMicrotask(() => setMode("still"));
-      return;
+      return () => cancelAnimationFrame(entrance);
     }
 
     let scene: WebScene | null = null;
     let disposed = false;
     let visible = true;
-    let raf = 0;
-
-    const progress = () => {
-      const r = el.getBoundingClientRect();
-      const span = el.offsetHeight - window.innerHeight;
-      return span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
-    };
-
-    // CSS-driven layers (bars, title, cues) follow scroll directly; the 3D scene eases toward it.
-    const paint = () => {
-      raf = 0;
-      const p = progress();
-      st.style.setProperty("--p", p.toFixed(4));
-      st.style.setProperty("--title", smooth(0.78, 0.9, p).toFixed(3));
-      st.style.setProperty("--bars", (1 - smooth(0.74, 0.92, p)).toFixed(3));
-      st.style.setProperty("--start", (1 - smooth(0.0, 0.06, p)).toFixed(3));
-      st.style.setProperty("--end", smooth(0.86, 0.94, p).toFixed(3));
-      st.style.setProperty("--veil", smooth(0.95, 1, p).toFixed(3));
-      st.toggleAttribute("data-start", p < 0.05);
-      st.toggleAttribute("data-end", p > 0.9);
-      scene?.setProgress(p);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(paint);
-    };
 
     (async () => {
       await document.fonts?.ready;
@@ -80,30 +75,18 @@ export function CinematicIntro({ nextId }: { nextId: string }) {
         word: NAME,
         fontFamily,
         mobile: window.innerWidth < 700,
-        // The scene sizes its sampling canvas as glyph width + 20px at a 220px font; match that exactly.
-        onTextWidth: (px) => {
-          const g = document.createElement("canvas").getContext("2d");
-          if (!g) return;
-          g.font = `700 220px ${fontFamily}`;
-          const canvasW = Math.ceil(g.measureText(NAME).width) + 20;
-          st.style.setProperty("--word-size", `${((px * 220) / canvasW).toFixed(1)}px`);
-        },
       });
-      paint();
       if (reduce) {
-        scene.still(1);
-        st.style.setProperty("--title", "1");
-        st.style.setProperty("--bars", "0");
-        st.style.setProperty("--start", "0");
-        st.style.setProperty("--end", "1");
-        st.setAttribute("data-end", "");
+        scene.still(0.5);
         setMode("still");
         return;
       }
+      scene.autoplay();
       setMode("live");
-      if (visible) scene.start();
+      if (visible && !document.hidden) scene.start();
     })().catch(() => setMode("still"));
 
+    // Pause when the landing screen is scrolled away or the tab is hidden; resume where it was.
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
       if (!scene || reduce) return;
@@ -116,19 +99,13 @@ export function CinematicIntro({ nextId }: { nextId: string }) {
       if (document.hidden) scene.stop();
       else if (visible) scene.start();
     };
-    const onResize = () => {
-      scene?.resize();
-      paint();
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const onResize = () => scene?.resize();
     window.addEventListener("resize", onResize);
     document.addEventListener("visibilitychange", onVis);
-    paint();
     return () => {
       disposed = true;
+      cancelAnimationFrame(entrance);
       io.disconnect();
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVis);
       scene?.dispose();
@@ -138,12 +115,6 @@ export function CinematicIntro({ nextId }: { nextId: string }) {
   const toProduct = () => {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     document.getElementById(nextId)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-  };
-  const begin = () => {
-    const el = section.current;
-    if (!el) return;
-    const span = el.offsetHeight - window.innerHeight;
-    window.scrollTo({ top: el.offsetTop + span * 0.45, behavior: "smooth" });
   };
 
   return (
@@ -167,28 +138,12 @@ export function CinematicIntro({ nextId }: { nextId: string }) {
           The future isn&rsquo;t AI-ready. <b>Your business can be.</b>
         </p>
 
-        <div className={styles.bars} aria-hidden="true">
-          <i />
-          <i />
-        </div>
-
-        <button type="button" className={`${styles.cue} ${styles.cueStart}`} onClick={begin} aria-label="Scroll to begin">
-          <span className={styles.mouse} aria-hidden="true">
-            <i />
-          </span>
-          <span>Scroll to begin</span>
-        </button>
         <button type="button" className={`${styles.cue} ${styles.cueEnd}`} onClick={toProduct}>
           <span>Explore Weblyy</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M12 5v14M6 13l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <button type="button" className={styles.skip} onClick={toProduct}>
-          Skip intro
-        </button>
-
-        <div className={styles.veil} aria-hidden="true" />
       </div>
     </section>
   );

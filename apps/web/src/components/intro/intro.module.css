@@ -1,7 +1,7 @@
 .intro {
   position: relative;
-  height: 460vh;
-  height: 460svh;
+  height: 100vh;
+  height: 100svh;
   background: #fff;
 }
 .intro[data-mode="still"] {
@@ -15,7 +15,7 @@
   --start: 1;
   --end: 0;
   --veil: 0;
-  --word-size: clamp(3.6rem, 16vw, 11rem);
+  --word-size: clamp(4rem, 17vw, 12.5rem);
   position: sticky;
   top: 0;
   height: 100vh;
@@ -115,6 +115,22 @@
   display: grid;
   place-items: center;
   pointer-events: none;
+  z-index: 3;
+  isolation: isolate;
+}
+/* A soft light halo behind the name and tagline keeps them readable over the moving web. */
+.title::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--word-size) * 0.18);
+  width: min(96vw, calc(var(--word-size) * 5.2));
+  height: calc(var(--word-size) * 2.3);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.7) 55%, transparent);
+  opacity: var(--title);
+  z-index: -1;
 }
 .tagline {
   position: absolute;
@@ -127,6 +143,7 @@
   font-family: var(--font-body);
   font-size: clamp(1rem, 2vw, 1.5rem);
   font-weight: 500;
+  z-index: 4;
   letter-spacing: 0.01em;
   color: #52525b;
   opacity: calc(var(--title) * var(--title));
@@ -357,5 +374,11 @@
   .posterFlare,
   .mouse i {
     animation: none !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .stage {
+    --word-size: clamp(4.4rem, 23vw, 7rem);
   }
 }
