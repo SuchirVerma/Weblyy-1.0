@@ -171,6 +171,11 @@ export function PhoneChat({ agentId, name, suggestions, from, onReply, full, sou
           </svg>
         </button>
       </form>
+      {full && (
+        <a className={styles.credit} href="/?ref=chat" target="_blank" rel="noopener">
+          Powered by <b>Weblyy™</b>
+        </a>
+      )}
     </div>
   );
 }

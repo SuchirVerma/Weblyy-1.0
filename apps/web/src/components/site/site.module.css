@@ -1275,7 +1275,64 @@
   color: color-mix(in oklab, var(--dark-ink) 55%, transparent);
 }
 .made {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-height: 32px;
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.85;
+  transition: opacity 0.2s var(--ease);
+}
+.made:hover {
+  opacity: 1;
+}
+.made b {
+  font-weight: 700;
+}
+.madeCta {
+  color: var(--a);
+  font-weight: 600;
+}
+.made:hover .madeCta {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.madeNote {
   opacity: 0.8;
+}
+/* Small credit in the corner of the 3D hero: outside the scene, never over the business's content or the chat button. */
+.heroCredit {
+  position: absolute;
+  right: 24px;
+  bottom: 104px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  background: rgb(0 0 0 / 0.38);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font: 600 12px/1 var(--site-body), system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  opacity: 0.78;
+  transition: opacity 0.2s var(--ease);
+}
+.heroCredit:hover {
+  opacity: 1;
+}
+@media (max-width: 720px) {
+  .heroCredit {
+    right: auto;
+    left: 12px;
+    bottom: 16px;
+  }
 }
 .mobileBar {
   display: none;

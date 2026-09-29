@@ -74,7 +74,24 @@ export function siteModel(k, search, brand) {
   return { identity, profile, goal: profile.goal, showWa, showChat, c, w, where, wa, phone, headline, intro, services, highlights, cheapest, about, testimonials, faqs, photos, mapQuery, mapHref, hasOffer, pages };
 }
 export const PAGE_SLUGS = ["services", "about", "gallery", "faq", "contact"];
-export function SiteView({ k, search, brand, agentId, preview, page = "", base, scene }) {
+// Free sites carry a small Weblyy credit; a paid plan can pass branded={false} to remove it.
+const WEBLYY_URL = process.env.APP_URL || "https://weblyy.vercel.app";
+function creditHref(place, k) {
+  let from = "";
+  try {
+    from = new URL(k.url).hostname.replace(/^www\./, "");
+  } catch {}
+  return `${WEBLYY_URL}/?ref=${place}${from ? `&from=${encodeURIComponent(from)}` : ""}`;
+}
+function WeblyyMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      <circle cx="12" cy="12" r="3" fill="currentColor" />
+    </svg>
+  );
+}
+export function SiteView({ k, search, brand, agentId, preview, page = "", base, scene, branded = true }) {
   const m = siteModel(k, search, brand);
   const t = m.identity.theme;
   const href = (slug) => (slug ? `${base}/${slug}` : base || "/");
@@ -95,7 +112,7 @@ export function SiteView({ k, search, brand, agentId, preview, page = "", base, 
     ["--case"]: t.upper ? "uppercase" : "none",
   };
   const sceneKey = SCENE_KEYS.includes(scene) ? scene : pickScene(k).key;
-  const ctx = { k, m, t, brand, search, agentId, preview, href, sceneKey };
+  const ctx = { k, m, t, brand, search, agentId, preview, href, sceneKey, branded };
   return (
     <div className={styles.site} data-fs-site data-theme={t.name.toLowerCase()} data-hero={t.hero} data-cards={t.cards} data-tone={t.tone} data-page={page || "home"} style={vars}>
       <link rel="stylesheet" precedence="default" href={fontsHref(t)} />
@@ -208,7 +225,7 @@ function Header({ k, m, brand, href, page }) {
     </header>
   );
 }
-function Footer({ k, m, href }) {
+function Footer({ k, m, href, branded }) {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
@@ -260,7 +277,18 @@ function Footer({ k, m, href }) {
           <span>
             © {new Date().getFullYear()} {k.name}
           </span>
-          <span className={styles.made}>Redesigned with Weblyy{k.url.includes("kesar-beauty.demo") ? " · demo business, fictional" : ""}</span>
+          {branded ? (
+            <a className={styles.made} href={creditHref("site-footer", k)} target="_blank" rel="noopener">
+              <WeblyyMark />
+              <span>
+                Made with <b>Weblyy™</b>
+                {k.url.includes("kesar-beauty.demo") ? " · demo business, fictional" : ""}
+              </span>
+              <span className={styles.madeCta}>Get your free website →</span>
+            </a>
+          ) : (
+            k.url.includes("kesar-beauty.demo") && <span className={styles.madeNote}>Demo business, fictional</span>
+          )}
         </div>
       </div>
     </footer>
@@ -556,6 +584,12 @@ function Home(p) {
         <div className={styles.hero3d}>
           <Hero3D color={p.t.accent} glow={p.t.darkInk} photo={Boolean(brand.hero)} scene={p.sceneKey} />
         </div>
+        {p.branded && (
+          <a className={styles.heroCredit} href={creditHref("site-3d", p.k)} target="_blank" rel="noopener">
+            <WeblyyMark />
+            3D by Weblyy™
+          </a>
+        )}
         <div className={`${styles.inner} ${styles.heroGrid}`}>
         <div className={styles.heroInner}>
           <p className={`${styles.eyebrow} ${styles.rise}`} style={{ ["--d"]: "250ms" }}>
