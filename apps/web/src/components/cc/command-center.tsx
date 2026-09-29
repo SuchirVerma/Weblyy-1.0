@@ -91,7 +91,7 @@ export function CommandCenter({ id, ownerKey, initial }: { id: string; ownerKey:
 
   return (
     <div className={styles.shell}>
-      <aside className={styles.side} data-tone="dark">
+      <aside className={styles.side}>
         <div className={styles.sideTop}>
           <BackButton />
           <Link href="/" className={styles.brand} aria-label="Weblyy home">

@@ -32,7 +32,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 4px;
+  border-radius: 14px;
   border: 1px solid var(--line);
   background: var(--surface);
   min-width: 0;

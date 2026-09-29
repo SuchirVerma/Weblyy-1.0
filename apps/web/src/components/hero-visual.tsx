@@ -37,7 +37,7 @@ export function HeroVisual() {
   }, [reduce]);
 
   return (
-    <div className={styles.heroVisual} data-tone="dark">
+    <div className={styles.heroVisual}>
       <Radar blips={DEMO_BLIPS.slice(0, Math.min(n, DEMO_BLIPS.length))} scanning centerLabel="your business" />
       <div className={styles.bubbleLane} aria-hidden="true">
         <AnimatePresence mode="wait">

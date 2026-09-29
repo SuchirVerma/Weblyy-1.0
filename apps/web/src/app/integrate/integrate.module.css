@@ -89,10 +89,10 @@
   align-content: start;
   gap: 12px;
   padding: 22px;
-  border-radius: 6px;
+  border-radius: 20px;
   border: 1px solid var(--line);
   background: var(--surface);
-  
+  box-shadow: var(--shadow);
   min-width: 0;
 }
 .card:first-child {
@@ -127,7 +127,7 @@
   font-size: 0.68rem;
   font-weight: 600;
   padding: 3px 10px;
-  border-radius: 3px;
+  border-radius: 999px;
 }
 .badge[data-s="ready"] {
   color: var(--ok);
@@ -199,13 +199,4 @@
 }
 .q p {
   margin: 8px 0 0;
-}
-
-.faqBand {
-  margin-top: clamp(56px, 8vw, 104px);
-  padding: clamp(48px, 7vw, 96px) 0;
-}
-.faqBand + :global(.site-footer) {
-  margin-top: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
 }

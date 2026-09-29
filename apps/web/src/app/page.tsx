@@ -1,6 +1,6 @@
 import { HeroVisual } from "@/components/hero-visual";
 import { CinematicIntro } from "@/components/intro/cinematic-intro";
-import { Footer, Nav, ScanBar } from "@/components/ui";
+import { Nav, ScanBar } from "@/components/ui";
 import Link from "next/link";
 import styles from "@/components/landing.module.css";
 
@@ -30,7 +30,6 @@ export default function Home() {
           <HeroVisual />
         </section>
       </main>
-      <Footer />
     </>
   );
 }

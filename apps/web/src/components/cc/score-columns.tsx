@@ -4,8 +4,8 @@ import { useState, useSyncExternalStore } from "react";
 import type { Audit } from "@/lib/audit";
 import styles from "./score-columns.module.css";
 
-const BEFORE = "#a0a0a0";
-const AFTER = "#000000";
+const BEFORE = "#f59e0b";
+const AFTER = "#2563eb";
 const SHORT: Record<string, string> = {
   website: "Website",
   agent: "AI assistant",

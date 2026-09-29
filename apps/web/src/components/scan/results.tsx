@@ -249,7 +249,7 @@ export function Results({
               <span className={styles.switchTrack}>
                 <span className={styles.switchThumb} />
               </span>
-              Roast my website
+              Roast my website <span aria-hidden="true">🔥</span>
             </button>
           </div>
           <AnimatePresence mode="wait">

@@ -230,7 +230,7 @@ export function SiteCompare({ agentId, host, fallbackPath }: { agentId: string; 
             <i />
           </span>
           <span className={styles.address}>
-            {summary?.host ?? host}
+            <span aria-hidden="true">🔒</span> {summary?.host ?? host}
             {addressPath !== "/" ? addressPath : ""}
             {view === "enhanced" && <em>+ Weblyy</em>}
           </span>
@@ -241,7 +241,7 @@ export function SiteCompare({ agentId, host, fallbackPath }: { agentId: string; 
               </button>
             )}
             <button className={styles.tool} aria-pressed={device === "mobile"} onClick={() => setDevice((d) => (d === "desktop" ? "mobile" : "desktop"))}>
-              {device === "desktop" ? "Phone view" : "Desktop view"}
+              {device === "desktop" ? "📱 Phone" : "🖥 Desktop"}
             </button>
             <a className={styles.tool} href={view === "original" ? originalSrc : enhancedSrc} target="_blank" rel="noreferrer">
               Open ↗

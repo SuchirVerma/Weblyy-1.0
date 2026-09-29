@@ -8,9 +8,9 @@ import styles from "./owner-demo.module.css";
 
 type Who = "priya" | "rahul" | "neha";
 const PEOPLE: Record<Who, { name: string; color: string }> = {
-  priya: { name: "Priya", color: "#3d3d3d" },
-  rahul: { name: "Rahul", color: "#3d3d3d" },
-  neha: { name: "Neha", color: "#6b6b6b" },
+  priya: { name: "Priya", color: "#7c3aed" },
+  rahul: { name: "Rahul", color: "#0d9488" },
+  neha: { name: "Neha", color: "#db2777" },
 };
 
 type Ev =
@@ -338,7 +338,7 @@ export function OwnerDemo() {
                   transition={{ type: "spring", stiffness: 380, damping: 28 }}
                 >
                   <b>
-                    {state.notice.tone === "urgent" ? "Urgent · " : state.notice.tone === "booking" ? "Booking · " : "✓ "}
+                    {state.notice.tone === "urgent" ? "🔴 " : state.notice.tone === "booking" ? "📅 " : "✓ "}
                     {state.notice.title}
                   </b>
                   <span>{state.notice.body}</span>

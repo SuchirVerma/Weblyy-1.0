@@ -89,12 +89,12 @@ function Reveal({ score, after, onReplay }: { score: number; after?: number; onR
               <feGaussianBlur stdDeviation="6" />
             </filter>
             <linearGradient id="sr-now" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0%" stopColor="#3d3d3d" />
-              <stop offset="100%" stopColor="#000000" />
+              <stop offset="0%" stopColor="#374151" />
+              <stop offset="100%" stopColor="#111827" />
             </linearGradient>
             <linearGradient id="sr-after" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0%" stopColor="#a0a0a0" />
-              <stop offset="100%" stopColor="#000000" />
+              <stop offset="0%" stopColor="#60a5fa" />
+              <stop offset="100%" stopColor="#2563eb" />
             </linearGradient>
           </defs>
 
@@ -138,7 +138,7 @@ function Reveal({ score, after, onReplay }: { score: number; after?: number; onR
           {/* glowing head */}
           {phase !== "checking" && (
             <g>
-              
+              <motion.circle cx={headX} cy={headY} r={11} className={styles.halo} data-accent={accent || undefined} filter="url(#sr-glow)" />
               <motion.circle cx={headX} cy={headY} r={5.5} className={styles.head} data-accent={accent || undefined} />
             </g>
           )}

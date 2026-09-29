@@ -34,7 +34,7 @@
 .card {
   min-width: 0;
   padding: 20px 22px;
-  border-radius: 6px;
+  border-radius: 18px;
   border: 1px solid var(--line);
   background: color-mix(in oklab, var(--surface) 50%, transparent);
 }
@@ -55,7 +55,7 @@
   font-size: 0.7rem;
   font-weight: 500;
   padding: 2px 8px;
-  border-radius: 3px;
+  border-radius: 999px;
   background: var(--surface-2);
   color: var(--muted);
 }
@@ -103,7 +103,7 @@
 .tag {
   font-size: 0.8rem;
   padding: 5px 10px;
-  border-radius: 3px;
+  border-radius: 999px;
   border: 1px solid var(--line-strong);
   color: var(--muted);
 }
