@@ -2,7 +2,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { BrowserContext, Page } from "playwright-core";
+import type { Browser, BrowserContext, Page } from "playwright-core";
 import { setBytes, useRedis } from "./kv";
 import { isPublicHost } from "./net";
 import { withBrowser } from "./render";
@@ -297,21 +297,24 @@ function failed(device: string, e: unknown) {
 }
 
 export async function capturePage(url: string, opts: { allowOrigin?: string; shots?: boolean } = {}): Promise<Capture | null> {
-  return withBrowser(async (browser) => {
-    const file = opts.shots === false ? null : randomBytes(8).toString("hex");
-    const make = (d: Device) => () => browser.newContext({ ...DEVICES[d], ignoreHTTPSErrors: true });
-    const run = (d: "desktop" | "mobile") => measure(make(d), url, d, opts.allowOrigin, file).catch((e) => failed(d, e));
-    // Serverless Chromium runs in a single process, so one device at a time is the reliable way there.
-    const [desktop, mobile] = process.env.VERCEL ? [await run("desktop"), await run("mobile")] : await Promise.all([run("desktop"), run("mobile")]);
-    if (!desktop && !mobile) console.warn(`[capture] ${url}: nothing captured`);
-    if (!desktop && !mobile) return null;
-    return {
-      url,
-      desktop: desktop?.metrics ?? null,
-      mobile: mobile?.metrics ?? null,
-      shots: { desktop: desktop?.shot, mobile: mobile?.shot },
-      brand: desktop?.brand ?? mobile!.brand,
-      html: desktop?.html ?? "",
-    };
-  });
+  const file = opts.shots === false ? null : randomBytes(8).toString("hex");
+  const run = (browser: Browser, d: Device) =>
+    measure(() => browser.newContext({ ...DEVICES[d], ignoreHTTPSErrors: true }), url, d, opts.allowOrigin, file).catch((e) => failed(d, e));
+  // Serverless Chromium runs as a single process and can't open a new context once one has closed,
+  // so there each device gets its own browser. Elsewhere one browser serves both.
+  const [desktop, mobile] = process.env.VERCEL
+    ? await Promise.all((["desktop", "mobile"] as const).map((d) => withBrowser((b) => run(b, d))))
+    : ((await withBrowser((b) => Promise.all([run(b, "desktop"), run(b, "mobile")]))) ?? [null, null]);
+  if (!desktop && !mobile) {
+    console.warn(`[capture] ${url}: nothing captured`);
+    return null;
+  }
+  return {
+    url,
+    desktop: desktop?.metrics ?? null,
+    mobile: mobile?.metrics ?? null,
+    shots: { desktop: desktop?.shot, mobile: mobile?.shot },
+    brand: desktop?.brand ?? mobile!.brand,
+    html: desktop?.html ?? "",
+  };
 }
