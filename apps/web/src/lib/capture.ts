@@ -16,6 +16,7 @@ import type { Capture, PageMetrics } from "./types";
 
 export const SHOT_DIR = path.join(process.env.DATA_DIR || path.join(process.cwd(), ".data"), "shots");
 const SHOT_TTL = 60 * 24 * 3600;
+const MAX_SHOT_BYTES = 700_000;
 const TRACKERS = /google-analytics|googletagmanager|doubleclick|facebook\.net|connect\.facebook|hotjar|clarity\.ms|adservice|googlesyndication/i;
 const MAX_SHOT_H = { desktop: 5200, mobile: 7000 };
 
@@ -264,7 +265,12 @@ async function measure(ctxFactory: () => Promise<BrowserContext>, url: string, d
     if (file) {
       const h = Math.min(metrics.heightPx, MAX_SHOT_H[device]);
       const width = DEVICES[device].viewport.width;
-      const buf = await page.screenshot({ type: "jpeg", quality: device === "mobile" ? 62 : 72, fullPage: true, clip: { x: 0, y: 0, width, height: h } }).catch(() => null);
+      let buf = await page.screenshot({ type: "jpeg", quality: device === "mobile" ? 62 : 72, fullPage: true, clip: { x: 0, y: 0, width, height: h } }).catch(() => null);
+      // Redis on the free plan takes about 1 MB per write (base64 adds a third), so shrink big shots until they fit.
+      for (const [quality, height] of [[50, h], [40, Math.min(h, 3600)], [35, Math.min(h, 2400)]] as const) {
+        if (!useRedis || !buf || buf.length <= MAX_SHOT_BYTES) break;
+        buf = await page.screenshot({ type: "jpeg", quality, fullPage: true, clip: { x: 0, y: 0, width, height } }).catch(() => null);
+      }
       if (buf) {
         shot = `${file}-${device}.jpg`;
         if (useRedis) await setBytes(`shot:${shot}`, buf, SHOT_TTL);
@@ -285,13 +291,18 @@ async function measure(ctxFactory: () => Promise<BrowserContext>, url: string, d
  * Measures a page on a laptop and a phone at the same time.
  * `allowOrigin` lets our own server be opened (the redesign preview and the built-in demo), which is otherwise blocked.
  */
+function failed(device: string, e: unknown) {
+  console.error(`[capture] ${device} failed:`, e instanceof Error ? e.message : e);
+  return null;
+}
+
 export async function capturePage(url: string, opts: { allowOrigin?: string; shots?: boolean } = {}): Promise<Capture | null> {
   return withBrowser(async (browser) => {
     const file = opts.shots === false ? null : randomBytes(8).toString("hex");
     const make = (d: Device) => () => browser.newContext({ ...DEVICES[d], ignoreHTTPSErrors: true });
     const [desktop, mobile] = await Promise.all([
-      measure(make("desktop"), url, "desktop", opts.allowOrigin, file).catch(() => null),
-      measure(make("mobile"), url, "mobile", opts.allowOrigin, file).catch(() => null),
+      measure(make("desktop"), url, "desktop", opts.allowOrigin, file).catch((e) => failed("desktop", e)),
+      measure(make("mobile"), url, "mobile", opts.allowOrigin, file).catch((e) => failed("mobile", e)),
     ]);
     if (!desktop && !mobile) return null;
     return {
