@@ -1,4 +1,5 @@
 import "server-only";
+import { detectPlace } from "./regions";
 import { webSearch, type SearchResult } from "./search";
 import type { SiteKnowledge, WebPresence } from "./types";
 
@@ -37,7 +38,7 @@ const SKIP = /glassdoor|ambitionbox|naukri|indeed\.|linkedin\.com\/jobs|zaubacor
 
 
 const CITIES =
-  /\b(new delhi|delhi|gurugram|gurgaon|noida|greater noida|ghaziabad|faridabad|mumbai|navi mumbai|thane|pune|bengaluru|bangalore|hyderabad|chennai|kolkata|ahmedabad|jaipur|lucknow|chandigarh|mohali|indore|bhopal|surat|nagpur|kochi|dehradun|patna|kanpur|agra|varanasi)\b/i;
+  /\b(new delhi|delhi|gurugram|gurgaon|noida|greater noida|ghaziabad|faridabad|mumbai|navi mumbai|thane|jammu|srinagar|anantnag|baramulla|katra|udhampur|kathua|pune|bengaluru|bangalore|hyderabad|chennai|kolkata|ahmedabad|jaipur|lucknow|chandigarh|mohali|indore|bhopal|surat|nagpur|kochi|dehradun|patna|kanpur|agra|varanasi)\b/i;
 const GENERIC = new Set(["the", "and", "for", "salon", "clinic", "unisex", "beauty", "dental", "studio", "centre", "center", "academy", "institute", "classes", "cafe", "restaurant", "shop", "store", "hospital", "parlour", "spa", "gym", "pvt", "ltd", "private", "limited"]);
 
 function platformOf(r: SearchResult): string | null {
@@ -63,7 +64,7 @@ export async function findWebPresence(k: SiteKnowledge, log: (text: string) => v
   const name = k.name.trim();
   if (!name || /\.demo$/.test(new URL(k.url).hostname)) return null;
 
-  const city = k.address.match(CITIES)?.[1] ?? "";
+  const city = detectPlace(k.address)?.city || (k.address.match(CITIES)?.[1] ?? "");
   const query = `${name}${city ? ` ${city}` : ""}`;
   log(`Searching the web for “${query}”`);
 

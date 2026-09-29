@@ -555,7 +555,7 @@ export function extractPage(url: URL, html: string): PageData {
   const address =
     clean($("address").first().text()) ||
     (() => {
-      const m = bodyText.match(/address[:\s]+([^|]{10,140}?(?:\d{6}|delhi|mumbai|bengaluru|bangalore|india))/i);
+      const m = bodyText.match(/address[:\s]+([^|]{10,140}?(?:\d{6}|delhi|gurugram|gurgaon|noida|mumbai|thane|jammu|srinagar|kashmir|bengaluru|bangalore|india))/i);
       return m ? clean(m[1]) : "";
     })();
 

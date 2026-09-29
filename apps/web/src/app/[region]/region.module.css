@@ -1,0 +1,105 @@
+.hero {
+  padding-top: clamp(28px, 5vw, 56px);
+  display: grid;
+  gap: 14px;
+}
+.hero > * {
+  max-width: 820px;
+}
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 5.6vw, 4rem);
+  line-height: 1.04;
+  text-wrap: balance;
+}
+.from {
+  margin: 0;
+  color: var(--faint);
+}
+.scan {
+  margin-top: 10px;
+  max-width: 680px;
+}
+.cities {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+.city {
+  padding: 20px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.city h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+.city h3 small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--faint);
+}
+.city ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+.city a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+.city a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.hint {
+  margin: 20px 0 0;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.hint a {
+  color: var(--accent);
+  font-weight: 600;
+}
+.next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: clamp(22px, 4vw, 36px);
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.others {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 20px;
+}
+.others a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}

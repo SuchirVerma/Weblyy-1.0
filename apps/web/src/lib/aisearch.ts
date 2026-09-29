@@ -1,3 +1,4 @@
+import { detectPlace } from "./regions";
 import type { BusinessType, FaqItem, SiteKnowledge } from "./types";
 
 export interface SearchPack {
@@ -35,6 +36,13 @@ export const typeLabel = (t: BusinessType) => TYPE_LABEL[t];
 
 /** "Shop 14, Pocket C, Sector 9, Rohini, New Delhi, 110085" → "Rohini, New Delhi" */
 export function locality(address: string): string {
+  // Known places (Delhi NCR, Jammu & Kashmir, Mumbai) are read exactly: "Rohini, New Delhi", "Gandhi Nagar, Jammu".
+  const place = detectPlace(address);
+  if (place?.city) return place.locality ? `${place.locality}, ${place.city}` : place.city;
+  return localityGuess(address);
+}
+
+function localityGuess(address: string): string {
   const parts = address
     .split(",")
     .map((p) => p.trim())
@@ -48,6 +56,19 @@ function phone(k: SiteKnowledge) {
   const p = k.whatsapp.find((w) => /\d{10,}/.test(w)) ?? k.phones[0] ?? "";
   const d = p.replace(/\D/g, "");
   return d.length === 12 && d.startsWith("91") ? `+${d}` : d.length === 10 ? `+91${d}` : p;
+}
+
+/** Structured address: the known city, state and PIN are filled in separately so search engines can place the business. */
+function postalAddress(address: string) {
+  const p = detectPlace(address);
+  return {
+    "@type": "PostalAddress",
+    streetAddress: address,
+    ...(p?.city && { addressLocality: p.city }),
+    ...(p?.state && { addressRegion: p.state }),
+    ...(p?.pin && { postalCode: p.pin }),
+    addressCountry: "IN",
+  };
 }
 
 function openingHoursSpec(hours: string[]) {
@@ -113,7 +134,7 @@ export function buildSearchPack(k: SiteKnowledge, publicUrl?: string): SearchPac
     description: clip(summary, 300),
     ...(phone(k) && { telephone: phone(k) }),
     ...(k.emails[0] && { email: k.emails[0] }),
-    ...(k.address && { address: { "@type": "PostalAddress", streetAddress: k.address, addressCountry: "IN" } }),
+    ...(k.address && { address: postalAddress(k.address) }),
     ...(k.hours.length && { openingHours: openingHoursSpec(k.hours) }),
     ...(k.socialLinks.length && { sameAs: k.socialLinks.map((s) => s.url) }),
     ...(k.prices.length && {

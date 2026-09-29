@@ -23,6 +23,9 @@ export default function Home() {
             <Link href="/how" className={styles.secondary}>
               How does it work? →
             </Link>
+            <p className={styles.regions}>
+              For businesses in <Link href="/delhi">Delhi NCR</Link> · <Link href="/jammu-kashmir">Jammu &amp; Kashmir</Link> · <Link href="/mumbai">Mumbai</Link>
+            </p>
           </div>
           <HeroVisual />
         </section>

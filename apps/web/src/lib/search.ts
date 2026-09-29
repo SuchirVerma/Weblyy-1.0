@@ -1,5 +1,6 @@
 import "server-only";
 import * as cheerio from "cheerio";
+import { PLACE_NAMES } from "./regions";
 import { renderPage } from "./render";
 
 export interface SearchResult {
@@ -155,7 +156,8 @@ export async function webSearch(q: string): Promise<SearchResult[]> {
 const cache = ((globalThis as unknown as { __fsSearch?: Map<string, { at: number; results: SearchResult[] }> }).__fsSearch ??= new Map());
 const TTL = 6 * 60 * 60_000;
 
-const GENERIC_Q = new Set(["the", "and", "for", "salon", "clinic", "unisex", "beauty", "dental", "delhi", "new", "india", "near", "best", "shop", "store", "cafe", "restaurant", "centre", "center", "studio", "classes", "institute", "academy", "parlour", "hospital", "gym", "sector", "road", "market"]);
+// City names don't identify a business ("Apollo Dental Mumbai"), so they're ignored when judging relevance.
+const GENERIC_Q = new Set([...PLACE_NAMES.flatMap((n) => n.split(" ")), "the", "and", "for", "salon", "clinic", "unisex", "beauty", "dental", "delhi", "new", "india", "near", "best", "shop", "store", "cafe", "restaurant", "centre", "center", "studio", "classes", "institute", "academy", "parlour", "hospital", "gym", "sector", "road", "market"]);
 
 function relevant(q: string, results: SearchResult[]) {
   const words = q.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !GENERIC_Q.has(w));
