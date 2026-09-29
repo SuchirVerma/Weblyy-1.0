@@ -93,7 +93,13 @@ export function ScanApp({ url }) {
           ))}
         </ol>
         {stage === "score" && analysis?.audit && (
-          <button className={`btn btn-primary ${styles.topCta}`} onClick={() => window.dispatchEvent(new Event(MAKE_READY_EVENT))}>
+          <button
+            className={`btn btn-primary ${styles.topCta}`}
+            onClick={() => {
+              window.__weblyyMakeReady = true;
+              window.dispatchEvent(new Event(MAKE_READY_EVENT));
+            }}
+          >
             Make My Business AI-Ready <Arrow />
           </button>
         )}

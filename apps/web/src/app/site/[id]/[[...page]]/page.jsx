@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { SiteView } from "@/components/site/site-view";
+import { notFound } from "next/navigation";
+import { PAGE_SLUGS, SiteView, siteModel } from "@/components/site/site-view";
 import { buildSearchPack } from "@/lib/aisearch";
 import { siteBrand } from "@/lib/makeover";
 import { getAgent } from "@/lib/store";
@@ -12,21 +13,31 @@ async function load(id) {
   const brand = agent.workspace?.makeover?.brand ?? siteBrand({ knowledge: k, touchpoints: [], gaps: [] });
   return { agent, k, search, brand };
 }
+/** "" for the home page, a known page name, or null when the address isn't one of the site's pages. */
+function pageOf(parts, d) {
+  const slug = parts?.[0] ?? "";
+  if (!slug) return "";
+  if (parts.length > 1 || !PAGE_SLUGS.includes(slug)) return null;
+  return siteModel(d.k, d.search, d.brand).pages.some((p) => p.slug === slug) ? slug : null;
+}
 export async function generateMetadata({ params }) {
-  const { id } = await params;
+  const { id, page } = await params;
   const d = await load(id);
   if (!d) return { title: "Not found" };
+  const slug = pageOf(page, d);
+  const label = slug ? siteModel(d.k, d.search, d.brand).pages.find((p) => p.slug === slug)?.label : "";
   const image = d.brand.hero?.src ?? d.k.content?.ogImage;
+  const title = label ? `${label} | ${d.k.name}` : d.search.metaTitle;
   return {
-    title: d.search.metaTitle,
+    title,
     description: d.search.metaDescription,
-    alternates: { canonical: `/site/${id}` },
-    openGraph: { title: d.search.metaTitle, description: d.search.metaDescription, ...(image && { images: [image] }) },
+    alternates: { canonical: `/site/${id}${slug ? `/${slug}` : ""}` },
+    openGraph: { title, description: d.search.metaDescription, ...(image && { images: [image] }) },
     icons: d.k.content?.favicon ? { icon: d.k.content.favicon } : undefined,
   };
 }
 export default async function TransformedSite({ params }) {
-  const { id } = await params;
+  const { id, page } = await params;
   const d = await load(id);
   if (!d) {
     return (
@@ -37,5 +48,7 @@ export default async function TransformedSite({ params }) {
       </main>
     );
   }
-  return <SiteView k={d.k} search={d.search} brand={d.brand} agentId={d.agent.id} />;
+  const slug = pageOf(page, d);
+  if (slug === null) notFound();
+  return <SiteView k={d.k} search={d.search} brand={d.brand} agentId={d.agent.id} page={slug} base={`/site/${id}`} />;
 }

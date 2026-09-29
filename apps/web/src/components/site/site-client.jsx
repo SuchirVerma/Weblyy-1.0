@@ -124,3 +124,106 @@ export function SafeImg({ src, alt, className, priority, fallback = null }) {
     />
   );
 }
+/**
+ * Motion for the whole site: sections rise in as they scroll into view, and the header turns solid
+ * once the hero has passed. Skipped for reduced motion and for automated browsers (screenshots stay complete).
+ */
+export function SiteMotion() {
+  useEffect(() => {
+    const root = document.documentElement;
+    const header = document.querySelector("[data-site-header]");
+    const onScroll = () => header?.toggleAttribute("data-solid", window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.webdriver;
+    // Screenshots and reduced motion get the finished page at once, with no opening curtain.
+    if (still) {
+      document.querySelector("[data-site-curtain]")?.remove();
+      return () => window.removeEventListener("scroll", onScroll);
+    }
+    root.setAttribute("data-site-motion", "");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.setAttribute("data-in", "");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+    );
+    document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      root.removeAttribute("data-site-motion");
+    };
+  }, []);
+  return null;
+}
+/** Menu-style price list with a live search box. */
+export function PriceList({ items, word }) {
+  const [q, setQ] = useState("");
+  const shown = q ? items.filter((p) => p.name.toLowerCase().includes(q.toLowerCase())) : items;
+  return (
+    <div className={styles.priceBlock}>
+      {items.length > 8 && (
+        <label className={styles.search}>
+          <span className={styles.srOnly}>Search {word}</span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${items.length} ${word.toLowerCase()}…`} />
+        </label>
+      )}
+      <ol className={styles.menuList}>
+        {shown.map((p, i) => (
+          <li key={p.name}>
+            <span className={styles.menuNo}>{String(i + 1).padStart(2, "0")}</span>
+            <span className={styles.menuName}>{p.name}</span>
+            <i aria-hidden="true" />
+            <b>{p.price}</b>
+          </li>
+        ))}
+      </ol>
+      {shown.length === 0 && <p className={styles.small}>Nothing matches &ldquo;{q}&rdquo;. Ask us, we probably do it.</p>}
+    </div>
+  );
+}
+/** Photo wall; tap a photo to see it large. Arrow keys and Escape work. */
+export function Gallery({ photos, name }) {
+  const [open, setOpen] = useState(-1);
+  useEffect(() => {
+    if (open < 0) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(-1);
+      if (e.key === "ArrowRight") setOpen((i) => (i + 1) % photos.length);
+      if (e.key === "ArrowLeft") setOpen((i) => (i - 1 + photos.length) % photos.length);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, photos.length]);
+  return (
+    <>
+      <ul className={styles.wall}>
+        {photos.map((g, i) => (
+          <li key={g.src} data-reveal style={{ ["--d"]: `${(i % 4) * 70}ms` }}>
+            <button type="button" onClick={() => setOpen(i)} aria-label={`Open photo ${i + 1}`}>
+              <SafeImg src={g.src} alt={g.alt || `${name} photo ${i + 1}`} />
+            </button>
+          </li>
+        ))}
+      </ul>
+      {open >= 0 && (
+        <div className={styles.lightbox} role="dialog" aria-modal="true" aria-label="Photo" onClick={() => setOpen(-1)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photos[open].src} alt={photos[open].alt || name} referrerPolicy="no-referrer" onClick={(e) => e.stopPropagation()} />
+          <button type="button" className={styles.lbClose} onClick={() => setOpen(-1)} aria-label="Close">
+            ✕
+          </button>
+          <span className={styles.lbCount}>
+            {open + 1} / {photos.length}
+          </span>
+        </div>
+      )}
+    </>
+  );
+}

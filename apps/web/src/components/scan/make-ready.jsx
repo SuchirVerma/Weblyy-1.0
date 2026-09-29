@@ -19,6 +19,7 @@ export function MakeReady({ scanId, answers, name }) {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const start = async () => {
+    window.__weblyyMakeReady = false;
     setPhase("working");
     setError("");
     setStep(0);
@@ -56,6 +57,8 @@ export function MakeReady({ scanId, answers, name }) {
       if (phaseRef.current === "idle") startRef.current();
     };
     window.addEventListener(MAKE_READY_EVENT, onTrigger);
+    // A click that landed before this listener existed is remembered, not lost.
+    if (window.__weblyyMakeReady) onTrigger();
     return () => window.removeEventListener(MAKE_READY_EVENT, onTrigger);
   }, []);
   return (

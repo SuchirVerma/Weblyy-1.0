@@ -1,10 +1,17 @@
 import Link from "next/link";
-import { SiteView } from "@/components/site/site-view";
+import { notFound } from "next/navigation";
+import { PAGE_SLUGS, SiteView, siteModel } from "@/components/site/site-view";
 import { buildSearchPack } from "@/lib/aisearch";
 import { siteBrand } from "@/lib/makeover";
 import { getScan } from "@/lib/store";
 export const dynamic = "force-dynamic";
 /** The redesigned website for a scan, before the business goes live. Not indexed; the form doesn't send. */
+function pageOf(parts, k, search, brand) {
+  const slug = parts?.[0] ?? "";
+  if (!slug) return "";
+  if (parts.length > 1 || !PAGE_SLUGS.includes(slug)) return null;
+  return siteModel(k, search, brand).pages.some((p) => p.slug === slug) ? slug : null;
+}
 export async function generateMetadata({ params }) {
   const { scanId } = await params;
   const scan = await getScan(scanId);
@@ -21,7 +28,7 @@ export async function generateMetadata({ params }) {
   };
 }
 export default async function Preview({ params }) {
-  const { scanId } = await params;
+  const { scanId, page } = await params;
   const scan = await getScan(scanId);
   if (!scan) {
     return (
@@ -32,5 +39,9 @@ export default async function Preview({ params }) {
       </main>
     );
   }
-  return <SiteView k={scan.knowledge} search={buildSearchPack(scan.knowledge)} brand={siteBrand(scan)} agentId={null} preview />;
+  const search = buildSearchPack(scan.knowledge);
+  const brand = siteBrand(scan);
+  const slug = pageOf(page, scan.knowledge, search, brand);
+  if (slug === null) notFound();
+  return <SiteView k={scan.knowledge} search={search} brand={brand} agentId={null} preview page={slug} base={`/preview/${scanId}`} />;
 }
