@@ -2,7 +2,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useReducedSafe } from "../use-reduced";
-import { SCENES } from "@/lib/scene-pick";
 import styles from "./site-compare.module.css";
 const STEPS = [
   { key: "open", label: "Opening your website" },
@@ -155,8 +154,8 @@ export function SiteCompare({ agentId, host, fallbackPath, design }) {
     setView(v);
     if (v === "enhanced" || v === "redesign") setReveal((n) => n + 1);
   };
-  const [scene, setScene] = useState(design?.key ?? "flow");
-  const redesignSrc = design && scene !== design.key ? `${fallbackPath}?scene=${scene}` : fallbackPath;
+  const scene = design?.key ?? "flow";
+  const redesignSrc = fallbackPath;
   const path = view === "original" ? (summary?.originalPath ?? "/") : view === "enhanced" ? (summary?.enhancedPath ?? "/") : "/";
   const addressPath = path.replace(/^\/mirror\/[^/]+\/(original|enhanced)\//, "/");
   if (phase === "no-site") {
@@ -208,22 +207,11 @@ export function SiteCompare({ agentId, host, fallbackPath, design }) {
       {view === "redesign" && design && (
         <div className={styles.designBar}>
           <span className={styles.designPick}>
-            <b>◆ 3D design: {SCENES.find((x) => x.key === scene)?.name}</b>
+            <b>◆ 3D design: {design.name}</b>
             <small>
-              {scene === design.key ? `Weblyy picked this because ${design.reason}.` : `Weblyy picked ${design.name}. You're previewing another design.`}
+              Weblyy picked this for your business because {design.reason}.
             </small>
           </span>
-          <label className={styles.designSelect}>
-            <span>Try another</span>
-            <select value={scene} onChange={(e) => setScene(e.target.value)}>
-              {SCENES.map((x) => (
-                <option key={x.key} value={x.key}>
-                  {x.name}
-                  {x.key === design.key ? " (picked for you)" : ""} · {x.blurb}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
       )}
       <div className={styles.browser}>
