@@ -18,7 +18,9 @@ async function launch(): Promise<Browser | null> {
     if (process.env.VERCEL) {
       // Serverless: no Chrome installed, so use the Chromium build made for AWS Lambda-style functions.
       const serverless = (await import("@sparticuz/chromium")).default;
-      const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args: serverless.args });
+      // --single-process crashes Chromium as soon as Playwright opens a second context (laptop + phone at once).
+      const args = serverless.args.filter((a) => a !== "--single-process" && a !== "--no-zygote");
+      const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args });
       browser.on("disconnected", () => {
         g.__fsBrowser = undefined;
       });
