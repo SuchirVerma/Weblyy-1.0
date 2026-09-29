@@ -21,19 +21,12 @@ async function launch(): Promise<Browser | null> {
       // --single-process crashes Chromium as soon as Playwright opens a second context (laptop + phone at once).
       const args = serverless.args.filter((a) => a !== "--single-process" && a !== "--no-zygote");
       const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args });
-      browser.on("disconnected", () => {
-        g.__fsBrowser = undefined;
-      });
       return browser;
     }
     const opts = { headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] };
-    const browser = await chromium
+    return await chromium
       .launch({ ...opts, channel: "chrome" })
       .catch(() => (process.env.CHROME_PATH ? chromium.launch({ ...opts, executablePath: process.env.CHROME_PATH }) : Promise.reject()));
-    browser.on("disconnected", () => {
-      g.__fsBrowser = undefined;
-    });
-    return browser;
   } catch (e) {
     console.error("[browser] couldn't start Chrome:", e instanceof Error ? e.message : e);
     return null;
@@ -41,7 +34,12 @@ async function launch(): Promise<Browser | null> {
 }
 
 function getBrowser() {
-  g.__fsBrowser ??= launch();
+  g.__fsBrowser ??= launch().then((b) => {
+    b?.on("disconnected", () => {
+      g.__fsBrowser = undefined;
+    });
+    return b;
+  });
   if (g.__fsBrowserIdle) clearTimeout(g.__fsBrowserIdle);
   g.__fsBrowserIdle = setTimeout(async () => {
     if ((g.__fsActive ?? 0) > 0) return getBrowser();
@@ -73,7 +71,9 @@ export async function renderPage(url: string, timeoutMs = 15_000, attempts = 1):
 }
 
 async function renderOnce(url: string, timeoutMs: number): Promise<{ url: string; html: string } | null> {
-  const browser = await getBrowser();
+  // Vercel: a fresh Chromium per page (see withBrowser); elsewhere the shared one.
+  const own = process.env.VERCEL ? await launch() : null;
+  const browser = own ?? (process.env.VERCEL ? null : await getBrowser());
   if (!browser) return null;
   g.__fsActive = (g.__fsActive ?? 0) + 1;
   let ctx: Awaited<ReturnType<Browser["newContext"]>> | null = null;
@@ -110,11 +110,26 @@ async function renderOnce(url: string, timeoutMs: number): Promise<{ url: string
   } finally {
     g.__fsActive = Math.max(0, (g.__fsActive ?? 1) - 1);
     await ctx?.close().catch(() => {});
+    await own?.close().catch(() => {});
   }
 }
 
 /** Runs `fn` with the shared Chrome, keeping it alive meanwhile. Null when no browser is available or `fn` fails. */
 export async function withBrowser<T>(fn: (browser: Browser) => Promise<T>): Promise<T | null> {
+  // On Vercel a Chromium that has already opened and closed pages can refuse new ones,
+  // so each job gets its own fresh browser there. Elsewhere the shared one is reused.
+  if (process.env.VERCEL) {
+    const own = await launch();
+    if (!own) return null;
+    try {
+      return await fn(own);
+    } catch (e) {
+      console.error("[browser]", e instanceof Error ? e.message : e);
+      return null;
+    } finally {
+      await own.close().catch(() => {});
+    }
+  }
   const browser = await getBrowser();
   if (!browser) return null;
   g.__fsActive = (g.__fsActive ?? 0) + 1;
