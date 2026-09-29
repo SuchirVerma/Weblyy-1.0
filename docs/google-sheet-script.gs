@@ -10,8 +10,10 @@
  *   4. Put that URL in apps/web/.env.local as SHEETS_WEBHOOK_URL=… and restart the server.
  *
  * The secret below must match SHEETS_SECRET in .env.local. Requests without it are ignored.
+ * Every new request is also emailed to NOTIFY_EMAIL (Gmail, free, sent from the sheet owner's account).
  */
 const SECRET = "PASTE_SHEETS_SECRET_HERE"; // same value as SHEETS_SECRET in .env.local
+const NOTIFY_EMAIL = "you@example.com";
 const HEADERS = ["Request ID", "Date & time (IST)", "Name", "Mobile", "Help needed", "Business", "Website", "Website made with", "Best time to call", "Note"];
 
 function doPost(e) {
@@ -43,12 +45,43 @@ function doPost(e) {
       return h === "Mobile" ? "'" + v : v;
     });
     sheet.appendRow(values);
-    return reply({ ok: true, row: sheet.getLastRow() });
+    const rowNum = sheet.getLastRow();
+    // Only brand-new requests get an email; retries were already answered as duplicates above.
+    try {
+      notify(row, rowNum);
+    } catch (mailErr) {
+      console.error("Email failed: " + mailErr);
+    }
+    return reply({ ok: true, row: rowNum });
   } catch (err) {
     return reply({ ok: false, error: String(err) });
   } finally {
     lock.releaseLock();
   }
+}
+
+function notify(row, rowNum) {
+  if (!NOTIFY_EMAIL) return;
+  const lines = HEADERS.map(function (h) {
+    return h + ": " + (row[h] == null || row[h] === "" ? "-" : row[h]);
+  });
+  const name = row["Name"] || "Someone";
+  const need = row["Help needed"] || "a setup call";
+  MailApp.sendEmail({
+    to: NOTIFY_EMAIL,
+    subject: "Weblyy: " + name + " wants help — " + need,
+    body:
+      "New free setup call request on Weblyy.\n\n" +
+      lines.join("\n") +
+      "\n\nCall: " + (row["Mobile"] || "-") +
+      "\nSheet row: " + rowNum +
+      "\nOpen the sheet: " + SpreadsheetApp.getActiveSpreadsheet().getUrl(),
+  });
+}
+
+/** Run this once from the editor to allow email and receive a test mail. */
+function testEmail() {
+  notify({ "Name": "Test", "Mobile": "98765 43210", "Help needed": "Test email from Weblyy", "Business": "Test Business" }, 0);
 }
 
 /** Open the web app URL in a browser to check it's deployed. */
