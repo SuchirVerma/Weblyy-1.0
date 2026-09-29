@@ -32,6 +32,14 @@ export async function PATCH(req, ctx) {
     savePersist();
     return Response.json({ ok: true });
   }
+  if (body.action === "publish") {
+    // The new website is already served by Weblyy; publishing marks it as the business's live site.
+    const prev = agent.published;
+    agent.published = { at: Date.now(), version: (prev?.version ?? 0) + 1, firstAt: prev?.firstAt ?? Date.now() };
+    recordRun(agent, "Your new website went live", ["New design", "AI agent", "Google data", "Hosting"], `Version ${agent.published.version} of ${agent.knowledge.name}'s website is live`);
+    savePersist();
+    return Response.json({ ok: true, published: agent.published });
+  }
   const lead = typeof body.leadId === "string" ? agent.leads.find((l) => l.id === body.leadId) : undefined;
   if (!lead) return Response.json({ error: "Lead not found." }, { status: 404 });
   if (body.action === "status") {

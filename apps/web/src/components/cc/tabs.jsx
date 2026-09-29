@@ -8,6 +8,7 @@ import { PhoneChat } from "../phone-chat";
 import { QrCard } from "../qr-card";
 import { ScoreColumns } from "./score-columns";
 import { SiteCompare } from "./site-compare";
+import { DeployCard } from "./deploy-card";
 import { ago } from "./types";
 import styles from "./cc.module.css";
 /* ------------------------------------------------------------------ shared */
@@ -259,7 +260,7 @@ const siteHost = (url) => {
     return url;
   }
 };
-export function WebsiteTab({ data }) {
+export function WebsiteTab({ data, act }) {
   const before = catOf(data.workspace?.auditBefore, "website");
   const after = catOf(data.workspace?.auditAfter, "website");
   return (
@@ -268,16 +269,17 @@ export function WebsiteTab({ data }) {
         kicker="My website"
         title={
           <>
-            Your website, <span className="em">with Weblyy added.</span>
+            Your website, <span className="em">reborn.</span>
           </>
         }
       />
       <p className="lede">
-        Your real website with the same design, pages and buttons. We only add what&apos;s missing: an AI assistant, Call, WhatsApp and Book buttons, a booking
-        form and your details for Google.
+        See your website today, the quick upgrade on your own site, and your <b>new website</b>: a fresh 3D design with every page, your real prices and
+        details, and your AI agent built in. Happy with it? Deploy it and get your link.
       </p>
 
       <SiteCompare agentId={data.id} host={siteHost(data.business.url)} fallbackPath={data.links.sitePath} />
+      <DeployCard data={data} act={act} />
 
       {data.workspace && (
         <section className={styles.panel}>

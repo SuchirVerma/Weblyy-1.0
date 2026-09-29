@@ -123,7 +123,7 @@ export function CommandCenter({ id, ownerKey, initial }) {
           <div key={tab} className={styles.tabIn}>
             {tab === "overview" && <OverviewTab data={data} go={go} />}
             {tab === "golive" && <GoLive data={data} ownerKey={ownerKey} />}
-            {tab === "website" && <WebsiteTab data={data} />}
+            {tab === "website" && <WebsiteTab data={data} act={act} />}
             {tab === "agent" && <AgentTab data={data} ownerKey={ownerKey} />}
             {tab === "search" && <SearchTab data={data} />}
             {tab === "leads" && <LeadsTab data={data} act={act} />}

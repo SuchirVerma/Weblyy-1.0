@@ -61,5 +61,6 @@ export function workspaceView(agent) {
     },
     integrations: { twilio: twilioReady(), n8n: n8nReady() },
     setupRequest: agent.setupRequest ?? null,
+    published: agent.published ?? null,
   };
 }

@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import Script from "next/script";
 import { locality } from "@/lib/aisearch";
 import { ChatButton, Gallery, LeadForm, PriceList, SafeImg, SiteMotion } from "./site-client";
+import { Hero3D } from "./hero-3d";
 import { fontsHref, themeFor, wordsFor } from "./themes";
 import styles from "./site.module.css";
 /**
@@ -487,6 +488,9 @@ function Home(p) {
           </div>
         )}
         <div className={styles.heroShade} aria-hidden="true" />
+        <div className={styles.hero3d}>
+          <Hero3D color={p.t.accent} glow={p.t.darkInk} photo={Boolean(brand.hero)} />
+        </div>
         <div className={`${styles.inner} ${styles.heroInner}`}>
           <p className={`${styles.eyebrow} ${styles.rise}`} style={{ ["--d"]: "250ms" }}>
             {m.w.kind}

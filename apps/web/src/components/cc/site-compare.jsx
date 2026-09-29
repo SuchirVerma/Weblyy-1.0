@@ -152,9 +152,10 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
       return;
     }
     setView(v);
-    if (v === "enhanced") setReveal((n) => n + 1);
+    if (v === "enhanced" || v === "redesign") setReveal((n) => n + 1);
   };
-  const path = view === "original" ? (summary?.originalPath ?? "/") : (summary?.enhancedPath ?? "/");
+  const redesignSrc = fallbackPath;
+  const path = view === "original" ? (summary?.originalPath ?? "/") : view === "enhanced" ? (summary?.enhancedPath ?? "/") : "/";
   const addressPath = path.replace(/^\/mirror\/[^/]+\/(original|enhanced)\//, "/");
   if (phase === "no-site") {
     return (
@@ -187,7 +188,16 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
           </span>
           <span>
             <b>With Weblyy</b>
-            <small>{phase === "ready" ? "Same site, add-ons written in" : phase === "building" ? "Building now…" : "Tap to build it live"}</small>
+            <small>{phase === "ready" ? "Same site, add-ons written in" : phase === "building" ? "Building now…" : "Quick upgrade, tap to build"}</small>
+          </span>
+        </button>
+        <button role="tab" aria-selected={view === "redesign"} onClick={() => show("redesign")} data-accent>
+          <span className={styles.swIcon} aria-hidden="true">
+            ◆
+          </span>
+          <span>
+            <b>New website</b>
+            <small>New 3D design + AI agent</small>
           </span>
         </button>
         <span className={styles.swPill} data-side={view} aria-hidden="true" />
@@ -201,9 +211,10 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
             <i />
           </span>
           <span className={styles.address}>
-            <span aria-hidden="true">🔒</span> {summary?.host ?? host}
-            {addressPath !== "/" ? addressPath : ""}
+            <span aria-hidden="true">🔒</span> {view === "redesign" ? `${host} · new design` : summary?.host ?? host}
+            {view !== "redesign" && addressPath !== "/" ? addressPath : ""}
             {view === "enhanced" && <em>+ Weblyy</em>}
+            {view === "redesign" && <em>Redesigned by Weblyy</em>}
           </span>
           <div className={styles.tools}>
             {view === "enhanced" && phase === "ready" && (
@@ -214,7 +225,7 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
             <button className={styles.tool} aria-pressed={device === "mobile"} onClick={() => setDevice((d) => (d === "desktop" ? "mobile" : "desktop"))}>
               {device === "desktop" ? "📱 Phone" : "🖥 Desktop"}
             </button>
-            <a className={styles.tool} href={view === "original" ? originalSrc : enhancedSrc} target="_blank" rel="noreferrer">
+            <a className={styles.tool} href={view === "original" ? originalSrc : view === "enhanced" ? enhancedSrc : redesignSrc} target="_blank" rel="noreferrer">
               Open ↗
             </a>
           </div>
@@ -244,8 +255,28 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
             </motion.div>
           )}
 
+          {view === "redesign" && (
+            <motion.div
+              key={`redesign-${reveal}`}
+              className={styles.enhancedLayer}
+              initial={reduce ? false : { clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={{ duration: 1, ease: [0.65, 0, 0.35, 1] }}
+            >
+              <iframe src={redesignSrc} title="Your new website" />
+              {!reduce && (
+                <motion.span
+                  className={styles.wipe}
+                  initial={{ left: "0%" }}
+                  animate={{ left: "100%", opacity: [1, 1, 0] }}
+                  transition={{ duration: 1, ease: [0.65, 0, 0.35, 1] }}
+                  aria-hidden="true"
+                />
+              )}
+            </motion.div>
+          )}
           <AnimatePresence>
-            {(phase === "building" || phase === "error") && (
+            {(phase === "building" || phase === "error") && view !== "redesign" && (
               <motion.div
                 className={styles.loader}
                 initial={{ opacity: 0 }}
@@ -348,7 +379,7 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
       )}
       {phase === "idle" && (
         <p className={styles.hint}>
-          This is your real website, running here. Tap <b>With Weblyy</b> to watch us write the add-ons into its code.
+          This is your real website, running here. Tap <b>With Weblyy</b> for a quick upgrade of this site, or <b>New website</b> to see your new 3D design.
         </p>
       )}
     </section>
