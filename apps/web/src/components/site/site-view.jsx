@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Script from "next/script";
 import { locality } from "@/lib/aisearch";
-import { ChatButton, Gallery, LeadForm, PriceList, SafeImg, SiteMotion } from "./site-client";
+import { ChatButton, CopyButton, Gallery, LeadForm, PriceList, SafeImg, SiteMotion } from "./site-client";
 import { Hero3D } from "./hero-3d";
 import { fontsHref, themeFor, wordsFor } from "./themes";
 import styles from "./site.module.css";
@@ -89,6 +89,7 @@ export function SiteView({ k, search, brand, agentId, preview, page = "", base }
   return (
     <div className={styles.site} data-fs-site data-theme={t.name.toLowerCase()} data-page={page || "home"} style={vars}>
       <link rel="stylesheet" precedence="default" href={fontsHref(t)} />
+      <style>{`@view-transition{navigation:auto}::view-transition-old(root){animation:.35s cubic-bezier(.22,1,.36,1) both wbSiteOut}::view-transition-new(root){animation:.55s cubic-bezier(.22,1,.36,1) both wbSiteIn}@keyframes wbSiteOut{to{opacity:0;transform:translateY(-12px)}}@keyframes wbSiteIn{from{opacity:0;transform:translateY(18px)}}html:has([data-fs-site]){scrollbar-color:${t.accent} ${t.bg};scrollbar-width:thin}html:has([data-fs-site])::-webkit-scrollbar{width:10px}html:has([data-fs-site])::-webkit-scrollbar-track{background:${t.bg}}html:has([data-fs-site])::-webkit-scrollbar-thumb{background:${t.accent};border-radius:10px;border:2px solid ${t.bg}}`}</style>
       {!page &&
         search.jsonLd.map((ld, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />)}
       {preview && (
@@ -154,6 +155,7 @@ function Brand({ k, brand, href }) {
 function Header({ k, m, brand, href, page }) {
   return (
     <header className={styles.header} data-site-header data-over={page === "" && brand.hero ? "photo" : undefined}>
+      <span className={styles.progress} data-site-progress aria-hidden="true" />
       <div className={styles.inner}>
         <Brand k={k} brand={brand} href={href} />
         <nav className={styles.tabs} aria-label="Pages">
@@ -293,9 +295,9 @@ function SectionHead({ no, eyebrow, title, action }) {
 }
 function Stats({ k, m, brand }) {
   const items = [
-    k.prices.length > 0 && { n: String(k.prices.length), l: `${m.w.offer.toLowerCase()} with clear prices` },
+    k.prices.length > 0 && { n: String(k.prices.length), count: k.prices.length, l: `${m.w.offer.toLowerCase()} with clear prices` },
     m.cheapest && { n: m.cheapest.price, l: `starting price (${m.cheapest.name})` },
-    brand.rating && { n: `${brand.rating.value}★`, l: `on ${brand.rating.platform}${brand.rating.count ? `, ${brand.rating.count} reviews` : ""}` },
+    brand.rating && { n: `${brand.rating.value}★`, count: brand.rating.value, after: "★", l: `on ${brand.rating.platform}${brand.rating.count ? `, ${brand.rating.count} reviews` : ""}` },
     k.hours[0] && { n: "Open", l: k.hours[0] },
   ]
     .filter(Boolean)
@@ -306,12 +308,54 @@ function Stats({ k, m, brand }) {
       <div className={styles.inner}>
         {items.map((s, i) => (
           <div key={s.l} data-reveal style={{ ["--d"]: `${i * 90}ms` }}>
-            <b>{s.n}</b>
+            <b>
+              {s.count !== undefined ? (
+                <>
+                  <span data-count={String(s.count)}>{String(s.count)}</span>
+                  {s.after}
+                </>
+              ) : (
+                s.n
+              )}
+            </b>
             <span>{s.l}</span>
           </div>
         ))}
       </div>
     </section>
+  );
+}
+/** Floating glass panel beside the hero headline: the facts a visitor looks for first. */
+function Glance({ k, m, brand }) {
+  const rows = [
+    k.hours[0] && { l: "Open", v: k.hours[0] },
+    m.cheapest && { l: "Prices from", v: m.cheapest.price, s: m.cheapest.name },
+    brand.rating && { l: "Rated", v: `${brand.rating.value}★`, s: `on ${brand.rating.platform}${brand.rating.count ? ` · ${brand.rating.count} reviews` : ""}` },
+    m.where && { l: "Where", v: m.where },
+  ].filter(Boolean);
+  if (rows.length < 2) return null;
+  return (
+    <aside className={`${styles.glance} ${styles.rise}`} style={{ ["--d"]: "1200ms" }} aria-label="At a glance">
+      <p className={styles.glanceHead}>
+        <span className={styles.live} aria-hidden="true" /> At a glance
+      </p>
+      <dl>
+        {rows.slice(0, 4).map((r) => (
+          <div key={r.l}>
+            <dt>{r.l}</dt>
+            <dd>
+              {r.v}
+              {r.s && <small>{r.s}</small>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {m.phone && (
+        <a className={styles.glanceCall} href={`tel:${telOf(m.phone)}`}>
+          Call {prettyPhone(m.phone)} →
+        </a>
+      )}
+    </aside>
   );
 }
 function Marquee({ items }) {
@@ -385,6 +429,7 @@ function ContactBlock({ k, m, agentId, preview }) {
               <dt>Address</dt>
               <dd>
                 <address className={styles.addr}>{k.address}</address>
+                <CopyButton text={k.address} label="Address" />
               </dd>
             </div>
           )}
@@ -405,6 +450,7 @@ function ContactBlock({ k, m, agentId, preview }) {
               <dt>Phone</dt>
               <dd>
                 <a href={`tel:${telOf(p)}`}>{prettyPhone(p)}</a>
+                <CopyButton text={prettyPhone(p)} label="Phone number" />
               </dd>
             </div>
           ))}
@@ -423,6 +469,7 @@ function ContactBlock({ k, m, agentId, preview }) {
               <dt>Email</dt>
               <dd>
                 <a href={`mailto:${e}`}>{e}</a>
+                <CopyButton text={e} label="Email" />
               </dd>
             </div>
           ))}
@@ -491,7 +538,8 @@ function Home(p) {
         <div className={styles.hero3d}>
           <Hero3D color={p.t.accent} glow={p.t.darkInk} photo={Boolean(brand.hero)} />
         </div>
-        <div className={`${styles.inner} ${styles.heroInner}`}>
+        <div className={`${styles.inner} ${styles.heroGrid}`}>
+        <div className={styles.heroInner}>
           <p className={`${styles.eyebrow} ${styles.rise}`} style={{ ["--d"]: "250ms" }}>
             {m.w.kind}
             {m.where && ` · ${m.where}`}
@@ -511,7 +559,7 @@ function Home(p) {
             </p>
           )}
           <div className={`${styles.row} ${styles.rise}`} style={{ ["--d"]: "1050ms" }}>
-            <a className={styles.btn} href={`${href("contact")}#book`}>
+            <a className={styles.btn} href={`${href("contact")}#book`} data-magnetic>
               {m.w.cta} →
             </a>
             {m.wa ? (
@@ -529,6 +577,8 @@ function Home(p) {
           <ChatButton className={`${styles.heroAsk} ${styles.rise}`} preview={preview}>
             <span className={styles.pulse} aria-hidden="true" /> Ask anything and get an instant answer
           </ChatButton>
+        </div>
+        <Glance {...p} />
         </div>
         <a className={styles.scrollCue} href="#home-offer" aria-label="Scroll to see more">
           <span />

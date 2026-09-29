@@ -132,35 +132,106 @@ export function SiteMotion() {
   useEffect(() => {
     const root = document.documentElement;
     const header = document.querySelector("[data-site-header]");
-    const onScroll = () => header?.toggleAttribute("data-solid", window.scrollY > 40);
+    const bar = document.querySelector("[data-site-progress]");
+    // Header turns solid past the hero; the thin bar shows how far down the page you are.
+    const onScroll = () => {
+      header?.toggleAttribute("data-solid", window.scrollY > 40);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar?.style.setProperty("--progress", max > 0 ? String(Math.min(1, window.scrollY / max)) : "0");
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.webdriver;
     // Screenshots and reduced motion get the finished page at once, with no opening curtain.
     if (still) {
       document.querySelector("[data-site-curtain]")?.remove();
-      return () => window.removeEventListener("scroll", onScroll);
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      };
     }
     root.setAttribute("data-site-motion", "");
+
+    // Numbers count up the first time they come into view (the real value is already in the HTML).
+    const countUp = (el) => {
+      const to = Number(el.dataset.count);
+      if (!Number.isFinite(to)) return;
+      const decimals = (el.dataset.count.split(".")[1] ?? "").length;
+      const t0 = performance.now();
+      const step = (now) => {
+        const k = Math.min(1, (now - t0) / 1400);
+        const v = to * (1 - Math.pow(1 - k, 3));
+        el.textContent = v.toFixed(decimals);
+        if (k < 1) requestAnimationFrame(step);
+      };
+      el.textContent = (0).toFixed(decimals);
+      requestAnimationFrame(step);
+    };
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.setAttribute("data-in", "");
-            io.unobserve(e.target);
-          }
+          if (!e.isIntersecting) continue;
+          e.target.setAttribute("data-in", "");
+          e.target.querySelectorAll("[data-count]").forEach(countUp);
+          if (e.target.hasAttribute("data-count")) countUp(e.target);
+          io.unobserve(e.target);
         }
       },
       { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
     );
-    document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+    document.querySelectorAll("[data-reveal], [data-count]").forEach((el) => io.observe(el));
+
+    // Magnetic buttons lean gently toward the pointer.
+    const magnets = [...document.querySelectorAll("[data-magnetic]")];
+    const onMove = (e) => {
+      for (const m of magnets) {
+        const r = m.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2);
+        const dy = e.clientY - (r.top + r.height / 2);
+        const near = Math.hypot(dx, dy) < Math.max(r.width, 120);
+        m.style.transform = near ? `translate(${dx * 0.18}px, ${dy * 0.28}px)` : "";
+      }
+    };
+    if (matchMedia("(pointer: fine)").matches) window.addEventListener("pointermove", onMove, { passive: true });
     return () => {
       io.disconnect();
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("pointermove", onMove);
       root.removeAttribute("data-site-motion");
     };
   }, []);
   return null;
+}
+/** A small button that copies a phone number, email or address, with a toast to confirm. */
+export function CopyButton({ text, label }) {
+  const [toast, setToast] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      return;
+    }
+    setToast(true);
+    setTimeout(() => setToast(false), 1800);
+  };
+  return (
+    <>
+      <button type="button" className={styles.copy} onClick={copy} aria-label={`Copy ${label}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
+          <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        Copy
+      </button>
+      {toast && (
+        <span className={styles.toast} role="status">
+          ✓ {label} copied
+        </span>
+      )}
+    </>
+  );
 }
 /** Menu-style price list with a live search box. */
 export function PriceList({ items, word }) {
