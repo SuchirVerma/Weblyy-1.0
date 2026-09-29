@@ -13,7 +13,7 @@ const STAGES = [
   { key: "scan", label: "Analyze" },
   { key: "ask", label: "Details" },
   { key: "score", label: "AI readiness report" },
-  { key: "live", label: "Agent live" },
+  { key: "live", label: "Website live" },
 ];
 export function ScanApp({ url }) {
   const [stage, setStage] = useState("scan");

@@ -833,10 +833,15 @@ body.paused *::after {
 }
 @media (max-width: 560px) {
   /* Phones: make room for Dashboard; the demo is still one tap away on the homepage. */
-  .nav-links .nav-demo {
+  .nav-links .nav-demo,
+  .nav-links .nav-setup {
     display: none;
   }
   .nav-links .nav-dash {
     padding: 6px 10px;
+  }
+  /* The logo never gets covered by the menu. */
+  .nav-start {
+    flex: none;
   }
 }

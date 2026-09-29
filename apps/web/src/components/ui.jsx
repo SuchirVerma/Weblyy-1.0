@@ -67,7 +67,7 @@ export function Nav({ right }) {
           <Link href="/owner-demo" className="hide-sm nav-demo">
             See a demo
           </Link>
-          <Link href="/setup" className="hide-sm">
+          <Link href="/setup" className="hide-sm nav-setup">
             We set it up
           </Link>
           <Link href="/dashboard" className="nav-dash" aria-current={path.startsWith("/dashboard") ? "page" : undefined}>

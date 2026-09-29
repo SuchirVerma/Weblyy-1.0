@@ -7,5 +7,12 @@ const nextConfig = {
     // Chromium's compressed binary is read from disk at runtime, and the built-in demo salon is read from public/.
     "/api/**/*": ["./node_modules/@sparticuz/chromium/bin/**", "./node_modules/playwright-core/**", "./public/demo/**"],
   },
+  // Short links that are easy to say out loud.
+  async redirects() {
+    return [
+      { source: "/demo", destination: "/scan?url=demo", permanent: false },
+      { source: "/try", destination: "/scan?url=demo", permanent: false },
+    ];
+  },
 };
 export default nextConfig;
