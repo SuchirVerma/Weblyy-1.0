@@ -46,6 +46,7 @@ async function build(scanId: string, scan: ScanResult, origin: string): Promise<
 
   const previewUrl = `${origin}/preview/${scanId}`;
   const cap = scan.capture ? await capturePage(previewUrl, { allowOrigin: origin }) : null;
+  console.info(`[makeover] ${scanId}: redesign ${cap ? `captured (${Object.keys(cap.shots).join(", ") || "no screenshots"})` : scan.capture ? "not captured" : "skipped (no browser for the original)"}`);
   const html = cap?.html || (await fetch(previewUrl, { signal: AbortSignal.timeout(15_000) }).then((r) => r.text()).catch(() => ""));
   if (!html) throw new Error("Couldn't build the redesigned website.");
 

@@ -300,10 +300,10 @@ export async function capturePage(url: string, opts: { allowOrigin?: string; sho
   return withBrowser(async (browser) => {
     const file = opts.shots === false ? null : randomBytes(8).toString("hex");
     const make = (d: Device) => () => browser.newContext({ ...DEVICES[d], ignoreHTTPSErrors: true });
-    const [desktop, mobile] = await Promise.all([
-      measure(make("desktop"), url, "desktop", opts.allowOrigin, file).catch((e) => failed("desktop", e)),
-      measure(make("mobile"), url, "mobile", opts.allowOrigin, file).catch((e) => failed("mobile", e)),
-    ]);
+    const run = (d: "desktop" | "mobile") => measure(make(d), url, d, opts.allowOrigin, file).catch((e) => failed(d, e));
+    // Serverless Chromium runs in a single process, so one device at a time is the reliable way there.
+    const [desktop, mobile] = process.env.VERCEL ? [await run("desktop"), await run("mobile")] : await Promise.all([run("desktop"), run("mobile")]);
+    if (!desktop && !mobile) console.warn(`[capture] ${url}: nothing captured`);
     if (!desktop && !mobile) return null;
     return {
       url,
