@@ -32,7 +32,8 @@ async function launch(): Promise<Browser | null> {
       g.__fsBrowser = undefined;
     });
     return browser;
-  } catch {
+  } catch (e) {
+    console.error("[browser] couldn't start Chrome:", e instanceof Error ? e.message : e);
     return null;
   }
 }

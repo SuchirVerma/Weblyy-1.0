@@ -61,6 +61,7 @@ function save() {
   writing = writing.then(async () => {
     try {
       if (useRedis) return void (await setJSON("outbox", state.items.slice(-2000)));
+      if (serverless) return; // no lasting disk and no Redis yet: nothing to save to
       await mkdir(DIR, { recursive: true });
       const tmp = `${FILE}.${process.pid}.tmp`;
       await writeFile(tmp, JSON.stringify(state.items.slice(-2000)));
