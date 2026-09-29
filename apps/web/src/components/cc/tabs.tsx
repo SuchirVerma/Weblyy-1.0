@@ -9,6 +9,7 @@ import { OwnerInbox } from "../owner-inbox";
 import { PhoneChat } from "../phone-chat";
 import { QrCard } from "../qr-card";
 import { ScoreColumns } from "./score-columns";
+import { SiteCompare } from "./site-compare";
 import type { TabKey } from "./command-center";
 import { ago, type CCData, type CCLead } from "./types";
 import styles from "./cc.module.css";
@@ -238,38 +239,26 @@ function RunList({ runs }: { runs: CCData["runs"] }) {
 
 /* ----------------------------------------------------------------- website */
 
+const siteHost = (url: string) => {
+  try {
+    return new URL(url).host.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+};
+
 export function WebsiteTab({ data }: { data: CCData }) {
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const before = catOf(data.workspace?.auditBefore, "website");
   const after = catOf(data.workspace?.auditAfter, "website");
   return (
     <div className={styles.stack}>
-      <Head kicker="My website" title={<>Your new website, <span className="em">ready for customers.</span></>}>
-        <a className="btn btn-primary btn-sm" href={data.links.sitePath} target="_blank" rel="noreferrer">
-          Open website ↗
-        </a>
-      </Head>
+      <Head kicker="My website" title={<>Your website, <span className="em">with Weblyy added.</span></>} />
       <p className="lede">
-        Same business, words, prices and brand as {data.business.url.includes("instagram.com") ? "your Instagram" : "your current site"}, rebuilt for phones with Call, WhatsApp
-        and Chat on every screen. Nothing on it is made up.
+        Your real website with the same design, pages and buttons. We only add what&apos;s missing: an AI assistant, Call, WhatsApp and Book buttons, a
+        booking form and your details for Google.
       </p>
 
-      <section className={styles.preview}>
-        <div className={styles.previewBar}>
-          <span className={styles.url}>{data.links.sitePath}</span>
-          <div className="chips">
-            <button className="chip" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")}>
-              Desktop
-            </button>
-            <button className="chip" aria-pressed={device === "mobile"} onClick={() => setDevice("mobile")}>
-              Mobile
-            </button>
-          </div>
-        </div>
-        <div className={styles.frameWrap} data-device={device}>
-          <iframe src={data.links.sitePath} title="AI-ready website preview" loading="lazy" />
-        </div>
-      </section>
+      <SiteCompare agentId={data.id} host={siteHost(data.business.url)} fallbackPath={data.links.sitePath} />
 
       {data.workspace && (
         <section className={styles.panel}>

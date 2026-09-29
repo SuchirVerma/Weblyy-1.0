@@ -89,7 +89,7 @@ async function fetchDemoPage(url: URL): Promise<{ url: URL; html: string }> {
   return { url, html };
 }
 
-async function fetchPage(start: URL): Promise<{ url: URL; html: string }> {
+export async function fetchPage(start: URL): Promise<{ url: URL; html: string }> {
   if (start.hostname === DEMO_HOST) return fetchDemoPage(start);
   let url = start;
   for (let hop = 0; hop < 5; hop++) {
