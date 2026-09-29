@@ -1,4 +1,5 @@
 import "server-only";
+import { pickScene } from "./scene-pick";
 import { AUTOMATIONS, isOn, runDetail, runName } from "./automations";
 const twilioReady = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM);
 const n8nReady = () => Boolean(process.env.N8N_URL && process.env.N8N_API_KEY);
@@ -62,5 +63,6 @@ export function workspaceView(agent) {
     integrations: { twilio: twilioReady(), n8n: n8nReady() },
     setupRequest: agent.setupRequest ?? null,
     published: agent.published ?? null,
+    design: pickScene(agent.knowledge),
   };
 }

@@ -27,8 +27,9 @@ export async function generateMetadata({ params }) {
     icons: scan.knowledge.content?.favicon ? { icon: scan.knowledge.content.favicon } : undefined,
   };
 }
-export default async function Preview({ params }) {
+export default async function Preview({ params, searchParams }) {
   const { scanId, page } = await params;
+  const { scene } = await searchParams;
   const scan = await getScan(scanId);
   if (!scan) {
     return (
@@ -43,5 +44,5 @@ export default async function Preview({ params }) {
   const brand = siteBrand(scan);
   const slug = pageOf(page, scan.knowledge, search, brand);
   if (slug === null) notFound();
-  return <SiteView k={scan.knowledge} search={search} brand={brand} agentId={null} preview page={slug} base={`/preview/${scanId}`} />;
+  return <SiteView k={scan.knowledge} search={search} brand={brand} agentId={null} preview page={slug} base={`/preview/${scanId}`} scene={typeof scene === "string" ? scene : undefined} />;
 }

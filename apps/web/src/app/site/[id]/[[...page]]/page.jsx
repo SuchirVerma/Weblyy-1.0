@@ -36,8 +36,9 @@ export async function generateMetadata({ params }) {
     icons: d.k.content?.favicon ? { icon: d.k.content.favicon } : undefined,
   };
 }
-export default async function TransformedSite({ params }) {
+export default async function TransformedSite({ params, searchParams }) {
   const { id, page } = await params;
+  const { scene } = await searchParams;
   const d = await load(id);
   if (!d) {
     return (
@@ -50,5 +51,5 @@ export default async function TransformedSite({ params }) {
   }
   const slug = pageOf(page, d);
   if (slug === null) notFound();
-  return <SiteView k={d.k} search={d.search} brand={d.brand} agentId={d.agent.id} page={slug} base={`/site/${id}`} />;
+  return <SiteView k={d.k} search={d.search} brand={d.brand} agentId={d.agent.id} page={slug} base={`/site/${id}`} scene={typeof scene === "string" ? scene : undefined} />;
 }

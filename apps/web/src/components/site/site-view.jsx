@@ -3,6 +3,7 @@ import Script from "next/script";
 import { locality } from "@/lib/aisearch";
 import { ChatButton, CopyButton, Gallery, LeadForm, PriceList, SafeImg, SiteMotion } from "./site-client";
 import { Hero3D } from "./hero-3d";
+import { pickScene, SCENE_KEYS } from "@/lib/scene-pick";
 import { fontsHref, themeFor, wordsFor } from "./themes";
 import styles from "./site.module.css";
 /**
@@ -65,7 +66,7 @@ export function siteModel(k, search, brand) {
   return { c, w, where, wa, phone, headline, intro, services, highlights, cheapest, about, testimonials, faqs, photos, mapQuery, mapHref, hasOffer, pages };
 }
 export const PAGE_SLUGS = ["services", "about", "gallery", "faq", "contact"];
-export function SiteView({ k, search, brand, agentId, preview, page = "", base }) {
+export function SiteView({ k, search, brand, agentId, preview, page = "", base, scene }) {
   const m = siteModel(k, search, brand);
   const t = themeFor(k.businessType);
   const href = (slug) => (slug ? `${base}/${slug}` : base || "/");
@@ -85,7 +86,8 @@ export function SiteView({ k, search, brand, agentId, preview, page = "", base }
     ["--track"]: t.tracking,
     ["--case"]: t.upper ? "uppercase" : "none",
   };
-  const ctx = { k, m, t, brand, search, agentId, preview, href };
+  const sceneKey = SCENE_KEYS.includes(scene) ? scene : pickScene(k).key;
+  const ctx = { k, m, t, brand, search, agentId, preview, href, sceneKey };
   return (
     <div className={styles.site} data-fs-site data-theme={t.name.toLowerCase()} data-page={page || "home"} style={vars}>
       <link rel="stylesheet" precedence="default" href={fontsHref(t)} />
@@ -536,7 +538,7 @@ function Home(p) {
         )}
         <div className={styles.heroShade} aria-hidden="true" />
         <div className={styles.hero3d}>
-          <Hero3D color={p.t.accent} glow={p.t.darkInk} photo={Boolean(brand.hero)} />
+          <Hero3D color={p.t.accent} glow={p.t.darkInk} photo={Boolean(brand.hero)} scene={p.sceneKey} />
         </div>
         <div className={`${styles.inner} ${styles.heroGrid}`}>
         <div className={styles.heroInner}>

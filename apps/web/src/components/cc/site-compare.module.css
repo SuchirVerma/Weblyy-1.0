@@ -565,3 +565,45 @@
     font-size: 0.8rem;
   }
 }
+
+.designBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--line));
+  background: var(--accent-soft);
+}
+.designPick {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.designPick b {
+  font-size: 0.98rem;
+}
+.designPick small {
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.designSelect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.designSelect select {
+  height: 40px;
+  max-width: 100%;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+}

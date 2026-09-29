@@ -2,6 +2,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useReducedSafe } from "../use-reduced";
+import { SCENES } from "@/lib/scene-pick";
 import styles from "./site-compare.module.css";
 const STEPS = [
   { key: "open", label: "Opening your website" },
@@ -27,7 +28,7 @@ const mmss = (ms) => {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
 /** "Your current website" next to "With Weblyy": the business's real site, and the same site with the add-ons written in. */
-export function SiteCompare({ agentId, host, fallbackPath }) {
+export function SiteCompare({ agentId, host, fallbackPath, design }) {
   const reduce = useReducedSafe();
   const [view, setView] = useState("original");
   const [device, setDevice] = useState("desktop");
@@ -154,7 +155,8 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
     setView(v);
     if (v === "enhanced" || v === "redesign") setReveal((n) => n + 1);
   };
-  const redesignSrc = fallbackPath;
+  const [scene, setScene] = useState(design?.key ?? "flow");
+  const redesignSrc = design && scene !== design.key ? `${fallbackPath}?scene=${scene}` : fallbackPath;
   const path = view === "original" ? (summary?.originalPath ?? "/") : view === "enhanced" ? (summary?.enhancedPath ?? "/") : "/";
   const addressPath = path.replace(/^\/mirror\/[^/]+\/(original|enhanced)\//, "/");
   if (phase === "no-site") {
@@ -203,6 +205,27 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
         <span className={styles.swPill} data-side={view} aria-hidden="true" />
       </div>
 
+      {view === "redesign" && design && (
+        <div className={styles.designBar}>
+          <span className={styles.designPick}>
+            <b>◆ 3D design: {SCENES.find((x) => x.key === scene)?.name}</b>
+            <small>
+              {scene === design.key ? `Weblyy picked this because ${design.reason}.` : `Weblyy picked ${design.name}. You're previewing another design.`}
+            </small>
+          </span>
+          <label className={styles.designSelect}>
+            <span>Try another</span>
+            <select value={scene} onChange={(e) => setScene(e.target.value)}>
+              {SCENES.map((x) => (
+                <option key={x.key} value={x.key}>
+                  {x.name}
+                  {x.key === design.key ? " (picked for you)" : ""} · {x.blurb}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
       <div className={styles.browser}>
         <div className={styles.bar}>
           <span className={styles.dots} aria-hidden="true">
@@ -257,7 +280,7 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
 
           {view === "redesign" && (
             <motion.div
-              key={`redesign-${reveal}`}
+              key={`redesign-${reveal}-${scene}`}
               className={styles.enhancedLayer}
               initial={reduce ? false : { clipPath: "inset(0 100% 0 0)" }}
               animate={{ clipPath: "inset(0 0% 0 0)" }}
