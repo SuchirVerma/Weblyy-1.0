@@ -1,3 +1,4 @@
+import { profileOf } from "./profiles";
 export const DEFAULT_ANSWERS = {
   dailyMessages: 30,
   replier: "owner",
@@ -28,14 +29,25 @@ const PRICE_ASK = {
   retail: "Is ka price kya hai? Stock mein hai?",
   services: "Rate kya hai?",
 };
+/** What a customer typically types when they want this business's main action. */
+const GOAL_ASK = {
+  booking: "Saturday 4pm free hai?",
+  reservation: "Aaj raat 4 logon ke liye table milegi?",
+  admission: "Class 6 mein admission ho jayega?",
+  demo: "Demo class kab hai?",
+  trial: "Free trial ke liye kab aa sakte hain?",
+};
 function templates(t, k) {
   const n = noun[t];
+  const p = profileOf(k);
+  const goal = p.goal;
+  const school = p.key === "school";
   const shortest = [...k.prices.slice(0, 8)].sort((a, b) => a.name.length - b.name.length)[0];
-  const priceAsk = shortest ? `${shortest.name.replace(/\s*\(.*?\)\s*/g, " ").trim()} kitne ka hai?` : PRICE_ASK[t];
+  const priceAsk = school ? "Class 6 ki fees kitni hai?" : shortest ? `${shortest.name.replace(/\s*\(.*?\)\s*/g, " ").trim()} kitne ka hai?` : PRICE_ASK[t];
   return [
     {
       key: "price",
-      name: t === "education" ? "Fee & batch enquiries" : t === "restaurant" ? "Menu & price questions" : "Price enquiries",
+      name: school ? "Fee & admission questions" : t === "education" ? "Fee & batch enquiries" : t === "restaurant" ? "Menu & price questions" : "Price enquiries",
       channel: "whatsapp",
       trigger: priceAsk,
       description: `The most common message. The answer is already on the website, but someone still types it out by hand every time.`,
@@ -47,27 +59,30 @@ function templates(t, k) {
         "Detect a price question (English or Hinglish)",
         "Look up the item in the published price list",
         "Reply with the price and one related suggestion",
-        "Offer to book a slot",
+        ...(goal.id === "enquiry" || goal.id === "quote" ? [] : [`Offer the next step: ${goal.cta.toLowerCase()}`]),
       ],
       guardrails: ["Only quote prices published on the website", "Never invent discounts or offers", "If the item isn't listed, hand over to the owner"],
     },
     {
       key: "booking",
-      name: t === "restaurant" ? "Table reservations" : t === "retail" ? "Order requests" : `${n.visit[0].toUpperCase()}${n.visit.slice(1)} booking`,
+      name: goal.requests,
       channel: "whatsapp",
-      trigger: "Saturday 4pm free hai?",
-      description: `Back-and-forth about dates and slots. Easy to automate, as long as the owner confirms the final slot.`,
+      trigger: GOAL_ASK[goal.id] ?? "Saturday 4pm free hai?",
+      description: school
+        ? "Parents ask about admissions again and again. Collect the class and contact, and the office calls back."
+        : `Back-and-forth about dates and slots. Easy to automate, as long as the owner confirms the final slot.`,
       share: 0.24,
       repetitiveness: 0.85,
       risk: 0.15,
       data: hasBooking,
       agentSteps: [
-        "Collect name, service and preferred time",
+        `Collect ${goal.fields.map((f) => f.label.toLowerCase()).join(", ")}`,
         "Check the opening hours",
-        "Propose the booking and send it to the owner to confirm",
-        "Send the customer a confirmation",
+        "Send the request to the owner to confirm",
+        "Tell the customer what happens next",
       ],
-      guardrails: ["Owner confirms every booking before it's final", "Never double-book: unsure means ask the owner"],
+      guardrails: ["The owner confirms every request before it's final", "Unsure means ask the owner"],
+      when: () => goal.id !== "enquiry" && goal.id !== "quote",
     },
     {
       key: "info",
@@ -94,7 +109,7 @@ function templates(t, k) {
       data: hasBooking,
       agentSteps: ["Read tomorrow's bookings", "Send each customer a reminder with the time and address", "Let them reply to confirm or reschedule"],
       guardrails: ["Only message customers who booked", "One reminder per booking, no spam"],
-      when: (_k, type) => type !== "retail",
+      when: () => p.needs.booking === true,
     },
     {
       key: "leads",
@@ -127,6 +142,7 @@ function templates(t, k) {
       data: (k) => (k.embeds.includes("Google Maps") ? 0.8 : 0.6),
       agentSteps: ["Wait until the visit is done", "Ask how it went", "If happy, share the review link. If not, alert the owner."],
       guardrails: ["Never ask an unhappy customer for a review", "Owner approves the message wording"],
+      when: () => p.needs.reviews === true,
     },
     {
       key: "medical",
@@ -151,7 +167,7 @@ function templates(t, k) {
       key: "complaints",
       name: "Complaints & refunds",
       channel: "whatsapp",
-      trigger: `I'm not happy with my ${n.service}. I want a refund.`,
+      trigger: school ? "School bus roz late aati hai, complaint karni hai." : `I'm not happy with my ${n.service}. I want a refund.`,
       description: `Needs a human. The agent's only job here is to spot it fast, stay calm and alert the owner at once.`,
       share: 0.05,
       repetitiveness: 0.3,
@@ -225,7 +241,7 @@ export function subScores(scan, a, workflows) {
   if (booking) responsiveness += 15;
   responsiveness += { staff: 15, owner: 6, nobody: 0 }[a.replier];
   responsiveness += { yes: 15, sometimes: 6, no: 0 }[a.afterHours];
-  responsiveness += { automated: 10, manual: 4, none: 0 }[a.reminders];
+  if (profileOf(k).needs.booking) responsiveness += { automated: 10, manual: 4, none: 0 }[a.reminders];
   const channels = new Set(scan.touchpoints.map((t) => t.channel).filter((c) => c !== "web"));
   const coverage = Math.min(100, channels.size * 18 + (k.prices.length ? 10 : 0));
   const repetitiveLoad = Math.min(100, Math.round(a.dailyMessages * 1.6 + 10));
@@ -241,8 +257,8 @@ export function findingsFor(scan, a, hours) {
   const out = [...scan.gaps];
   if (a.replier === "owner") out.push("The owner answers messages personally, between customers and after closing.");
   if (a.afterHours !== "yes") out.push("Messages after closing wait until the next morning.");
-  if (a.reminders !== "automated") out.push("Reminders are manual or missing, so no-shows go unchecked.");
-  if (k.prices.length) out.push(`${k.prices.length} prices are already on the site. That's ready-made knowledge for an agent.`);
+  if (a.reminders !== "automated" && profileOf(k).needs.booking) out.push("Reminders are manual or missing, so no-shows go unchecked.");
+  if (k.prices.length) out.push(`${k.prices.length} prices are already on the site, ready to show clearly on the new website.`);
   out.push(`About ${hours} hours a week go into replies that could be automatic.`);
   return out;
 }

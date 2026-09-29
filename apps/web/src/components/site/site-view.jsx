@@ -4,7 +4,9 @@ import { locality } from "@/lib/aisearch";
 import { ChatButton, CopyButton, Gallery, LeadForm, PriceList, SafeImg, SiteMotion } from "./site-client";
 import { Hero3D } from "./hero-3d";
 import { pickScene, SCENE_KEYS } from "@/lib/scene-pick";
-import { fontsHref, themeFor, wordsFor } from "./themes";
+import { profileOf } from "@/lib/profiles";
+import { fontsHref } from "./themes";
+import { identityFor } from "./identity";
 import styles from "./site.module.css";
 /**
  * The redesigned website: a new identity (theme, fonts, layout, motion) and more pages,
@@ -36,7 +38,11 @@ function lede(s, max = 240) {
 /** Everything the pages need, worked out once from the business's facts. */
 export function siteModel(k, search, brand) {
   const c = k.content;
-  const w = wordsFor(k.businessType);
+  // Words come from the theme; the main action comes from what this kind of business actually needs.
+  const profile = profileOf(k);
+  // Each business gets its own look and wording (seeded by the business), and the main action its kind of business needs.
+  const identity = identityFor(k, brand, profile.key);
+  const w = { ...identity.words, cta: profile.goal.cta, ctaShort: profile.goal.short };
   const where = k.address ? locality(k.address) : "";
   const wa = k.whatsapp.find((x) => digits(x).length >= 10);
   const phone = k.phones[0] ?? wa;
@@ -63,12 +69,14 @@ export function siteModel(k, search, brand) {
     faqs.length > 0 && { slug: "faq", label: "FAQ" },
     { slug: "contact", label: "Contact" },
   ].filter(Boolean);
-  return { c, w, where, wa, phone, headline, intro, services, highlights, cheapest, about, testimonials, faqs, photos, mapQuery, mapHref, hasOffer, pages };
+  const showWa = Boolean(wa) && profile.quick.includes("whatsapp");
+  const showChat = profile.agent.mode === "full";
+  return { identity, profile, goal: profile.goal, showWa, showChat, c, w, where, wa, phone, headline, intro, services, highlights, cheapest, about, testimonials, faqs, photos, mapQuery, mapHref, hasOffer, pages };
 }
 export const PAGE_SLUGS = ["services", "about", "gallery", "faq", "contact"];
 export function SiteView({ k, search, brand, agentId, preview, page = "", base, scene }) {
   const m = siteModel(k, search, brand);
-  const t = themeFor(k.businessType);
+  const t = m.identity.theme;
   const href = (slug) => (slug ? `${base}/${slug}` : base || "/");
   const vars = {
     ["--bg"]: t.bg,
@@ -89,7 +97,7 @@ export function SiteView({ k, search, brand, agentId, preview, page = "", base, 
   const sceneKey = SCENE_KEYS.includes(scene) ? scene : pickScene(k).key;
   const ctx = { k, m, t, brand, search, agentId, preview, href, sceneKey };
   return (
-    <div className={styles.site} data-fs-site data-theme={t.name.toLowerCase()} data-page={page || "home"} style={vars}>
+    <div className={styles.site} data-fs-site data-theme={t.name.toLowerCase()} data-hero={t.hero} data-cards={t.cards} data-tone={t.tone} data-page={page || "home"} style={vars}>
       <link rel="stylesheet" precedence="default" href={fontsHref(t)} />
       <style>{`@view-transition{navigation:auto}::view-transition-old(root){animation:.35s cubic-bezier(.22,1,.36,1) both wbSiteOut}::view-transition-new(root){animation:.55s cubic-bezier(.22,1,.36,1) both wbSiteIn}@keyframes wbSiteOut{to{opacity:0;transform:translateY(-12px)}}@keyframes wbSiteIn{from{opacity:0;transform:translateY(18px)}}html:has([data-fs-site]){scrollbar-color:${t.accent} ${t.bg};scrollbar-width:thin}html:has([data-fs-site])::-webkit-scrollbar{width:10px}html:has([data-fs-site])::-webkit-scrollbar-track{background:${t.bg}}html:has([data-fs-site])::-webkit-scrollbar-thumb{background:${t.accent};border-radius:10px;border:2px solid ${t.bg}}`}</style>
       {!page &&
@@ -116,17 +124,23 @@ export function SiteView({ k, search, brand, agentId, preview, page = "", base, 
       <Footer {...ctx} />
       <div className={styles.mobileBar} role="group" aria-label="Quick contact">
         {m.phone && <a href={`tel:${telOf(m.phone)}`}>Call</a>}
-        {m.wa && (
+        {m.showWa ? (
           <a href={`https://wa.me/${digits(m.wa)}`} target="_blank" rel="noreferrer">
             WhatsApp
           </a>
+        ) : (
+          m.mapHref && (
+            <a href={m.mapHref} target="_blank" rel="noreferrer">
+              Directions
+            </a>
+          )
         )}
         <a href={`${href("contact")}#book`} data-primary>
           {m.w.ctaShort}
         </a>
       </div>
       <SiteMotion />
-      {agentId && !preview && <Script src="/widget.js" data-agent={agentId} data-color={t.accent} data-label="Ask us anything" strategy="afterInteractive" />}
+      {agentId && !preview && <Script src="/widget.js" data-agent={agentId} data-color={t.accent} data-label={m.showChat ? "Ask us anything" : "Questions?"} strategy="afterInteractive" />}
     </div>
   );
 }
@@ -482,16 +496,18 @@ function ContactBlock({ k, m, agentId, preview }) {
               Get directions ↗
             </a>
           )}
-          <ChatButton className={styles.btnGhost} preview={preview}>
-            Ask a question
-          </ChatButton>
+          {m.showChat && (
+            <ChatButton className={styles.btnGhost} preview={preview}>
+              Ask a question
+            </ChatButton>
+          )}
         </div>
       </div>
       <div id="book" className={styles.formCard} data-reveal style={{ ["--d"]: "120ms" }}>
         <p className={styles.eyebrow}>{m.w.ctaShort}</p>
         <h3 className={styles.display}>{m.w.cta}</h3>
         <p className={styles.small}>Leave your details and we&apos;ll get back to you.</p>
-        <LeadForm agentId={agentId} services={m.services} cta={m.w.cta} />
+        <LeadForm agentId={agentId} services={m.services} cta={m.w.cta} goal={m.goal} />
       </div>
     </div>
   );
@@ -508,7 +524,7 @@ function CtaBand({ k, m, href }) {
           <a className={styles.btn} href={`${href("contact")}#book`}>
             {m.w.cta} →
           </a>
-          {m.wa ? (
+          {m.showWa ? (
             <a className={styles.btnLight} href={`https://wa.me/${digits(m.wa)}`} target="_blank" rel="noreferrer">
               WhatsApp us
             </a>
@@ -564,7 +580,7 @@ function Home(p) {
             <a className={styles.btn} href={`${href("contact")}#book`} data-magnetic>
               {m.w.cta} →
             </a>
-            {m.wa ? (
+            {m.showWa ? (
               <a className={styles.btnLight} href={`https://wa.me/${digits(m.wa)}`} target="_blank" rel="noreferrer">
                 WhatsApp us
               </a>
@@ -576,9 +592,11 @@ function Home(p) {
               )
             )}
           </div>
-          <ChatButton className={`${styles.heroAsk} ${styles.rise}`} preview={preview}>
-            <span className={styles.pulse} aria-hidden="true" /> Ask anything and get an instant answer
-          </ChatButton>
+          {m.showChat && (
+            <ChatButton className={`${styles.heroAsk} ${styles.rise}`} preview={preview}>
+              <span className={styles.pulse} aria-hidden="true" /> Ask anything and get an instant answer
+            </ChatButton>
+          )}
         </div>
         <Glance {...p} />
         </div>

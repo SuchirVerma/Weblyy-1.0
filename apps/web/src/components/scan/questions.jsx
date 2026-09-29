@@ -2,6 +2,7 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Arrow } from "../ui";
+import { profileOf } from "@/lib/profiles";
 import styles from "./scan.module.css";
 const Q = [
   {
@@ -82,7 +83,7 @@ export function Questions({ scanId, scan, initial, onBack, onDone }) {
       </div>
 
       <div className={styles.qGrid}>
-        {Q.map((q, i) => (
+        {Q.filter((q) => q.key !== "reminders" || profileOf(scan.knowledge).needs.booking).map((q, i) => (
           <motion.fieldset
             key={q.key}
             className={styles.qCard}

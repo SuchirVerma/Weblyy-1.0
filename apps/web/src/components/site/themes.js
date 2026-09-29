@@ -145,6 +145,7 @@ export const WORDS = {
   fitness: { kind: "Fitness studio", offer: "Programs", offerTitle: "Programs & memberships", story: "Who we are", reviews: "Member stories", people: "members", cta: "Book a trial session", ctaShort: "Try a session", mood: "Show up. We'll handle the rest." },
   restaurant: { kind: "Restaurant", offer: "Menu", offerTitle: "The menu", story: "Our kitchen", reviews: "From our guests", people: "guests", cta: "Send an enquiry", ctaShort: "Enquire", mood: "Pull up a chair." },
   education: { kind: "Institute", offer: "Courses", offerTitle: "Courses & fees", story: "About us", reviews: "Student stories", people: "students", cta: "Request a call back", ctaShort: "Call back", mood: "Learning that goes somewhere." },
+  school: { kind: "School", offer: "Academics", offerTitle: "Classes, admissions & fees", story: "About the school", reviews: "What parents say", people: "students", cta: "Admission enquiry", ctaShort: "Enquire", mood: "Where every child is known." },
   retail: { kind: "Store", offer: "Products", offerTitle: "Products & prices", story: "About the store", reviews: "What customers say", people: "customers", cta: "Send an enquiry", ctaShort: "Enquire", mood: "Come and have a look." },
   services: { kind: "Services", offer: "Services", offerTitle: "Services & prices", story: "About us", reviews: "What clients say", people: "clients", cta: "Request a call back", ctaShort: "Call back", mood: "Tell us what you need." },
 };

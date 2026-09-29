@@ -2,17 +2,27 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { hasOwnWebsite, profileOf } from "@/lib/profiles";
 import styles from "./make-ready.module.css";
-const STEPS = [
-  { t: "Transforming your website", d: "Mobile-first layout, clear headline, Book / Call / Chat buttons" },
-  { t: "Training your AI Customer Agent", d: "Learning prices, services, hours and FAQs from your site" },
-  { t: "Optimizing for AI search", d: "Business summary, structured data, FAQs, meta tags" },
-  { t: "Opening your Lead Center", d: "Capture, qualify and follow up every interested customer" },
-  { t: "Switching on automations", d: "Lead follow-up, booking requests, owner alerts" },
-];
+/** Only the steps this kind of business needs, in its own words. */
+function stepsFor(k) {
+  const p = profileOf(k);
+  const own = hasOwnWebsite(k);
+  return [
+    {
+      t: own ? "Improving your website" : "Building your website",
+      d: `Made for a ${p.label.toLowerCase()}: ${p.sections.slice(0, 3).join(", ")} and a “${p.goal.cta}” button`,
+    },
+    p.agent.mode === "full" && { t: "Training your AI Customer Agent", d: "Learning your services, hours and FAQs from your own details" },
+    { t: "Getting you found on Google and AI apps", d: "Business summary, structured data, FAQs" },
+    { t: "Opening your Lead Center", d: `Every “${p.goal.cta}” request saved in one place` },
+    { t: "Switching on only what you need", d: p.key === "school" ? "Enquiry alerts for the admissions office" : "Owner alerts and follow-ups" },
+  ].filter(Boolean);
+}
 /** Fired by the "Make My Business AI-Ready" button in the top corner of the report; this component runs the flow. */
 export const MAKE_READY_EVENT = "weblyy:make-ready";
-export function MakeReady({ scanId, answers, name }) {
+export function MakeReady({ scanId, answers, name, k }) {
+  const STEPS = stepsFor(k);
   const router = useRouter();
   const [phase, setPhase] = useState("idle");
   const [step, setStep] = useState(0);
@@ -82,7 +92,7 @@ export function MakeReady({ scanId, answers, name }) {
           >
             <motion.div className={styles.modal} initial={{ y: 20, scale: 0.97 }} animate={{ y: 0, scale: 1 }}>
               <p className="kicker">{phase === "done" ? "Done" : "Working on it"}</p>
-              <h3>{phase === "done" ? `${name} is AI-ready.` : `Making ${name} AI-ready…`}</h3>
+              <h3>{phase === "done" ? `${name} is ready.` : `Getting ${name} ready…`}</h3>
               <ol className={styles.steps}>
                 {STEPS.map((s, i) => (
                   <li key={s.t} data-state={i < step ? "done" : i === step && phase === "working" ? "now" : "todo"}>

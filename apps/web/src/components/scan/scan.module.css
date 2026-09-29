@@ -1424,3 +1424,20 @@
 .detailsAll > :not(summary) + :not(summary) {
   margin-top: 40px;
 }
+
+/* Instagram-only businesses: say it plainly, then offer the website we build for them. */
+.noSite {
+  display: grid;
+  gap: 4px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--warn) 35%, transparent);
+  background: color-mix(in oklab, var(--warn) 8%, var(--surface));
+}
+.noSite b {
+  font-size: 1.05rem;
+}
+.noSite span {
+  color: var(--muted);
+  line-height: 1.5;
+}

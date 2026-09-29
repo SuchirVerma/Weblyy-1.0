@@ -1808,3 +1808,71 @@
 .signature li:hover b {
   color: color-mix(in oklab, var(--a) 45%, var(--dark-ink));
 }
+
+/* ----- per-business layout variants (picked in identity.js) */
+.site[data-hero="center"] .heroGrid,
+.site[data-hero="left"] .heroGrid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.site[data-hero="center"] .heroInner {
+  justify-items: center;
+  text-align: center;
+}
+.site[data-hero="center"] .heroTitle,
+.site[data-hero="center"] .heroLede {
+  margin-inline: auto;
+}
+.site[data-hero="center"] .heroInner .row {
+  justify-content: center;
+}
+.site[data-hero="center"] .glance {
+  justify-self: center;
+  width: min(100%, 720px);
+}
+.site[data-hero="center"] .glance dl,
+.site[data-hero="left"] .glance dl {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.site[data-hero="left"] .glance {
+  width: min(100%, 900px);
+}
+
+.site[data-cards="raised"] .cards,
+.site[data-cards="outline"] .cards {
+  gap: 16px;
+  background: none;
+  border: 0;
+}
+.site[data-cards="raised"] .cards li {
+  border-radius: var(--card-r);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.site[data-cards="outline"] .cards li {
+  border-radius: var(--card-r);
+  border: 1px solid var(--line);
+  background: transparent;
+}
+
+/* ----- per-business card styles for the offer grid */
+.site[data-cards="ruled"] .signature {
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.site[data-cards="ruled"] .signature li {
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.site[data-cards="outline"] .signature li {
+  background: transparent;
+  box-shadow: none;
+  border: 1.5px solid color-mix(in oklab, var(--a) 35%, var(--line));
+}
+.site[data-cards="outline"] .signature li:hover {
+  box-shadow: none;
+}

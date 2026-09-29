@@ -12,6 +12,7 @@ import { ScoreReveal } from "./score-reveal";
 import { SiteReport } from "./site-report";
 import { WebPresencePanel } from "./web-presence";
 import { useReducedSafe } from "../use-reduced";
+import { hasOwnWebsite, profileOf } from "@/lib/profiles";
 import styles from "./scan.module.css";
 const VERDICT = {
   automate: { label: "Automate", tone: "var(--ok)" },
@@ -81,6 +82,15 @@ export function Results({ scanId, scan, analysis, onEditAnswers, onDeployed, ans
   };
   return (
     <div className={styles.results}>
+      {!hasOwnWebsite(k) && (
+        <div className={styles.noSite} role="note">
+          <b>You don&rsquo;t have a website yet.</b>
+          <span>
+            We found {k.instagram?.handle ? `@${k.instagram.handle} on Instagram` : "your Instagram page"}, but no website. Customers searching on Google can&rsquo;t
+            find you. Weblyy builds a proper {profileOf(k).label.toLowerCase()} website for you from your Instagram details, in one click below.
+          </span>
+        </div>
+      )}
       <section className={styles.scoreHero} aria-labelledby="score-h">
         <div className={styles.scoreLeft}>
           <p className="kicker">AI readiness · {k.name}</p>
@@ -210,7 +220,7 @@ export function Results({ scanId, scan, analysis, onEditAnswers, onDeployed, ans
 
       {audit && after && <ChangeList before={audit} after={after} name={k.name} />}
 
-      {audit && <MakeReady scanId={scanId} answers={answers} name={k.name} />}
+      {audit && <MakeReady scanId={scanId} answers={answers} name={k.name} k={k} />}
 
       <details className={styles.detailsAll}>
         <summary>

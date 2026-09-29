@@ -7,9 +7,9 @@ const STEPS = [
   { key: "open", label: "Opening your website" },
   { key: "pages", label: "Reading every page" },
   { key: "design", label: "Keeping your design exactly as it is" },
-  { key: "assistant", label: "Writing in the AI assistant" },
-  { key: "actions", label: "Adding Call, WhatsApp and Book buttons" },
-  { key: "booking", label: "Connecting the booking form" },
+  { key: "assistant", label: "Adding the assistant, only if it helps your customers" },
+  { key: "actions", label: "Adding the right quick buttons for your business" },
+  { key: "booking", label: "Connecting your enquiry form" },
   { key: "search", label: "Adding your details for Google and AI apps" },
   { key: "test", label: "Testing every button" },
   { key: "ready", label: "Starting your improved website" },
@@ -162,7 +162,7 @@ export function SiteCompare({ agentId, host, fallbackPath }) {
       <section className={styles.wrap}>
         <div className={styles.noSite}>
           <b>This business has no website yet</b>
-          <span>We only found an Instagram profile, so there was no existing site to improve. Here is the website Weblyy built for it.</span>
+          <span>You don&rsquo;t have a website yet, only an Instagram page. So Weblyy built one for you from it.</span>
         </div>
         <div className={styles.frame} data-device={device}>
           <iframe src={fallbackPath} title="Website built by Weblyy" />

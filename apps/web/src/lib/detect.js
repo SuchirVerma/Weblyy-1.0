@@ -1,3 +1,4 @@
+import { hasOwnWebsite, profileOf } from "./profiles";
 const pathOf = (u) => {
   try {
     return new URL(u).pathname || "/";
@@ -62,16 +63,18 @@ export function detectTouchpoints(k) {
 }
 export function findGaps(k) {
   const gaps = [];
-  if (k.instagram && k.pages.every((p) => p.url.includes("instagram.com"))) {
-    gaps.push("No website. Customers can only reach you through Instagram DMs or by calling, and every DM needs a human.");
+  const p = profileOf(k);
+  if (!hasOwnWebsite(k)) {
+    gaps.push("You don't have a website yet, only Instagram. People searching on Google can't find you.");
   }
   const hasChat = k.embeds.some((e) => /chat|widget/i.test(e));
   const hasBookingTool = k.embeds.some((e) => /booking|appointments/i.test(e));
-  if (!hasChat) gaps.push("No chat widget or auto-reply found. Every message waits for a human.");
-  if (!k.whatsapp.length) gaps.push("No WhatsApp link, even though most customers prefer it.");
-  if (!hasBookingTool && !k.forms.some((f) => f.purpose === "booking")) gaps.push("No online booking. Appointments happen by call or message.");
-  if (!k.prices.length) gaps.push("No prices published, so customers have to ask for every rate.");
+  if (!hasChat && p.agent.mode === "full") gaps.push("No chat or auto-reply. Every question waits for a person.");
+  if (!k.whatsapp.length && p.quick.includes("whatsapp")) gaps.push("No WhatsApp link, even though most customers prefer it.");
+  if (p.goal.id === "booking" && !hasBookingTool && !k.forms.some((f) => f.purpose === "booking")) gaps.push("No online booking. Appointments happen by call or message.");
+  if (p.goal.id !== "booking" && p.goal.id !== "enquiry" && p.goal.id !== "quote" && !k.forms.length) gaps.push(`No “${p.goal.cta}” form. Interested people have to call.`);
+  if (!k.prices.length && p.needs.prices) gaps.push("No prices published, so customers have to ask for every rate.");
   if (!k.hours.length) gaps.push("Opening hours aren't clearly listed.");
-  if (k.forms.length && !hasChat) gaps.push("Form submissions land in an inbox with no instant reply.");
+  if (k.forms.length && !hasChat && p.agent.mode === "full") gaps.push("Form submissions land in an inbox with no instant reply.");
   return gaps;
 }

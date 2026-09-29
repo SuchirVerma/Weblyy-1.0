@@ -16,7 +16,9 @@ export default function Home() {
             <h1 className={`h-display ${styles.heroTitle}`}>
               Make your business <span className="em">AI-ready.</span>
             </h1>
-            <p className="lede">Type your website or shop name. We&apos;ll show what&apos;s missing and fix it for you.</p>
+            <p className="lede">
+              Type your website, shop name or Instagram. We show what a business like yours is missing, and build the website it should have.
+            </p>
             <ScanBar />
             <Link href="/how" className={styles.secondary}>
               How does it work? →

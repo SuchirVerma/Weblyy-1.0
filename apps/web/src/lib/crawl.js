@@ -574,7 +574,7 @@ function detectBusinessType(text) {
     ["salon", score(["salon", "facial", "haircut", "hair spa", "manicure", "pedicure", "makeup", "bridal", "waxing", "beauty", "threading"])],
     ["clinic", score(["clinic", "doctor", "dr.", "patient", "treatment", "dental", "physio", "consultation", "hospital", "diagnosis"])],
     ["restaurant", score(["restaurant", "menu", "cafe", "dine", "food", "cuisine", "table", "delivery", "biryani", "coffee"])],
-    ["education", score(["course", "classes", "coaching", "admission", "students", "batch", "tuition", "academy", "exam"])],
+    ["education", score(["course", "classes", "coaching", "admission", "students", "batch", "tuition", "academy", "exam", "school", "cbse", "icse", "nursery", "kindergarten", "principal", "curriculum"])],
     ["fitness", score(["gym", "fitness", "yoga", "workout", "trainer", "membership", "zumba"])],
     ["retail", score(["shop", "store", "cart", "product", "buy now", "shipping", "order now"])],
   ];

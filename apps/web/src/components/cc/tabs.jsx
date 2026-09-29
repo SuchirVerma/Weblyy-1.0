@@ -335,8 +335,10 @@ export function AgentTab({ data, ownerKey }) {
     ["Explains services", "Suggests the right service and quotes the published price."],
     ["Captures visitor details", "Asks for name and number when a customer shows interest."],
     ["Qualifies leads", "Scores every lead hot, warm or cold with reasons."],
-    ["Guides to booking", "Collects the service and time, then the owner confirms."],
-    ["Triggers automations", "Lead follow-up, owner alerts, booking confirmations."],
+    ...(data.profile && data.profile.goal.id !== "enquiry" && data.profile.goal.id !== "quote"
+      ? [[`Helps with “${data.profile.goal.cta}”`, `Collects ${data.profile.goal.fields.map((f) => f.label.toLowerCase()).join(", ")}, then you confirm.`]]
+      : []),
+    ["Alerts you", "New enquiries and anything that needs a person."],
     ["Knows its limits", "Complaints, refunds and medical questions go to the owner."],
   ];
   return (

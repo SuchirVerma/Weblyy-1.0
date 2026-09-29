@@ -1,3 +1,4 @@
+import { profileOf } from "./profiles";
 const HINGLISH =
   /\b(kya|hai|hain|kitna|kitne|kitni|kab|kaha|kahan|mujhe|chahiye|aap|kar|karna|karwana|milega|hoga|kal|aaj|bhai|ji|acha|accha|nahi|haan|batao|bata|wala|wali)\b/i;
 const PATTERNS = [
@@ -91,7 +92,18 @@ function when(msg) {
   const time = msg.match(/\b\d{1,2}(:\d{2})?\s?(am|pm|baje)\b/i)?.[0];
   return [day, time].filter(Boolean).join(" ");
 }
+/** The next step the agent offers after answering, in the words this kind of business uses. */
+const OFFER = {
+  booking: ["Want me to book a slot for you?", "Aapke liye slot book kar du?"],
+  reservation: ["Shall I request a table for you?", "Table book karwa du?"],
+  admission: ["Would you like the admissions office to call you?", "Admission office se call karwa du?"],
+  demo: ["Want to try a free demo class?", "Free demo class book kar du?"],
+  trial: ["Want to book a free trial?", "Free trial book kar du?"],
+  enquiry: ["Anything else you'd like to know?", "Aur kuch jaanna hai?"],
+  quote: ["Shall I have the team call you back?", "Team se call back karwa du?"],
+};
 export function rulesReply(k, message) {
+  const P = profileOf(k);
   const hi = HINGLISH.test(message);
   const medical = k.businessType === "clinic" && MEDICAL.test(message);
   const hoursQ =
@@ -99,6 +111,7 @@ export function rulesReply(k, message) {
     !/\bbook|appointment|slot\b/i.test(message);
   const intent = medical ? "medical" : hoursQ ? "hours" : (PATTERNS.find(([, re]) => re.test(message))?.[0] ?? "other");
   const T = (en, hin) => (hi ? hin : en);
+  const offer = () => T(...(OFFER[P.goal.id] ?? OFFER.enquiry));
   const base = { intent, engine: "rules" };
   // The business's own FAQ answer beats any generic rule, even for health questions it has answered itself.
   if (intent !== "refund" && intent !== "complaint" && intent !== "price" && intent !== "booking") {
@@ -142,8 +155,8 @@ export function rulesReply(k, message) {
       return {
         ...base,
         reply: T(
-          `Hi! Welcome to ${k.name}. Ask me about prices, timings or booking a slot.`,
-          `Namaste! ${k.name} mein aapka swagat hai. Price, timing ya booking ke baare mein puchiye.`,
+          `Hi! Welcome to ${k.name}. ${P.agent.greeting}`,
+          `Namaste! ${k.name} mein aapka swagat hai. Jo bhi jaanna ho, puchiye.`,
         ),
         escalate: false,
         source: "none",
@@ -154,7 +167,7 @@ export function rulesReply(k, message) {
         const list = found.map((p) => `${p.name}: ${p.price}`).join(", ");
         return {
           ...base,
-          reply: T(`${list}. Want me to book a slot for you?`, `${list}. Aapke liye slot book kar du?`),
+          reply: `${list}. ${offer()}`,
           escalate: false,
           source: "Price list",
         };
@@ -200,6 +213,23 @@ export function rulesReply(k, message) {
     }
     case "booking": {
       const slot = when(message);
+      if (P.goal.id === "admission")
+        return {
+          ...base,
+          reply: T(
+            "Happy to help with admission! Which class is it for? Share your name and number and the admissions office will call you.",
+            "Admission ke liye zaroor! Kis class ke liye? Apna naam aur number bhej dijiye, admission office call karega.",
+          ),
+          escalate: true,
+          source: "Admission rule",
+        };
+      if (P.goal.id === "enquiry" || P.goal.id === "quote")
+        return {
+          ...base,
+          reply: T("Sure! Tell me what you need and your number, and the team will get back to you.", "Zaroor! Kya chahiye aur apna number bata dijiye, team aapse baat karegi."),
+          escalate: true,
+          source: "Enquiry rule",
+        };
       return {
         ...base,
         reply: slot
@@ -238,8 +268,8 @@ export function rulesReply(k, message) {
       ...base,
       intent: "service_info",
       reply: T(
-        `Yes, we do! ${found[0].name} is ${found[0].price}. Shall I book it?`,
-        `Haan ji, hota hai! ${found[0].name} ${found[0].price} ka hai. Book kar du?`,
+        `Yes, we do! ${found[0].name} is ${found[0].price}. ${OFFER[P.goal.id]?.[0] ?? ""}`.trim(),
+        `Haan ji, hota hai! ${found[0].name} ${found[0].price} ka hai. ${OFFER[P.goal.id]?.[1] ?? ""}`.trim(),
       ),
       escalate: false,
       source: "Price list",

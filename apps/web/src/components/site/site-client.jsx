@@ -16,7 +16,13 @@ export function ChatButton({ children, className, preview }) {
     </>
   );
 }
-export function LeadForm({ agentId, services, cta }) {
+export function LeadForm({ agentId, services, cta, goal }) {
+  // The form asks only what this kind of business needs: a class for a school, party size for a restaurant, a slot for a salon.
+  const field = (n) => goal?.fields?.find((f) => f.name === n);
+  const svc = field("service");
+  const when = field("when");
+  const people = field("people");
+  const note = field("note");
   const [state, setState] = useState("idle");
   const [msg, setMsg] = useState("");
   const submit = async (e) => {
@@ -38,7 +44,7 @@ export function LeadForm({ agentId, services, cta }) {
           phone: f.get("phone"),
           email: f.get("email"),
           interest: f.get("interest"),
-          message: f.get("message"),
+          message: [f.get("people") && `${f.get("people")} people`, note && f.get("note") && `${note.label}: ${f.get("note")}`, f.get("message")].filter(Boolean).join(". "),
           website: f.get("website"),
         }),
       });
@@ -62,7 +68,7 @@ export function LeadForm({ agentId, services, cta }) {
     <form className={styles.form} onSubmit={submit}>
       <div className={styles.row2}>
         <label>
-          <span>Your name</span>
+          <span>{field("name")?.label ?? "Your name"}</span>
           <input name="name" required maxLength={60} autoComplete="name" />
         </label>
         <label>
@@ -74,19 +80,38 @@ export function LeadForm({ agentId, services, cta }) {
         <span>Email (optional)</span>
         <input name="email" type="email" maxLength={100} autoComplete="email" />
       </label>
+      {goal?.id === "admission" || !services.length ? (
+        <label>
+          <span>{svc?.label ?? "What are you interested in?"}</span>
+          <input name="interest" maxLength={80} placeholder={svc?.placeholder ?? ""} />
+        </label>
+      ) : (
+        <label>
+          <span>{svc?.label ?? "What are you interested in?"}</span>
+          <select name="interest" defaultValue="">
+            <option value="">{svc?.placeholder ?? "Choose one"}</option>
+            {services.slice(0, 30).map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+            <option>Something else</option>
+          </select>
+        </label>
+      )}
+      {people && (
+        <label>
+          <span>{people.label}</span>
+          <input name="people" type="number" min={1} max={50} inputMode="numeric" placeholder={people.placeholder} />
+        </label>
+      )}
+      {note && (
+        <label>
+          <span>{note.label}</span>
+          <input name="note" maxLength={80} placeholder={note.placeholder} />
+        </label>
+      )}
       <label>
-        <span>What are you interested in?</span>
-        <select name="interest" defaultValue="">
-          <option value="">Choose a service</option>
-          {services.slice(0, 30).map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-          <option>Something else</option>
-        </select>
-      </label>
-      <label>
-        <span>Message</span>
-        <textarea name="message" rows={3} maxLength={500} placeholder="Preferred day and time, questions…" />
+        <span>{when ? when.label : "Message"}</span>
+        <textarea name="message" rows={when ? 2 : 3} maxLength={500} placeholder={when?.placeholder ?? "Your question or requirement"} />
       </label>
       <input name="website" tabIndex={-1} autoComplete="off" className={styles.hp} aria-hidden="true" aria-label="Leave this empty" />
       {state === "error" && (

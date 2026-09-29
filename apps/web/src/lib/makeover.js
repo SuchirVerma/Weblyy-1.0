@@ -1,3 +1,4 @@
+import { profileOf } from "./profiles";
 export const AREAS = [
   { key: "design", label: "Design", blurb: "Visual hierarchy, brand, photos" },
   { key: "ux", label: "UX", blurb: "Navigation, links, forms, accessibility" },
@@ -220,7 +221,7 @@ const RULES = [
       if (!c) return null;
       return {
         ok: c.length > 0,
-        detail: c.length ? `“${c.slice(0, 3).join("”, “")}”` : "A phone visitor has to scroll before they can call, book or message.",
+        detail: c.length ? `“${c.slice(0, 3).join("”, “")}”` : "A phone visitor has to scroll before they can contact you.",
       };
     },
   },
@@ -233,7 +234,7 @@ const RULES = [
       f.mobile
         ? {
             ok: f.mobile.stickyContact,
-            detail: f.mobile.stickyContact ? "A call / chat button stays on screen while scrolling." : "Once visitors scroll, the contact buttons are gone.",
+            detail: f.mobile.stickyContact ? "A contact button stays on screen while scrolling." : "Once visitors scroll, the contact buttons are gone.",
           }
         : null,
   },
@@ -279,6 +280,7 @@ const RULES = [
     area: "content",
     label: "Prices published",
     improve: "Content structure",
+    when: (p) => p.needs.prices,
     run: (f) => ({
       ok: f.k.prices.length >= 5 ? true : f.k.prices.length ? "partial" : false,
       detail: f.k.prices.length ? `${n(f.k.prices.length, "price")}.` : "No prices on the website.",
@@ -448,7 +450,7 @@ const RULES = [
             ok: f.desktop.ctaAboveFold.length > 0,
             detail: f.desktop.ctaAboveFold.length
               ? `“${f.desktop.ctaAboveFold.slice(0, 3).join("”, “")}”`
-              : "No Book, Call or Contact button before the visitor scrolls.",
+              : "No clear button (Call, Contact or Enquire) before the visitor scrolls.",
           }
         : null,
   },
@@ -474,6 +476,7 @@ const RULES = [
     area: "conversion",
     label: "WhatsApp click-to-chat",
     improve: "Conversion flow",
+    when: (p) => p.quick.includes("whatsapp"),
     run: (f) => ({ ok: f.k.whatsapp.length > 0, detail: f.k.whatsapp.length ? "WhatsApp link." : "No WhatsApp link." }),
   },
   {
@@ -489,17 +492,23 @@ const RULES = [
     area: "features",
     label: "Instant answers (chat)",
     improve: "Conversion flow",
+    when: (p) => p.agent.mode === "full",
     run: (f) => ({ ok: hasChat(f), detail: hasChat(f) ? "Chat on the page." : "Questions wait until someone is free." }),
   },
   {
     id: "f-booking",
     area: "features",
-    label: "Booking or appointment request",
+    label: (p) => `${p.goal.title} request`,
     improve: "Conversion flow",
-    run: (f) => ({
-      ok: hasBooking(f) ? true : enquiryForms(f) ? "partial" : false,
-      detail: hasBooking(f) ? "Booking request available." : enquiryForms(f) ? "Only a general contact form." : "Bookings only by phone.",
-    }),
+    when: (p) => p.goal.id !== "enquiry" && p.goal.id !== "quote",
+    run: (f) => {
+      const booking = profileOf(f.k).goal.id === "booking";
+      const good = booking ? hasBooking(f) : enquiryForms(f) > 0;
+      return {
+        ok: good ? true : enquiryForms(f) ? "partial" : false,
+        detail: good ? "Request form available." : enquiryForms(f) ? "Only a general contact form." : "Only by phone.",
+      };
+    },
   },
   {
     id: "f-map",
@@ -539,8 +548,11 @@ export function auditSite(f, only) {
   const checks = [];
   for (const r of RULES) {
     if (only && !only.has(r.id)) continue;
+    // Some checks only make sense for some businesses: no "booking" check for a school, no "prices" check for a clinic.
+    const prof = profileOf(f.k);
+    if (r.when && !r.when(prof)) continue;
     const res = r.run(f);
-    if (res) checks.push({ id: r.id, area: r.area, label: r.label, ...res });
+    if (res) checks.push({ id: r.id, area: r.area, label: typeof r.label === "function" ? r.label(prof) : r.label, ...res });
   }
   const areas = AREAS.map((a) => {
     const cs = checks.filter((c) => c.area === a.key);

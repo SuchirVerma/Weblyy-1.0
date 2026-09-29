@@ -1,3 +1,4 @@
+import { profileKeyOf } from "./profiles";
 import { detectPlace } from "./regions";
 const SCHEMA_TYPE = {
   salon: "BeautySalon",
@@ -55,7 +56,7 @@ function openingHoursSpec(hours) {
 }
 export function buildSearchPack(k, publicUrl) {
   const where = k.address ? locality(k.address) : "";
-  const label = TYPE_LABEL[k.businessType];
+  const label = (profileKeyOf(k) === "school" ? "School" : TYPE_LABEL[k.businessType]);
   const topServices = (k.prices.length ? k.prices.map((p) => p.name) : k.services).slice(0, 4);
   const metaTitle = clip(`${k.name}${where ? ` | ${label} in ${where}` : ` | ${label}`}`, 60);
   const metaDescription = clip(
@@ -107,7 +108,7 @@ export function buildSearchPack(k, publicUrl) {
   const url = publicUrl ?? k.url;
   const business = {
     "@context": "https://schema.org",
-    "@type": SCHEMA_TYPE[k.businessType],
+    "@type": profileKeyOf(k) === "school" ? "School" : SCHEMA_TYPE[k.businessType],
     name: k.name,
     url,
     description: clip(summary, 300),

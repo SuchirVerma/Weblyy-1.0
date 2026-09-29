@@ -1,3 +1,4 @@
+import { Concierge } from "@/components/concierge/concierge";
 import { NavHistory } from "@/components/nav-history";
 import { Albert_Sans, Bricolage_Grotesque, DM_Mono } from "next/font/google";
 import { MotionRoot } from "@/components/motion-root";
@@ -7,7 +8,7 @@ const display = Bricolage_Grotesque({ variable: "--font-display", subsets: ["lat
 const body = Albert_Sans({ variable: "--font-body", subsets: ["latin"], weight: ["400", "500", "600"] });
 const mono = DM_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500"] });
 const DESCRIPTION =
-  "Turn your existing website into an AI-powered customer acquisition system: AI readiness audit, website transformation, AI Customer Agent, AI search readiness, Lead Center and automations.";
+  "Weblyy checks your website against what a business like yours needs and builds the website it should have: the right sections, the right main button, found on Google. No website? We build one from your Instagram.";
 export const metadata = {
   metadataBase: new URL(siteUrl()),
   title: "Weblyy: Make your business AI-ready",
@@ -52,6 +53,7 @@ export default function RootLayout({ children }) {
         />
         <NavHistory />
         <MotionRoot>{children}</MotionRoot>
+        <Concierge />
       </body>
     </html>
   );

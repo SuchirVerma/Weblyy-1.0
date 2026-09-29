@@ -1,5 +1,6 @@
 /*!
- * Weblyy add-ons for an existing website: Call / WhatsApp / Book buttons and a booking form.
+ * Weblyy add-ons for an existing website: the quick buttons and the one form this kind of business needs
+ * (a booking for a salon, an admission enquiry for a school, a table for a restaurant). cfg.goal and cfg.quick decide which.
  * Everything lives in its own Shadow DOM, so the site's design is never touched and its CSS can't break these.
  *   <script src="https://YOUR-WEBLYY-URL/weblyy-addons.js" data-config='{"agent":"…","phone":"…","whatsapp":"…","services":[…]}' async></script>
  */
@@ -27,6 +28,7 @@
     call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.2.1-.2 0-.3 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>',
     book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   };
 
@@ -85,10 +87,26 @@
     return d.innerHTML;
   }
 
+  var goal = cfg.goal || {
+    id: "booking",
+    title: "Book an appointment",
+    cta: "Request appointment",
+    short: "Book",
+    fields: [{ name: "name" }, { name: "phone" }, { name: "service", label: "Service" }, { name: "when", label: "Preferred day and time", placeholder: "e.g. Saturday 4 pm" }],
+  };
+  var quick = cfg.quick || ["call", "whatsapp", "goal"];
+  var has = function (q) {
+    return quick.indexOf(q) >= 0;
+  };
+  function fieldOf(n) {
+    for (var i = 0; i < (goal.fields || []).length; i++) if (goal.fields[i].name === n) return goal.fields[i];
+    return null;
+  }
+
   /* ------------------------------------------------------------ quick actions */
   var dock = el("div", { class: "dock", role: "group", "aria-label": "Contact " + (cfg.name || "us") });
-  if (cfg.phone) dock.appendChild(el("a", { href: "tel:" + cfg.phone, "aria-label": "Call" }, ICON.call + '<span class="lbl">Call</span>'));
-  if (cfg.whatsapp && cfg.whatsapp.length >= 10)
+  if (cfg.phone && has("call")) dock.appendChild(el("a", { href: "tel:" + cfg.phone, "aria-label": "Call" }, ICON.call + '<span class="lbl">Call</span>'));
+  if (cfg.whatsapp && cfg.whatsapp.length >= 10 && has("whatsapp"))
     dock.appendChild(
       el(
         "a",
@@ -96,9 +114,13 @@
         ICON.wa + '<span class="lbl">WhatsApp</span>',
       ),
     );
-  var bookBtn = el("button", { class: "book", type: "button", "aria-label": "Book" }, ICON.book + '<span class="lbl">Book</span>');
-  bookBtn.addEventListener("click", openBooking);
-  dock.appendChild(bookBtn);
+  if (cfg.map && has("directions"))
+    dock.appendChild(el("a", { href: cfg.map, target: "_blank", rel: "noopener", "aria-label": "Directions" }, ICON.pin + '<span class="lbl">Directions</span>'));
+  if (has("goal") || !dock.children.length) {
+    var bookBtn = el("button", { class: "book", type: "button", "aria-label": goal.short }, ICON.book + '<span class="lbl">' + text(goal.short) + "</span>");
+    bookBtn.addEventListener("click", openBooking);
+    dock.appendChild(bookBtn);
+  }
   root.appendChild(dock);
 
   /* ------------------------------------ never cover the site's own buttons */
@@ -176,7 +198,12 @@
   var lastFocus = null;
   function openBooking() {
     lastFocus = document.activeElement;
-    var veil = el("div", { class: "veil", role: "dialog", "aria-modal": "true", "aria-label": "Book an appointment" });
+    var veil = el("div", { class: "veil", role: "dialog", "aria-modal": "true", "aria-label": goal.title });
+    var svc = fieldOf("service");
+    var when = fieldOf("when");
+    var people = fieldOf("people");
+    var note = fieldOf("note");
+    var nameLabel = (fieldOf("name") && fieldOf("name").label) || "Your name";
     var options = (cfg.services || [])
       .map(function (s) {
         return "<option>" + text(s) + "</option>";
@@ -188,19 +215,27 @@
       '<button class="close" type="button" aria-label="Close">' +
         ICON.x +
         "</button>" +
-        "<h2>Book an appointment</h2><p>Leave your details and " +
+        "<h2>" +
+        text(goal.title) +
+        "</h2><p>Leave your details and " +
         text(cfg.name || "we") +
-        " will confirm your time" +
+        " will get back to you" +
         (cfg.hours ? " (" + text(cfg.hours) + ")" : "") +
         ".</p>" +
         "<form novalidate>" +
         '<div class="err" hidden></div>' +
-        '<label>Your name<input name="name" autocomplete="name" required maxlength="60"></label>' +
+        "<label>" + text(nameLabel) + '<input name="name" autocomplete="name" required maxlength="60"></label>' +
         '<label>Phone number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="98765 43210"></label>' +
-        (options ? '<label>Service<select name="service"><option value="">Choose a service</option>' + options + "<option>Something else</option></select></label>" : "") +
-        '<label>Preferred day and time<input name="when" maxlength="60" placeholder="e.g. Saturday 4 pm"></label>' +
+        (svc
+          ? options && goal.id !== "admission"
+            ? "<label>" + text(svc.label || "Service") + '<select name="service"><option value="">' + text(svc.placeholder || "Choose one") + "</option>" + options + "<option>Something else</option></select></label>"
+            : "<label>" + text(svc.label || "Service") + '<input name="service" maxlength="80" placeholder="' + text(svc.placeholder || "") + '"></label>'
+          : "") +
+        (people ? "<label>" + text(people.label) + '<input name="people" type="number" min="1" max="50" inputmode="numeric" placeholder="' + text(people.placeholder || "") + '"></label>' : "") +
+        (note ? "<label>" + text(note.label) + '<input name="note" maxlength="80" placeholder="' + text(note.placeholder || "") + '"></label>' : "") +
+        (when ? "<label>" + text(when.label) + '<input name="when" maxlength="60" placeholder="' + text(when.placeholder || "") + '"></label>' : "") +
         '<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">' +
-        '<button class="submit" type="submit">Request appointment</button>' +
+        '<button class="submit" type="submit">' + text(goal.cta) + "</button>" +
         '<div class="note">Added by Weblyy · your details go only to ' +
         text(cfg.name || "the business") +
         "</div>" +
@@ -239,7 +274,8 @@
       btn.disabled = true;
       btn.textContent = "Sending…";
       var service = String(f.get("service") || "");
-      var when = String(f.get("when") || "").trim();
+      var whenV = String(f.get("when") || "").trim();
+      var extra = [f.get("people") ? f.get("people") + " people" : "", note && f.get("note") ? note.label + ": " + f.get("note") : ""].filter(Boolean).join(" · ");
       fetch(origin + "/api/leads", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -247,8 +283,8 @@
           agentId: cfg.agent,
           name: name,
           phone: phone,
-          interest: service || "Appointment",
-          message: "Appointment request" + (when ? " · Preferred: " + when : "") + " · from the website booking button",
+          interest: service || goal.title,
+          message: goal.title + (extra ? " · " + extra : "") + (whenV ? " · " + (when ? when.label : "When") + ": " + whenV : "") + " · from the website button",
           website: String(f.get("website") || ""),
         }),
       })
@@ -266,12 +302,12 @@
             text(cfg.name || "We") +
             " will call you on " +
             text(phone) +
-            ' to confirm.</p><button class="submit" type="button">Done</button></div>';
+            '.</p><button class="submit" type="button">Done</button></div>';
           card.querySelector(".submit").addEventListener("click", close);
         })
         .catch(function (e2) {
           btn.disabled = false;
-          btn.textContent = "Request appointment";
+          btn.textContent = goal.cta;
           showErr(e2 && e2.message ? e2.message : "Couldn't send. Please check your connection and try again.");
         });
     });
@@ -321,7 +357,7 @@
     mark("New", function () {
       return dock.getBoundingClientRect();
     });
-    mark("New · AI assistant", function () {
+    if (cfg.assistant !== false) mark("New · AI assistant", function () {
       var b = document.querySelector(".fs-w-btn");
       return b ? b.getBoundingClientRect() : null;
     });

@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { moreScenes } from "./hero-3d-more";
 /**
- * The 3D backdrop of the redesigned website's hero. One of 10 scenes (chosen per business by lib/scene-pick),
+ * The 3D backdrop of the redesigned website's hero. One of 42 scenes (chosen per business by lib/scene-pick),
  * lit in the site's theme colours, with depth fade and a gentle camera drift that follows the pointer.
  * Pauses when off screen or in a hidden tab. Reduced motion and automated browsers get one still frame.
  */
@@ -560,6 +561,9 @@ const SCENES = {
     };
   },
 };
+
+// The 32 particle-field designs from hero-3d-more.js join the original 10.
+Object.assign(SCENES, moreScenes(softPoints));
 
 export function Hero3D({ color, glow, photo, scene = "flow" }) {
   const ref = useRef(null);

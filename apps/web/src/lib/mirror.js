@@ -1,6 +1,7 @@
 import "server-only";
 import * as cheerio from "cheerio";
 import { CrawlError, DEMO_URL, fetchPage } from "./crawl";
+import { profileOf } from "./profiles";
 import { renderPage } from "./render";
 export const MODES = ["original", "enhanced"];
 const DEMO_HOST = new URL(DEMO_URL).hostname;
@@ -138,8 +139,15 @@ export function transform(html, o) {
     const phone = (k.phones[0] ?? "").replace(/[^\d+]/g, "");
     const wa = (k.whatsapp[0] ?? k.phones[0] ?? "").replace(/\D/g, "");
     const services = [...new Set([...k.prices.map((p) => p.name), ...k.services])].slice(0, 12);
+    const profile = profileOf(k);
+    const assistant = profile.agent.mode === "full";
+    const mapQuery = k.address ? `${k.name} ${k.address}` : "";
     const cfg = {
       agent: o.agent.id,
+      goal: { id: profile.goal.id, title: profile.goal.title, cta: profile.goal.cta, short: profile.goal.short, fields: profile.goal.fields },
+      quick: profile.quick,
+      map: k.mapUrl || (mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : ""),
+      assistant,
       name: k.name,
       phone,
       whatsapp: wa.length === 10 ? `91${wa}` : wa,
@@ -147,11 +155,12 @@ export function transform(html, o) {
       hours: k.hours[0] ?? "",
       highlight: o.highlight,
     };
+    // The chat assistant only goes where customers ask a lot before buying (salons, clinics, coaching, gyms).
     $("body").append(
-      `<script src="${o.appOrigin}/widget.js" data-agent="${esc(o.agent.id)}" async></script>` +
+      (assistant ? `<script src="${o.appOrigin}/widget.js" data-agent="${esc(o.agent.id)}" async></script>` : "") +
         `<script src="${o.appOrigin}/weblyy-addons.js" data-config="${esc(JSON.stringify(cfg))}" async></script>`,
     );
-    added.push("ai-assistant", "quick-actions", "booking-form");
+    added.push(...(assistant ? ["ai-assistant"] : []), "quick-actions", `${profile.goal.id}-form`);
   }
   return { html: $.html(), added };
 }

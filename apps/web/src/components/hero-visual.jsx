@@ -13,15 +13,16 @@ const DEMO_BLIPS = [
   { id: "f", channel: "form", label: "Contact form" },
   { id: "g", channel: "social", label: "Instagram" },
 ];
+// Each kind of business gets a different website: the pair shows the business, then what its site leads with.
+const BUBBLES = ["A school", "A salon", "A restaurant", "A clinic", "A shop", "A coaching institute"];
 const REPLIES = [
-  "Hair Spa ₹1,200 hai. Slot book kar du?",
-  "Haan ji! Kaunsi service? Team confirm karegi.",
-  "Tue–Sun, 10am se 8:30pm tak.",
-  "Haan, free parking bahar hi hai.",
-  "Fruit Facial ₹900, Gold ₹1,500.",
-  "Bridal HD ₹18,000 se start.",
+  "Admissions · Fee structure · Notices · Directions",
+  "Services & prices · Book a slot · Gallery",
+  "Menu · Reserve a table · Directions",
+  "Doctors & timings · Book a consultation",
+  "Products · Is it in stock? · Directions",
+  "Courses & batches · Free demo class · Results",
 ];
-const BUBBLES = ["Hair spa kitne ka hai?", "Saturday 4pm free hai?", "Kab tak khule ho?", "Parking hai?", "Facial ka rate?", "Bridal makeup price?"];
 export function HeroVisual() {
   const reduce = useReducedSafe();
   const [tick, setN] = useState(0);
@@ -56,7 +57,7 @@ export function HeroVisual() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span className={styles.bubbleWho}>customer · 21:4{bubble}</span>
+              <span className={styles.bubbleWho}>business</span>
               {BUBBLES[bubble]}
             </motion.div>
             <motion.div
@@ -65,7 +66,7 @@ export function HeroVisual() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span className={styles.bubbleWho}>agent · replied in 3s</span>
+              <span className={styles.bubbleWho}>its Weblyy website leads with</span>
               {REPLIES[bubble]}
             </motion.div>
           </motion.div>

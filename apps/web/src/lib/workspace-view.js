@@ -1,11 +1,13 @@
 import "server-only";
 import { pickScene } from "./scene-pick";
+import { profileOf } from "./profiles";
 import { AUTOMATIONS, isOn, runDetail, runName } from "./automations";
 const twilioReady = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM);
 const n8nReady = () => Boolean(process.env.N8N_URL && process.env.N8N_API_KEY);
 /** The Command Center's data, shared by the page (first render) and the API (live refresh). */
 export function workspaceView(agent) {
   const k = agent.knowledge;
+  const profile = profileOf(k);
   const intents = {};
   for (const l of agent.log) intents[l.intent] = (intents[l.intent] ?? 0) + 1;
   const bySource = {};
@@ -46,8 +48,16 @@ export function workspaceView(agent) {
       .slice(-60)
       .reverse()
       .map((r) => ({ ...r, automation: runName(r.automation), detail: runDetail(r.detail) })),
-    automations: AUTOMATIONS.map((a) => ({
+    // Only the automations this kind of business needs; WhatsApp and n8n stay available as optional extras.
+    automations: AUTOMATIONS.filter((a) => profile.automations.includes(a.key) || a.requires).map((a) => ({
       ...a,
+      ...(a.key === "booking"
+        ? {
+            name: `Take ${profile.goal.requests.toLowerCase()}`,
+            trigger: `A customer wants to ${profile.goal.cta.toLowerCase()}`,
+            description: `Requests for “${profile.goal.cta}” come to you in one place. You confirm with one reply.`,
+          }
+        : {}),
       on: isOn(agent.automations, a.key),
       ready: a.requires === "twilio" ? twilioReady() : true,
       runs: agent.runs.filter((r) => runName(r.automation) === a.name).length,
@@ -64,5 +74,6 @@ export function workspaceView(agent) {
     setupRequest: agent.setupRequest ?? null,
     published: agent.published ?? null,
     design: pickScene(agent.knowledge),
+    profile: { key: profile.key, label: profile.label, goal: profile.goal, quick: profile.quick, agentMode: profile.agent.mode },
   };
 }

@@ -1,3 +1,4 @@
+import { profileOf } from "./profiles";
 import "server-only";
 import { AUTOMATIONS, isOn } from "./automations";
 import { conversationFor, newId, recordRun, savePersist } from "./store";
@@ -86,6 +87,13 @@ function qualify(ctx) {
   const temperature = score >= 70 ? "hot" : score >= 45 ? "warm" : "cold";
   return { score, temperature, why };
 }
+const NEXT_STEP = {
+  booking: "Would you like to book a slot this week?",
+  reservation: "Shall we keep a table for you?",
+  admission: "When would be a good time for our admissions office to call you?",
+  demo: "Would you like to join a free demo class this week?",
+  trial: "Would you like to come in for a free trial this week?",
+};
 function followUpFor(agent, lead, ctx) {
   const biz = agent.knowledge.name;
   const who = lead.name ? `Hi ${lead.name.split(" ")[0]}` : "Hi";
@@ -94,7 +102,7 @@ function followUpFor(agent, lead, ctx) {
     ? ctx.when
       ? `Shall we confirm your slot for ${ctx.when}?`
       : "Which day and time suits you? We'll lock it in."
-    : "Would you like to book a slot this week?";
+    : NEXT_STEP[profileOf(agent.knowledge).goal.id] ?? "Is there anything else we can help with?";
   return `${who}, this is ${biz}. Thanks for reaching out${about}! ${ask}`;
 }
 function upsertLead(agent, from, ctx, source) {
