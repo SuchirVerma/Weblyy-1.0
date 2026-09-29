@@ -18,9 +18,8 @@ async function launch(): Promise<Browser | null> {
     if (process.env.VERCEL) {
       // Serverless: no Chrome installed, so use the Chromium build made for AWS Lambda-style functions.
       const serverless = (await import("@sparticuz/chromium")).default;
-      // --single-process crashes Chromium as soon as Playwright opens a second context (laptop + phone at once).
-      const args = serverless.args.filter((a) => a !== "--single-process" && a !== "--no-zygote");
-      const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args });
+      // Its flags include --single-process, which the function sandbox needs; that's also why each job gets a fresh browser.
+      const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args: serverless.args });
       return browser;
     }
     const opts = { headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] };
