@@ -19,7 +19,8 @@ function lanOrigin(req: Request): string | null {
 
 export function GET(req: Request) {
   // Every page calls this on load, so Chrome is ready by the time someone presses Analyze.
-  warmBrowser();
+  // (Not on Vercel: each instance would start its own Chromium for nothing.)
+  if (!process.env.VERCEL) warmBrowser();
   return Response.json({
     ai: aiEnabled() ? "ai" : "rules",
     n8n: Boolean(process.env.N8N_URL && process.env.N8N_API_KEY),

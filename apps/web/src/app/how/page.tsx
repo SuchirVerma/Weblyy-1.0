@@ -3,7 +3,7 @@ import { Steps } from "@/components/steps";
 import { CountUp, Nav, Reveal, ScanBar } from "@/components/ui";
 import styles from "@/components/landing.module.css";
 
-export const metadata = { title: "How it works | Weblyy" };
+export const metadata = { title: "How it works | Weblyy", description: "How Weblyy reads a business website, scores its AI readiness, rebuilds the website from its own content and switches on an AI customer agent, lead center and automations.", alternates: { canonical: "/how" } };
 
 export default function HowPage() {
   return (

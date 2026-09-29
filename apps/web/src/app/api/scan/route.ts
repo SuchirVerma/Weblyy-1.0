@@ -10,7 +10,7 @@ import type { ScanEvent, WebPresence } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
         const result = { knowledge, touchpoints, gaps, presence, capture };
         send({ type: "stage", stage: "done" });
         // The rendered HTML stays on the server; the browser only needs the measurements.
-        send({ type: "result", scanId: saveScan(result), result: { ...result, capture: capture && { ...capture, html: "" } } });
+        send({ type: "result", scanId: await saveScan(result), result: { ...result, capture: capture && { ...capture, html: "" } } });
       } catch (e) {
         const message = e instanceof CrawlError ? e.message : "Something went wrong while scanning. Try again or use the demo.";
         if (!(e instanceof CrawlError)) console.error("[scan]", e);

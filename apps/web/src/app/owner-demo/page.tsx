@@ -2,7 +2,7 @@ import Link from "next/link";
 import { OwnerDemo } from "@/components/owner-demo";
 import { Arrow, Nav } from "@/components/ui";
 
-export const metadata = { title: "The owner's side | Weblyy" };
+export const metadata = { title: "The owner’s side | Weblyy", description: "See what a business owner sees in Weblyy: customer chats answered by AI, leads, and the conversations that need a person.", alternates: { canonical: "/owner-demo" } };
 
 export default function OwnerDemoPage() {
   return (

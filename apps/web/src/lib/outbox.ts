@@ -1,6 +1,7 @@
 import "server-only";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { getJSON, serverless, setJSON, useRedis } from "./kv";
 import { appendRow, sheetConfigured } from "./sheet";
 import { NotConfigured, sendSms, smsProvider } from "./sms";
 import type { SetupRequest } from "./store";
@@ -37,6 +38,12 @@ const state = (g.__weblyyOutbox ??= { items: [], loaded: null, timer: null, runn
 export const SMS_TO = () => process.env.SETUP_SMS_TO || "";
 
 async function load() {
+  if (useRedis) {
+    // Another instance may have added requests, so read fresh every time.
+    const list = await getJSON<OutboxItem[]>("outbox");
+    if (Array.isArray(list)) state.items = list;
+    return;
+  }
   state.loaded ??= readFile(FILE, "utf8")
     .then((t) => {
       const list = JSON.parse(t);
@@ -53,6 +60,7 @@ let writing: Promise<void> = Promise.resolve();
 function save() {
   writing = writing.then(async () => {
     try {
+      if (useRedis) return void (await setJSON("outbox", state.items.slice(-2000)));
       await mkdir(DIR, { recursive: true });
       const tmp = `${FILE}.${process.pid}.tmp`;
       await writeFile(tmp, JSON.stringify(state.items.slice(-2000)));
@@ -172,7 +180,8 @@ export async function processOutbox(force = false) {
 }
 
 function startTimer() {
-  if (state.timer) return;
+  // Serverless instances freeze between requests; retries run when the team page is opened instead.
+  if (state.timer || serverless) return;
   state.timer = setInterval(() => {
     processOutbox().catch((e) => console.error("[outbox] run failed", e));
   }, 60_000);
@@ -200,6 +209,7 @@ export async function enqueueSetupRequest(request: OutboxItem["request"]) {
 export async function outboxItems() {
   await load();
   startTimer();
+  if (serverless) await processOutbox().catch((e) => console.error("[outbox] retry run failed", e));
   return [...state.items].sort((a, b) => b.createdAt - a.createdAt);
 }
 

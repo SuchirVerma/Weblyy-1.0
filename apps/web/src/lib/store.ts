@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Audit } from "./audit";
+import { background, getJSON, getMany, redis, setJSON, useRedis } from "./kv";
 import type { SearchPack } from "./aisearch";
 import type { MakeoverPlan, SiteAudit, SiteBrand } from "./makeover";
 import type { Answers, Capture, ChatTurn, ScanResult, SiteKnowledge } from "./types";
@@ -134,25 +135,41 @@ const MAX_AGENTS = 300;
 const g = globalThis as unknown as { __weblyyAgents?: Map<string, DeployedAgent>; __weblyyLoaded?: Promise<void> };
 const agents: Map<string, DeployedAgent> = (g.__weblyyAgents ??= new Map<string, DeployedAgent>());
 
+function normalize(a: DeployedAgent) {
+  a.conversations ??= {};
+  a.leads ??= [];
+  a.runs ??= [];
+  a.automations ??= {};
+  a.ownerKey ??= randomBytes(12).toString("hex");
+  return a;
+}
+
 async function load() {
+  if (useRedis) return; // each business is read from Redis when it's needed
   try {
     const list = JSON.parse(await readFile(FILE, "utf8")) as DeployedAgent[];
-    for (const a of list) {
-      a.conversations ??= {};
-      a.leads ??= [];
-      a.runs ??= [];
-      a.automations ??= {};
-      a.ownerKey ??= randomBytes(12).toString("hex");
-      if (!agents.has(a.id)) agents.set(a.id, a);
-    }
+    for (const a of list) if (!agents.has(a.id)) agents.set(a.id, normalize(a));
   } catch {
     /* first run: nothing saved yet */
   }
 }
 const ready = () => (g.__weblyyLoaded ??= load());
 
+/* With Redis, each business is its own record. Writes cover only the businesses this request read or created,
+   so one instance never overwrites another's newer data with a stale copy. */
+const AGENT_KEY = (id: string) => `agent:${id}`;
+const AGENT_IDS = "agents";
+const touched = new Set<string>();
+
 let saveTimer: NodeJS.Timeout | null = null;
 function persist() {
+  if (useRedis) {
+    const ids = [...touched];
+    touched.clear();
+    const list = ids.map((id) => agents.get(id)).filter((a): a is DeployedAgent => Boolean(a));
+    if (list.length) background(Promise.all(list.map((a) => setJSON(AGENT_KEY(a.id), a))));
+    return;
+  }
   if (saveTimer) return;
   saveTimer = setTimeout(async () => {
     saveTimer = null;
@@ -160,23 +177,37 @@ function persist() {
       await mkdir(DIR, { recursive: true });
       await writeFile(FILE, JSON.stringify([...agents.values()]));
     } catch {
-      /* read-only filesystem (e.g. serverless): keep running from memory */
+      /* read-only filesystem: keep running from memory */
     }
   }, 300);
 }
 
-/* Scans live in memory only; they are cheap to redo. */
-const scanStore = ((globalThis as unknown as { __weblyyScans?: Map<string, ScanResult> }).__weblyyScans ??= new Map<string, ScanResult>());
+async function allAgents(): Promise<DeployedAgent[]> {
+  if (!redis) return [...agents.values()];
+  const ids = await redis.smembers(AGENT_IDS);
+  return (await getMany<DeployedAgent>(ids.map(AGENT_KEY))).map(normalize);
+}
 
-export function saveScan(scan: ScanResult): string {
+/* Scans are cheap to redo: in memory on a server, in Redis for a day on Vercel. */
+const scanStore = ((globalThis as unknown as { __weblyyScans?: Map<string, ScanResult> }).__weblyyScans ??= new Map<string, ScanResult>());
+const SCAN_TTL = 24 * 3600;
+
+export async function saveScan(scan: ScanResult): Promise<string> {
   const id = randomBytes(6).toString("hex");
   scanStore.set(id, scan);
   if (scanStore.size > 40) scanStore.delete(scanStore.keys().next().value!);
+  // The rendered HTML is large and only needed during the scan itself.
+  if (useRedis) await setJSON(`scan:${id}`, { ...scan, capture: scan.capture && { ...scan.capture, html: "" } }, SCAN_TTL);
   return id;
 }
 
-export function getScan(id: string) {
-  return scanStore.get(id) ?? null;
+export async function getScan(id: string): Promise<ScanResult | null> {
+  if (!/^[a-f0-9]{12}$/.test(id)) return null;
+  const hit = scanStore.get(id);
+  if (hit || !useRedis) return hit ?? null;
+  const scan = await getJSON<ScanResult>(`scan:${id}`);
+  if (scan) scanStore.set(id, scan);
+  return scan;
 }
 
 export async function createAgent(knowledge: SiteKnowledge, workflowName: string): Promise<DeployedAgent> {
@@ -196,7 +227,10 @@ export async function createAgent(knowledge: SiteKnowledge, workflowName: string
     automations: {},
   };
   agents.set(id, agent);
-  if (agents.size > MAX_AGENTS) {
+  if (redis) {
+    touched.add(id);
+    await redis.sadd(AGENT_IDS, id);
+  } else if (agents.size > MAX_AGENTS) {
     // Drop the oldest unused one first, so a business that has customers or asked for setup is never lost to a pile of test scans.
     const used = (a: DeployedAgent) => a.leads.length > 0 || Object.keys(a.conversations).length > 0 || Boolean(a.setupRequest);
     const byAge = [...agents.values()].filter((a) => a.id !== id).sort((a, b) => a.createdAt - b.createdAt);
@@ -209,12 +243,20 @@ export async function createAgent(knowledge: SiteKnowledge, workflowName: string
 
 export async function getAgent(id: string) {
   await ready();
+  if (useRedis) {
+    // Always fresh: another instance may have changed it since.
+    const a = /^[a-f0-9]{6,32}$/.test(id) ? await getJSON<DeployedAgent>(AGENT_KEY(id)) : null;
+    if (!a) return null;
+    agents.set(id, normalize(a));
+    touched.add(id);
+  }
   return agents.get(id) ?? null;
 }
 
 export async function latestAgent() {
   await ready();
-  return [...agents.values()].sort((a, b) => b.createdAt - a.createdAt)[0] ?? null;
+  const latest = (await allAgents()).sort((a, b) => b.createdAt - a.createdAt)[0];
+  return latest ? getAgent(latest.id) : null;
 }
 
 const MAX_CONVERSATIONS = 200;
@@ -302,7 +344,7 @@ export function historyFor(agent: DeployedAgent, from: string): ChatTurn[] {
 /** Every done-for-you setup request across businesses, newest first (for the Weblyy team). */
 export async function allSetupRequests() {
   await ready();
-  return [...agents.values()]
+  return (await allAgents())
     .map((a) => a.setupRequest)
     .filter((r): r is SetupRequest => Boolean(r))
     .sort((a, b) => b.at - a.at);

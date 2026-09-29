@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 /** The redesigned website for a scan, before the business goes live. Not indexed; the form doesn't send. */
 export async function generateMetadata({ params }: PageProps<"/preview/[scanId]">): Promise<Metadata> {
   const { scanId } = await params;
-  const scan = getScan(scanId);
+  const scan = await getScan(scanId);
   if (!scan) return { title: "Preview expired", robots: { index: false } };
   const search = buildSearchPack(scan.knowledge);
   const image = siteBrand(scan).hero?.src ?? scan.knowledge.content?.ogImage;
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/preview/[scanId]"
 
 export default async function Preview({ params }: PageProps<"/preview/[scanId]">) {
   const { scanId } = await params;
-  const scan = getScan(scanId);
+  const scan = await getScan(scanId);
   if (!scan) {
     return (
       <main style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: 24, textAlign: "center" }}>

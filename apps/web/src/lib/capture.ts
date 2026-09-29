@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { BrowserContext, Page } from "playwright-core";
+import { setBytes, useRedis } from "./kv";
 import { isPublicHost } from "./net";
 import { withBrowser } from "./render";
 import type { Capture, PageMetrics } from "./types";
@@ -14,6 +15,7 @@ import type { Capture, PageMetrics } from "./types";
  */
 
 export const SHOT_DIR = path.join(process.env.DATA_DIR || path.join(process.cwd(), ".data"), "shots");
+const SHOT_TTL = 60 * 24 * 3600;
 const TRACKERS = /google-analytics|googletagmanager|doubleclick|facebook\.net|connect\.facebook|hotjar|clarity\.ms|adservice|googlesyndication/i;
 const MAX_SHOT_H = { desktop: 5200, mobile: 7000 };
 
@@ -264,9 +266,12 @@ async function measure(ctxFactory: () => Promise<BrowserContext>, url: string, d
       const width = DEVICES[device].viewport.width;
       const buf = await page.screenshot({ type: "jpeg", quality: device === "mobile" ? 62 : 72, fullPage: true, clip: { x: 0, y: 0, width, height: h } }).catch(() => null);
       if (buf) {
-        await mkdir(SHOT_DIR, { recursive: true });
         shot = `${file}-${device}.jpg`;
-        await writeFile(path.join(SHOT_DIR, shot), buf);
+        if (useRedis) await setBytes(`shot:${shot}`, buf, SHOT_TTL);
+        else {
+          await mkdir(SHOT_DIR, { recursive: true });
+          await writeFile(path.join(SHOT_DIR, shot), buf);
+        }
       }
     }
     const html = device === "desktop" ? await page.content().catch(() => "") : "";

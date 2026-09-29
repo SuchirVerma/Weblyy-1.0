@@ -4,6 +4,8 @@ import { Nav, ScanBar } from "@/components/ui";
 import Link from "next/link";
 import styles from "@/components/landing.module.css";
 
+export const metadata = { alternates: { canonical: "/" } };
+
 export default function Home() {
   return (
     <>

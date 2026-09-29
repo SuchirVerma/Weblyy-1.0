@@ -15,6 +15,15 @@ async function launch(): Promise<Browser | null> {
   if (process.env.DISABLE_BROWSER === "1") return null;
   try {
     const { chromium } = await import("playwright-core");
+    if (process.env.VERCEL) {
+      // Serverless: no Chrome installed, so use the Chromium build made for AWS Lambda-style functions.
+      const serverless = (await import("@sparticuz/chromium")).default;
+      const browser = await chromium.launch({ headless: true, executablePath: await serverless.executablePath(), args: serverless.args });
+      browser.on("disconnected", () => {
+        g.__fsBrowser = undefined;
+      });
+      return browser;
+    }
     const opts = { headless: true, args: ["--no-sandbox", "--disable-dev-shm-usage"] };
     const browser = await chromium
       .launch({ ...opts, channel: "chrome" })

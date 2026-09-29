@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": [
+    "bom1"
+  ],
+  "functions": {
+    "src/app/api/scan/route.ts": {
+      "memory": 2048
+    },
+    "src/app/api/makeover/[scanId]/route.ts": {
+      "memory": 2048
+    },
+    "src/app/api/workspace/route.ts": {
+      "memory": 2048
+    },
+    "src/app/api/search/route.ts": {
+      "memory": 2048
+    }
+  }
+}

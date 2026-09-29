@@ -2,7 +2,7 @@ import { Arrow, Nav, Reveal } from "@/components/ui";
 import Link from "next/link";
 import styles from "@/components/landing.module.css";
 
-export const metadata = { title: "We set it up for you | Weblyy" };
+export const metadata = { title: "We set it up for you | Weblyy", description: "Book a free setup call. The Weblyy team connects your AI customer agent, WhatsApp, website and lead center for you.", alternates: { canonical: "/setup" } };
 
 export default function SetupPage() {
   return (

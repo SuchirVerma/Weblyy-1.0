@@ -3,7 +3,7 @@ import { CodeBlock } from "@/components/code-block";
 import { Arrow, Fold, Nav } from "@/components/ui";
 import styles from "./integrate.module.css";
 
-export const metadata = { title: "Add it to your business | Weblyy" };
+export const metadata = { title: "Add it to your business | Weblyy", description: "Add the Weblyy AI chat assistant to any website with one line of code, or connect it to WhatsApp.", alternates: { canonical: "/integrate" } };
 
 const WIDGET = `<script src="{ORIGIN}/widget.js" data-agent="YOUR_AGENT_ID" async></script>`;
 const API = `curl -X POST {ORIGIN}/api/agent \\

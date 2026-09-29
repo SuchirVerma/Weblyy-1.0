@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   } catch {
     return Response.json({ error: "Bad request" }, { status: 400 });
   }
-  const scan = typeof body.scanId === "string" ? getScan(body.scanId) : null;
+  const scan = typeof body.scanId === "string" ? await getScan(body.scanId) : null;
   if (!scan) return Response.json({ error: "This scan expired. Please scan the site again." }, { status: 404 });
 
   const answers = parseAnswers(body.answers);

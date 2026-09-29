@@ -1,12 +1,15 @@
 import "server-only";
 import { capturePage } from "./capture";
 import { extractPage } from "./crawl";
+import { getJSON, setJSON, useRedis } from "./kv";
 import { auditSite, factsFor, hasRating, planMakeover, siteBrand, type SiteFacts } from "./makeover";
 import type { StoredMakeover } from "./store";
 import type { ScanResult } from "./types";
 
 /** Where this server can reach itself. Used to open the redesign preview (and the built-in demo) in the browser. */
 export function internalOrigin(req: Request) {
+  // On Vercel there's no "this machine"; the page is reached through the public address.
+  if (process.env.VERCEL) return new URL(req.url).origin;
   const port = new URL(req.url).port || process.env.PORT || "3000";
   return `http://127.0.0.1:${port}`;
 }
@@ -20,7 +23,15 @@ const running = ((globalThis as unknown as { __weblyyMakeovers?: Map<string, Pro
 export function ensureMakeover(scanId: string, scan: ScanResult, origin: string): Promise<StoredMakeover> {
   let p = running.get(scanId);
   if (!p) {
-    p = build(scanId, scan, origin);
+    // On Vercel another instance may already have built it.
+    p = (useRedis ? getJSON<StoredMakeover>(`makeover:${scanId}`) : Promise.resolve(null)).then(
+      (hit) =>
+        hit ??
+        build(scanId, scan, origin).then(async (m) => {
+          if (useRedis) await setJSON(`makeover:${scanId}`, m, 24 * 3600);
+          return m;
+        }),
+    );
     running.set(scanId, p);
     p.catch(() => running.delete(scanId));
     if (running.size > 40) running.delete(running.keys().next().value!);

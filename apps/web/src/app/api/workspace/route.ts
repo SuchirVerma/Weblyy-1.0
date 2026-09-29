@@ -7,6 +7,7 @@ import { createAgent, getScan, recordRun, savePersist } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 /** "Make my business AI-ready": switches on the agent, the AI-ready website, AI Search assets, Lead Center and automations. */
 export async function POST(req: Request) {
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
   } catch {
     return Response.json({ error: "Bad request" }, { status: 400 });
   }
-  const scan = typeof body.scanId === "string" ? getScan(body.scanId) : null;
+  const scan = typeof body.scanId === "string" ? await getScan(body.scanId) : null;
   if (!scan) return Response.json({ error: "This scan expired. Please analyze the website again." }, { status: 404 });
   const answers = parseAnswers(body.answers);
   // Usually ready already (the report builds it); don't hold up going live if it isn't.
