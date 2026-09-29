@@ -49,8 +49,9 @@ export function FindResults({ q }: { q: string }) {
     const ctrl = new AbortController();
     fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: ctrl.signal })
       .then(async (r) => {
-        const d = await r.json();
-        if (!r.ok) throw new Error(d?.error || "Search failed.");
+        const d = await r.json().catch(() => null);
+        if (!r.ok || !d) throw new Error(d?.error || "Search took too long. Paste the website address or @instagram handle instead.");
+        if (d.unavailable) throw new Error("Search by name isn't available right now. Paste the business's website address or @instagram handle instead.");
         setState({ loading: false, error: "", results: d.results });
       })
       .catch((e) => {

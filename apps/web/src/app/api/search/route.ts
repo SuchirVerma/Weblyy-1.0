@@ -10,8 +10,8 @@ export async function GET(req: Request) {
   if (q.length < 2) return Response.json({ error: "Type a business name to search." }, { status: 400 });
   if (!allow(`search:${clientIp(req)}`, 10, 60_000)) return Response.json({ error: "Too many searches. Give it a minute." }, { status: 429 });
   try {
-    const results = await searchBusiness(q);
-    return Response.json({ q, results });
+    const { results, answered } = await searchBusiness(q);
+    return Response.json({ q, results, unavailable: !answered });
   } catch (e) {
     console.error("[search]", e);
     return Response.json({ error: "Search isn't working right now. Paste the website or @instagram handle instead." }, { status: 502 });

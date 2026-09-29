@@ -38,9 +38,9 @@ function toResult(title: string, href: string, snippet: string): SearchResult | 
 async function duckduckgo(q: string): Promise<SearchResult[]> {
   const res = await fetch(`https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(q)}&kl=in-en`, {
     headers: { "user-agent": UA, accept: "text/html" },
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(8_000),
   });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const $ = cheerio.load(await res.text());
   const out: SearchResult[] = [];
   $("a.result-link").each((_, a) => {
@@ -59,23 +59,39 @@ async function duckduckgo(q: string): Promise<SearchResult[]> {
   return out;
 }
 
-async function brave(q: string): Promise<SearchResult[]> {
-  const key = process.env.BRAVE_SEARCH_API_KEY;
-  if (key) {
-    const res = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(q)}&country=in&count=15`, {
-      headers: { accept: "application/json", "x-subscription-token": key },
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (res.ok) {
-      const d = (await res.json()) as { web?: { results?: { title: string; url: string; description?: string }[] } };
-      return (d.web?.results ?? []).map((r) => toResult(r.title, r.url, (r.description ?? "").replace(/<[^>]+>/g, ""))).filter((r): r is SearchResult => r !== null);
-    }
-  }
-  const res = await fetch(`https://search.brave.com/search?q=${encodeURIComponent(q)}`, {
-    headers: { "user-agent": UA, accept: "text/html", "accept-language": "en-IN,en;q=0.9" },
+/** Google results via Serper.dev (free: 2,500 searches, no card). Works from cloud servers, unlike the free engines. */
+async function serper(q: string): Promise<SearchResult[] | null> {
+  const key = process.env.SERPER_API_KEY;
+  if (!key) return null;
+  const res = await fetch("https://google.serper.dev/search", {
+    method: "POST",
+    headers: { "x-api-key": key, "content-type": "application/json" },
+    body: JSON.stringify({ q, gl: "in", hl: "en", num: 15 }),
     signal: AbortSignal.timeout(10_000),
   });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const d = (await res.json()) as { organic?: { title: string; link: string; snippet?: string }[] };
+  return (d.organic ?? []).map((r) => toResult(r.title, r.link, r.snippet ?? "")).filter((r): r is SearchResult => r !== null);
+}
+
+async function braveApi(q: string): Promise<SearchResult[] | null> {
+  const key = process.env.BRAVE_SEARCH_API_KEY;
+  if (!key) return null;
+  const res = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(q)}&country=in&count=15`, {
+    headers: { accept: "application/json", "x-subscription-token": key },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const d = (await res.json()) as { web?: { results?: { title: string; url: string; description?: string }[] } };
+  return (d.web?.results ?? []).map((r) => toResult(r.title, r.url, (r.description ?? "").replace(/<[^>]+>/g, ""))).filter((r): r is SearchResult => r !== null);
+}
+
+async function brave(q: string): Promise<SearchResult[]> {
+  const res = await fetch(`https://search.brave.com/search?q=${encodeURIComponent(q)}`, {
+    headers: { "user-agent": UA, accept: "text/html", "accept-language": "en-IN,en;q=0.9" },
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const $ = cheerio.load(await res.text());
   const out: SearchResult[] = [];
   $('[data-type="web"]').each((_, el) => {
@@ -102,13 +118,38 @@ async function duckduckgoBrowser(q: string): Promise<SearchResult[]> {
   return out;
 }
 
-/** Try engines in order until one answers. Free engines rate-limit, so each is a fallback for the last. */
-export async function webSearch(q: string): Promise<SearchResult[]> {
-  for (const engine of [brave, duckduckgo, duckduckgoBrowser]) {
-    const r = await engine(q).catch(() => [] as SearchResult[]);
-    if (r.length >= 2) return r;
+/**
+ * Try engines in order until one answers. Keyed APIs first (they work from any server),
+ * then the free engines, which rate-limit and often block cloud IPs.
+ * `answered` is false only when no engine could be reached, so "nothing found" is never claimed falsely.
+ */
+export async function webSearchDetailed(q: string): Promise<{ results: SearchResult[]; answered: boolean }> {
+  // A real browser is too slow for a serverless time limit, and cloud IPs get a captcha anyway.
+  const engines: [string, (q: string) => Promise<SearchResult[] | null>][] = [
+    ["serper", serper],
+    ["brave-api", braveApi],
+    ["brave", brave],
+    ["duckduckgo", duckduckgo],
+    ...(process.env.VERCEL ? [] : ([["duckduckgo-browser", duckduckgoBrowser]] as [string, (q: string) => Promise<SearchResult[]>][])),
+  ];
+  let answered = false;
+  let best: SearchResult[] = [];
+  for (const [name, engine] of engines) {
+    try {
+      const r = await engine(q);
+      if (r === null) continue; // not configured
+      answered = true;
+      if (r.length >= 2) return { results: r, answered };
+      if (r.length > best.length) best = r;
+    } catch (e) {
+      console.warn(`[search] ${name} failed: ${e instanceof Error ? e.message : e}`);
+    }
   }
-  return [];
+  return { results: best, answered };
+}
+
+export async function webSearch(q: string): Promise<SearchResult[]> {
+  return (await webSearchDetailed(q)).results;
 }
 
 const cache = ((globalThis as unknown as { __fsSearch?: Map<string, { at: number; results: SearchResult[] }> }).__fsSearch ??= new Map());
@@ -127,12 +168,14 @@ function relevant(q: string, results: SearchResult[]) {
 }
 
 /** Find a business's website or Instagram from its name. */
-export async function searchBusiness(q: string): Promise<SearchResult[]> {
+export async function searchBusiness(q: string): Promise<{ results: SearchResult[]; answered: boolean }> {
   const key = q.toLowerCase().replace(/\s+/g, " ").trim();
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < TTL) return hit.results;
+  if (hit && Date.now() - hit.at < TTL) return { results: hit.results, answered: true };
 
-  let results = await webSearch(q);
+  const first = await webSearchDetailed(q);
+  if (!first.answered) return first;
+  let results = first.results;
   // Small businesses often have no website, so look for an Instagram profile explicitly too.
   if (results.length && !results.some((r) => r.kind === "instagram")) {
     const ig = await webSearch(`${q} instagram`);
@@ -166,5 +209,5 @@ export async function searchBusiness(q: string): Promise<SearchResult[]> {
     cache.set(key, { at: Date.now(), results: final });
     if (cache.size > 300) cache.delete(cache.keys().next().value!);
   }
-  return final;
+  return { results: final, answered: true };
 }
