@@ -1,7 +1,7 @@
 /*!
  * Weblyy chat widget. Add to any website:
  *   <script src="https://YOUR-WEBLYY-URL/widget.js" data-agent="AGENT_ID" async></script>
- * Optional: data-color="#000000" data-label="Chat with us"
+ * Optional: data-color="#111111" data-label="Chat with us"
  */
 (function () {
   var script = document.currentScript;
@@ -11,19 +11,19 @@
   window.__weblyyWidget = true;
 
   var origin = new URL(script.src, location.href).origin;
-  var color = script.getAttribute("data-color") || "#000000";
+  var color = script.getAttribute("data-color") || "#111111";
   var label = script.getAttribute("data-label") || "Chat with us";
 
   var style = document.createElement("style");
   style.textContent =
     ".fs-w-btn{position:fixed;right:20px;bottom:20px;z-index:2147483000;display:flex;align-items:center;gap:10px;height:54px;padding:0 20px 0 16px;border:0;border-radius:999px;background:" +
     color +
-    ";color:#fff;font:600 15px/1 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 12px 30px -8px rgba(0,0,0,.35);cursor:pointer;transition:transform .25s cubic-bezier(.22,1,.36,1)}" +
+    ";color:#fff;font:600 15px/1 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 12px 30px -8px rgba(17,17,17,.35);cursor:pointer;transition:transform .25s cubic-bezier(.22,1,.36,1)}" +
     ".fs-w-btn:hover{transform:translateY(-2px)}.fs-w-btn svg{width:22px;height:22px}" +
-    ".fs-w-frame{position:fixed;right:20px;bottom:86px;z-index:2147483000;width:380px;height:620px;max-height:calc(100vh - 110px);border:0;border-radius:24px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45);background:#fff;opacity:0;transform:translateY(16px) scale(.98);pointer-events:none;transition:opacity .3s,transform .35s cubic-bezier(.22,1,.36,1)}" +
+    ".fs-w-frame{position:fixed;right:20px;bottom:86px;z-index:2147483000;width:380px;height:620px;max-height:calc(100vh - 110px);border:0;border-radius:24px;box-shadow:0 30px 80px -20px rgba(17,17,17,.45);background:#fff;opacity:0;transform:translateY(16px) scale(.98);pointer-events:none;transition:opacity .3s,transform .35s cubic-bezier(.22,1,.36,1)}" +
     ".fs-w-frame.open{opacity:1;transform:none;pointer-events:auto}" +
     "@media (max-width:520px){.fs-w-frame{right:0;bottom:0;width:100vw;height:100dvh;max-height:none;border-radius:0}.fs-w-btn.open{display:none}}" +
-    ".fs-w-close{position:fixed;right:14px;top:14px;z-index:2147483001;display:none;width:40px;height:40px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:20px;cursor:pointer}" +
+    ".fs-w-close{position:fixed;right:14px;top:14px;z-index:2147483001;display:none;width:40px;height:40px;border:0;border-radius:50%;background:rgba(17,17,17,.55);color:#fff;font-size:20px;cursor:pointer}" +
     "@media (max-width:520px){.fs-w-close.open{display:block}}";
   document.head.appendChild(style);
 

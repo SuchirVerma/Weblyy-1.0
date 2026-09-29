@@ -5,14 +5,14 @@
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(17, 17, 17, 0.45);
 }
 .modal {
   width: min(520px, 100%);
   padding: 28px;
   border-radius: 6px;
   background: var(--surface);
-  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 40px 100px -30px rgba(17, 17, 17, 0.5);
   display: grid;
   gap: 16px;
 }

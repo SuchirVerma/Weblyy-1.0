@@ -72,12 +72,12 @@
   left: 6px;
   width: calc(50% - 9px);
   border-radius: 4px;
-  background: #000000;
+  background: #111111;
   transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1), background-color 0.45s;
 }
 .swPill[data-side="enhanced"] {
   transform: translateX(calc(100% + 6px));
-  background: #000000;
+  background: #111111;
   
 }
 
@@ -184,7 +184,7 @@
   margin: 12px auto;
   height: calc(100% - 24px);
   border-radius: 6px;
-  box-shadow: 0 0 0 8px #000000, 0 30px 60px -20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 8px #111111, 0 30px 60px -20px rgba(17, 17, 17, 0.4);
 }
 .enhancedLayer {
   position: absolute;
@@ -199,7 +199,7 @@
   bottom: 0;
   width: 3px;
   margin-left: -2px;
-  background: #000000;
+  background: #111111;
   
   pointer-events: none;
 }
@@ -213,7 +213,7 @@
   grid-template-rows: auto 1fr auto;
   gap: 18px;
   padding: 24px;
-  background: #ffffff;
+  background: #f5f0e8;
   overflow: auto;
 }
 .lTop {
@@ -260,7 +260,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: 999px;
-  background: #000000;
+  background: #111111;
   
 }
 .track i::after {
@@ -289,8 +289,8 @@
   display: grid;
   grid-template-rows: auto 1fr;
   border-radius: 6px;
-  background: #000000;
-  color: #a0a0a0;
+  background: #111111;
+  color: #b9b2a4;
   
   overflow: hidden;
   min-height: 260px;
@@ -312,7 +312,7 @@
   margin-left: 8px;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.72rem;
-  color: #6b6b6b;
+  color: #555555;
 }
 .codeLines {
   display: grid;
@@ -335,20 +335,20 @@
   margin: 1px -14px;
   padding: 0 14px;
   color: #ffffff;
-  background: rgba(0, 0, 0, 0.12);
-  box-shadow: inset 3px 0 0 #000000;
+  background: rgba(17, 17, 17, 0.12);
+  box-shadow: inset 3px 0 0 #111111;
 }
 .ln {
   flex: none;
   width: 18px;
   text-align: right;
-  color: #3d3d3d;
+  color: #555555;
 }
 .caret {
   width: 8px;
   height: 14px;
   margin-left: 30px;
-  background: #a0a0a0;
+  background: #b9b2a4;
   animation: blink 1s steps(2) infinite;
 }
 @keyframes blink {

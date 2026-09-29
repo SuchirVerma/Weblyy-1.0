@@ -8,9 +8,9 @@ import styles from "./owner-demo.module.css";
 
 type Who = "priya" | "rahul" | "neha";
 const PEOPLE: Record<Who, { name: string; color: string }> = {
-  priya: { name: "Priya", color: "#3d3d3d" },
-  rahul: { name: "Rahul", color: "#3d3d3d" },
-  neha: { name: "Neha", color: "#6b6b6b" },
+  priya: { name: "Priya", color: "#555555" },
+  rahul: { name: "Rahul", color: "#555555" },
+  neha: { name: "Neha", color: "#555555" },
 };
 
 type Ev =

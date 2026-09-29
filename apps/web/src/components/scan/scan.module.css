@@ -132,16 +132,16 @@
   overflow-y: auto;
   border-radius: 6px;
   /* The scan log stays a dark terminal on the light page. */
-  --muted: #a0a0a0;
-  --faint: #6b6b6b;
+  --muted: #b9b2a4;
+  --faint: #555555;
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.25);
   --ok: #ffffff;
   --warn: #fbbf24;
-  --accent: #a0a0a0;
-  border: 1px solid #1a1a1a;
+  --accent: #b9b2a4;
+  border: 1px solid #1c1c1c;
   background: var(--term);
-  color: #a0a0a0;
+  color: #b9b2a4;
   
   padding: 0 16px 14px;
   font-family: var(--font-mono);
@@ -921,7 +921,7 @@
 }
 .hold[data-holding] {
   transform: scale(0.98);
-  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.15), 0 20px 50px -12px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 6px rgba(17, 17, 17, 0.15), 0 20px 50px -12px rgba(17, 17, 17, 0.45);
 }
 .hold:disabled {
   cursor: progress;
@@ -1025,7 +1025,7 @@
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid color-mix(in oklab, var(--warn) 50%, var(--line));
-  box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 20px 50px -14px rgba(17, 17, 17, 0.35);
 }
 .alert > div {
   display: grid;

@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 const page = (title: string, body: string, status: number) =>
   new Response(
     `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>` +
-      `<body style="margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font:16px/1.5 system-ui,sans-serif;background:#ffffff;color:#000000;text-align:center">` +
-      `<div style="max-width:420px"><h1 style="font-size:20px;margin:10px 0 6px">${title}</h1><p style="color:#3d3d3d;margin:0">${body}</p></div></body>`,
+      `<body style="margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font:16px/1.5 system-ui,sans-serif;background:#ffffff;color:#111111;text-align:center">` +
+      `<div style="max-width:420px"><h1 style="font-size:20px;margin:10px 0 6px">${title}</h1><p style="color:#555555;margin:0">${body}</p></div></body>`,
     { status, headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "noindex" } },
   );
 

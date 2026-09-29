@@ -60,8 +60,8 @@
   width: 34px;
   height: 34px;
   border-radius: 4px;
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--text);
+  color: var(--bg);
   font-weight: 700;
 }
 .nav {
@@ -92,9 +92,10 @@
   color: var(--text);
 }
 .nav button[data-on] {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: rgba(245, 240, 232, 0.08);
+  color: var(--text);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 .nav em {
   margin-left: auto;
@@ -340,12 +341,11 @@
   border-radius: 4px;
 }
 .trackBefore {
-  background: color-mix(in oklab, var(--faint) 45%, transparent);
+  background: var(--line-strong);
   z-index: 1;
 }
 .trackAfter {
-  background: var(--accent);
-  opacity: 0.85;
+  background: var(--text);
 }
 
 /* ------------------------------------------------------------------ cards */
@@ -958,7 +958,7 @@ button.tr:hover {
   height: 20px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(17, 17, 17, 0.2);
   transition: transform 0.25s var(--ease-out);
 }
 .toggle[aria-checked="true"] {
@@ -1120,8 +1120,8 @@ button.tr:hover {
   gap: 14px;
   padding: 18px 22px;
   border-radius: 6px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--bg);
+  color: var(--text);
 }
 .nextStep > div {
   display: grid;
@@ -1132,10 +1132,6 @@ button.tr:hover {
 }
 .nextStep span {
   opacity: 0.9;
-}
-.nextStep :global(.btn) {
-  background: #fff;
-  color: var(--accent);
 }
 
 .tabIn {

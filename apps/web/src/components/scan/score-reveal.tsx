@@ -89,12 +89,12 @@ function Reveal({ score, after, onReplay }: { score: number; after?: number; onR
               <feGaussianBlur stdDeviation="6" />
             </filter>
             <linearGradient id="sr-now" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0%" stopColor="#3d3d3d" />
-              <stop offset="100%" stopColor="#000000" />
+              <stop offset="0%" stopColor="#555555" />
+              <stop offset="100%" stopColor="#111111" />
             </linearGradient>
             <linearGradient id="sr-after" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0%" stopColor="#a0a0a0" />
-              <stop offset="100%" stopColor="#000000" />
+              <stop offset="0%" stopColor="#b9b2a4" />
+              <stop offset="100%" stopColor="#111111" />
             </linearGradient>
           </defs>
 

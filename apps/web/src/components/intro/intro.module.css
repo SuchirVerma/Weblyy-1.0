@@ -2,7 +2,7 @@
   position: relative;
   height: 460vh;
   height: 460svh;
-  background: #fff;
+  background: #f5f0e8;
 }
 .intro[data-mode="still"] {
   height: 100vh;
@@ -22,8 +22,8 @@
   height: 100svh;
   overflow: hidden;
   isolation: isolate;
-  color: #000;
-  background: #fff;
+  color: #111;
+  background: #f5f0e8;
 }
 
 /* -------------------------------------------------------- poster (instant) */
@@ -43,7 +43,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #000;
+  background: #111;
   box-shadow: 0 0 18px 6px rgba(20, 20, 26, 0.35), 0 0 70px 24px rgba(20, 20, 26, 0.08);
   animation: breathe 3.2s ease-in-out infinite;
 }
@@ -128,14 +128,14 @@
   font-size: clamp(1rem, 2vw, 1.5rem);
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: #3d3d3d;
+  color: #555555;
   opacity: calc(var(--title) * var(--title));
   transform: translateY(calc((1 - var(--title)) * 14px));
   pointer-events: none;
 }
 .tagline b {
   font-weight: 600;
-  color: #000000;
+  color: #111111;
 }
 @media (max-width: 560px) {
   .tagline b {
@@ -156,7 +156,7 @@
   line-height: 1;
   letter-spacing: calc((1 - var(--title)) * 0.25em - 0.02em);
   white-space: nowrap;
-  color: #000000;
+  color: #111111;
   text-shadow: none;
   opacity: var(--title);
   filter: blur(calc((1 - var(--title)) * 14px));
@@ -183,7 +183,7 @@
   left: 0;
   right: 0;
   height: 11vh;
-  background: #fff;
+  background: #f5f0e8;
   display: none;
 }
 .bars i:first-child {
@@ -226,8 +226,8 @@
 .cueEnd {
   padding: 14px 24px;
   border-radius: 3px;
-  background: #000;
-  border: 1px solid #000;
+  background: #111;
+  border: 1px solid #111;
   color: #fff;
   font-size: 1rem;
   backdrop-filter: blur(6px);
@@ -253,7 +253,7 @@
 }
 .cue:focus-visible,
 .skip:focus-visible {
-  outline: 2px solid #000;
+  outline: 2px solid #111;
   outline-offset: 4px;
 }
 .mouse {
@@ -294,10 +294,10 @@
   right: clamp(14px, 3vw, 32px);
   top: calc(11vh * var(--bars) + 14px);
   padding: 8px 14px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(17, 17, 17, 0.18);
   border-radius: 3px;
-  background: #fff;
-  color: #3d3d3d;
+  background: #f5f0e8;
+  color: #555555;
   font-family: var(--font-body);
   font-size: 0.78rem;
   cursor: pointer;
@@ -305,7 +305,7 @@
   animation: fadeUp 1s var(--ease-out) 1.6s both;
 }
 .skip:hover {
-  color: #000;
+  color: #111;
 }
 .intro[data-mode="still"] .skip {
   display: none;

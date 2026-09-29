@@ -50,7 +50,7 @@
   background: var(--accent-soft);
 }
 .kind[data-kind="better"] {
-  color: #3d3d3d;
+  color: #555555;
   background: color-mix(in oklab, var(--warn) 14%, var(--surface));
 }
 .tabs {
@@ -253,7 +253,7 @@
   color: var(--faint);
 }
 .compare [data-side="before"] i {
-  background: #a0a0a0;
+  background: #b9b2a4;
 }
 .compare [data-side="after"] {
   background: color-mix(in oklab, var(--ok) 9%, var(--surface));

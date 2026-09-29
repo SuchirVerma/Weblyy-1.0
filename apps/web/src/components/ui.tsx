@@ -64,13 +64,13 @@ export function Nav({ right }: { right?: ReactNode }) {
           </Link>
         </div>
         <nav className="nav-links" aria-label="Main">
-          <Link href="/how" className="hide-sm">
+          <Link href="/how" aria-current={path === "/how" ? "page" : undefined} className="hide-sm">
             How it works
           </Link>
-          <Link href="/owner-demo" className="hide-sm nav-demo">
+          <Link href="/owner-demo" aria-current={path === "/owner-demo" ? "page" : undefined} className="hide-sm nav-demo">
             See a demo
           </Link>
-          <Link href="/setup" className="hide-sm">
+          <Link href="/setup" aria-current={path === "/setup" ? "page" : undefined} className="hide-sm">
             We set it up
           </Link>
           <Link href="/dashboard" className="nav-dash" aria-current={path.startsWith("/dashboard") ? "page" : undefined}>

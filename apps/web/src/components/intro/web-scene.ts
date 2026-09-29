@@ -58,9 +58,9 @@ function glowTexture(size: number, flare = false) {
     g.fillStyle = grad;
     g.fillRect(0, 0, size, size / 8);
     const v = g.createLinearGradient(0, 0, 0, size / 8);
-    v.addColorStop(0, "rgba(0,0,0,1)");
-    v.addColorStop(0.5, "rgba(0,0,0,0)");
-    v.addColorStop(1, "rgba(0,0,0,1)");
+    v.addColorStop(0, "rgba(17,17,17,1)");
+    v.addColorStop(0.5, "rgba(17,17,17,0)");
+    v.addColorStop(1, "rgba(17,17,17,1)");
     g.globalCompositeOperation = "destination-out";
     g.fillStyle = v;
     g.fillRect(0, 0, size, size / 8);
@@ -334,10 +334,10 @@ export class WebScene {
     this.pts.frustumCulled = false;
     this.scene.add(this.pts);
 
-    this.webLines = this.makeLines(this.webPairs, new THREE.Color(0.35, 0.35, 0.4), 1);
-    this.textLines = this.makeLines(this.textPairs, new THREE.Color(0.15, 0.15, 0.18), 0.6);
+    this.webLines = this.makeLines(this.webPairs, new THREE.Color(0.34, 0.32, 0.29), 1);
+    this.textLines = this.makeLines(this.textPairs, new THREE.Color(0.07, 0.07, 0.07), 0.6);
     this.spokeIdx.forEach((i) => this.spokePairs.push(-1, i));
-    this.spokes = this.makeLines(this.spokePairs, new THREE.Color(0.25, 0.25, 0.3), 1.4);
+    this.spokes = this.makeLines(this.spokePairs, new THREE.Color(0.2, 0.19, 0.17), 1.4);
 
     // Far dust for depth
     const dn = mobile ? 350 : 700;

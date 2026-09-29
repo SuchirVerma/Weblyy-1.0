@@ -127,7 +127,7 @@ export function OverviewTab({ data, go }: { data: CCData; go: (t: TabKey) => voi
       </Head>
 
       {!data.setupRequest && (
-        <section className={styles.nextStep}>
+        <section className={styles.nextStep} data-tone="dark">
           <div>
             <b>Next step: put your assistant to work</b>
             <span>We can set it up on your website and WhatsApp for you, free. No coding.</span>
