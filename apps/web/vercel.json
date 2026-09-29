@@ -4,16 +4,16 @@
     "bom1"
   ],
   "functions": {
-    "src/app/api/scan/route.ts": {
+    "src/app/api/scan/route.js": {
       "memory": 2048
     },
-    "src/app/api/makeover/[scanId]/route.ts": {
+    "src/app/api/makeover/[scanId]/route.js": {
       "memory": 2048
     },
-    "src/app/api/workspace/route.ts": {
+    "src/app/api/workspace/route.js": {
       "memory": 2048
     },
-    "src/app/api/search/route.ts": {
+    "src/app/api/search/route.js": {
       "memory": 2048
     }
   }
