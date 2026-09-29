@@ -159,15 +159,28 @@ const ready = () => (g.__weblyyLoaded ??= load());
    so one instance never overwrites another's newer data with a stale copy. */
 const AGENT_KEY = (id: string) => `agent:${id}`;
 const AGENT_IDS = "agents";
+/* What each business looked like when this instance last read or wrote it. A save writes every business
+   that differs from that, so several changes in one request all land, and untouched copies are never re-sent. */
+const saved = new Map<string, string>();
 const touched = new Set<string>();
+const queue = new Map<string, Promise<unknown>>();
 
 let saveTimer: NodeJS.Timeout | null = null;
 function persist() {
   if (useRedis) {
-    const ids = [...touched];
-    touched.clear();
-    const list = ids.map((id) => agents.get(id)).filter((a): a is DeployedAgent => Boolean(a));
-    if (list.length) background(Promise.all(list.map((a) => setJSON(AGENT_KEY(a.id), a))));
+    const writes: Promise<unknown>[] = [];
+    for (const id of touched) {
+      const a = agents.get(id);
+      if (!a) continue;
+      const json = JSON.stringify(a);
+      if (saved.get(id) === json) continue;
+      saved.set(id, json);
+      // Queued per business, so an older copy can never land after a newer one.
+      const next = (queue.get(id) ?? Promise.resolve()).then(() => setJSON(AGENT_KEY(id), JSON.parse(json)));
+      queue.set(id, next.catch(() => {}));
+      writes.push(next);
+    }
+    if (writes.length) background(Promise.all(writes));
     return;
   }
   if (saveTimer) return;
@@ -248,6 +261,7 @@ export async function getAgent(id: string) {
     const a = /^[a-f0-9]{6,32}$/.test(id) ? await getJSON<DeployedAgent>(AGENT_KEY(id)) : null;
     if (!a) return null;
     agents.set(id, normalize(a));
+    saved.set(id, JSON.stringify(a));
     touched.add(id);
   }
   return agents.get(id) ?? null;
