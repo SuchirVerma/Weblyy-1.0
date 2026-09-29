@@ -1,7 +1,7 @@
 /*!
  * Weblyy chat widget. Add to any website:
  *   <script src="https://YOUR-WEBLYY-URL/widget.js" data-agent="AGENT_ID" async></script>
- * Optional: data-color="#2563eb" data-label="Chat with us"
+ * Optional: data-color="#000000" data-label="Chat with us"
  */
 (function () {
   var script = document.currentScript;
@@ -11,7 +11,7 @@
   window.__weblyyWidget = true;
 
   var origin = new URL(script.src, location.href).origin;
-  var color = script.getAttribute("data-color") || "#2563eb";
+  var color = script.getAttribute("data-color") || "#000000";
   var label = script.getAttribute("data-label") || "Chat with us";
 
   var style = document.createElement("style");

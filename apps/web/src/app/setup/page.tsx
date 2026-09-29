@@ -1,4 +1,4 @@
-import { Arrow, Nav, Reveal } from "@/components/ui";
+import { Arrow, Footer, Nav, Reveal } from "@/components/ui";
 import Link from "next/link";
 import styles from "@/components/landing.module.css";
 
@@ -45,10 +45,7 @@ export default function SetupPage() {
         </section>
 
       </main>
-      <footer className={`wrap ${styles.footer}`}>
-        <span>Weblyy · a B.Tech project</span>
-        <span className="muted">The demo salon is a fictional business.</span>
-      </footer>
+      <Footer />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Arrow, Nav, Reveal, ScanBar } from "@/components/ui";
+import { Arrow, Nav, Reveal, ScanBar, Footer } from "@/components/ui";
 import landing from "@/components/landing.module.css";
 import { REGIONS, regionByKey, type RegionKey } from "@/lib/regions";
 import { siteUrl } from "@/lib/site-url";
@@ -154,9 +154,7 @@ export default async function RegionPage({ params }: PageProps<"/[region]">) {
           </nav>
         </section>
       </main>
-      <footer className={`wrap ${landing.footer}`}>
-        <span>Weblyy · a B.Tech project</span>
-      </footer>
+      <Footer />
     </>
   );
 }

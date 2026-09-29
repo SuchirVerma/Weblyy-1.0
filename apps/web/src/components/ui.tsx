@@ -8,11 +8,10 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "rea
 export function Logo({ size = 26 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="9" fill="#111827" />
-      <circle cx="16" cy="16" r="10" fill="none" stroke="#60a5fa" strokeWidth="1.6" opacity=".45" />
-      <circle cx="16" cy="16" r="5" fill="none" stroke="#60a5fa" strokeWidth="1.8" />
-      <path d="M16 16 L25 9" stroke="#60a5fa" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="22" cy="20.5" r="2.1" fill="#4ade80" />
+      <rect width="32" height="32" rx="5" style={{ fill: "var(--text)" }} />
+      <circle cx="16" cy="16" r="10" fill="none" strokeWidth="1.6" opacity=".45" style={{ stroke: "var(--bg)" }} />
+      <circle cx="16" cy="16" r="5" fill="none" strokeWidth="1.8" style={{ stroke: "var(--bg)" }} />
+      <path d="M16 16 L25 9" strokeWidth="2.4" strokeLinecap="round" style={{ stroke: "var(--bg)" }} />
     </svg>
   );
 }
@@ -55,7 +54,7 @@ export function BackButton({ fallback = "/", className = "" }: { fallback?: stri
 export function Nav({ right }: { right?: ReactNode }) {
   const path = usePathname();
   return (
-    <header className="nav">
+    <header className="nav" data-tone="dark">
       <div className="wrap nav-inner">
         <div className="nav-start">
           {path !== "/" && <BackButton />}
@@ -238,5 +237,45 @@ export function Tip({ children, label = "What does this mean?" }: { children: Re
         {children}
       </span>
     </span>
+  );
+}
+
+/** The shared black footer: big wordmark, the main links, and the fine print. */
+export function Footer() {
+  return (
+    <footer className="site-footer" data-tone="dark">
+      <div className="wrap">
+        <div className="site-footer-top">
+          <div className="site-footer-brand">
+            <p className="site-footer-word">Weblyy</p>
+            <p className="site-footer-line">The future isn&apos;t AI-ready. Your business can be.</p>
+          </div>
+          <nav className="site-footer-cols" aria-label="Footer">
+            <div>
+              <span>Product</span>
+              <Link href="/#product">Analyze a website</Link>
+              <Link href="/how">How it works</Link>
+              <Link href="/owner-demo">See a demo</Link>
+              <Link href="/dashboard">Dashboard</Link>
+            </div>
+            <div>
+              <span>Help</span>
+              <Link href="/setup">We set it up</Link>
+              <Link href="/integrate">Add it yourself</Link>
+            </div>
+            <div>
+              <span>Cities</span>
+              <Link href="/delhi">Delhi NCR</Link>
+              <Link href="/jammu-kashmir">Jammu &amp; Kashmir</Link>
+              <Link href="/mumbai">Mumbai</Link>
+            </div>
+          </nav>
+        </div>
+        <div className="site-footer-bottom">
+          <span>© 2026 Weblyy · A B.Tech project</span>
+          <span>The demo salon is a fictional business.</span>
+        </div>
+      </div>
+    </footer>
   );
 }

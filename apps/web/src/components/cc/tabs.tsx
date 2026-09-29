@@ -642,7 +642,7 @@ export function LeadsTab({ data, act }: { data: CCData; act: Act }) {
 
 /* ------------------------------------------------------------ Automations */
 
-const JOB_ICON: Record<string, string> = { capture: "🙋", qualify: "🔥", booking: "📅", form: "📝", escalate: "🛟", whatsapp: "💬", n8n: "🧩" };
+const JOB_ICON: Record<string, string> = { capture: "01", form: "02", qualify: "03", booking: "04", escalate: "!", whatsapp: "W", n8n: "+" };
 const JOB_SHORT: Record<string, string> = {
   capture: "Save customers",
   form: "Website enquiries",
@@ -784,7 +784,7 @@ export function AutomationsTab({ data, act }: { data: CCData; act: Act }) {
         )}
       </AnimatePresence>
 
-      <Fold icon="🕘" title="What your assistant did" summary="Every job it did by itself, newest first." badge={`${data.runs.length} ${data.runs.length === 1 ? "job" : "jobs"}`}>
+      <Fold icon="≡" title="What your assistant did" summary="Every job it did by itself, newest first." badge={`${data.runs.length} ${data.runs.length === 1 ? "job" : "jobs"}`}>
         {data.runs.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>
             Nothing yet. Jobs show up here the moment a customer chats with your assistant.

@@ -63,10 +63,10 @@
   display: grid;
   gap: 2px;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow);
+  
   font-size: 0.82rem;
   white-space: nowrap;
   pointer-events: none;

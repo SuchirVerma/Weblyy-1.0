@@ -10,7 +10,7 @@
   padding: 8px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: #ffffff;
 }

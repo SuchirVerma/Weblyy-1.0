@@ -21,7 +21,7 @@
   align-items: center;
   gap: 18px;
   padding: 22px;
-  border-radius: 22px;
+  border-radius: 6px;
   border: 1.5px solid var(--accent);
   background: var(--surface);
   box-shadow: 0 0 0 5px var(--accent-soft), var(--shadow);
@@ -38,7 +38,7 @@
   place-items: center;
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: 6px;
   background: var(--accent);
   color: #fff;
   font-family: var(--font-display);
@@ -48,7 +48,7 @@
 .mark[data-small] {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: 4px;
   font-size: 1.05rem;
   background: var(--bg-2);
   color: var(--text);
@@ -79,7 +79,7 @@
   list-style: none;
   margin: 0;
   padding: 0 18px;
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
 }
@@ -126,7 +126,7 @@
   place-items: center;
   width: 64px;
   height: 64px;
-  border-radius: 20px;
+  border-radius: 6px;
   background: var(--accent-soft);
   color: var(--accent);
   font-size: 1.6rem;
@@ -161,7 +161,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: 4px;
   border: 1px solid var(--line);
   background: var(--surface);
   font-size: 0.92rem;

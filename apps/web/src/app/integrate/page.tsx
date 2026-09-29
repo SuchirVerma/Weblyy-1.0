@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
-import { Arrow, Fold, Nav } from "@/components/ui";
+import { Arrow, Fold, Footer, Nav } from "@/components/ui";
 import styles from "./integrate.module.css";
 
 export const metadata = { title: "Add it to your business | Weblyy", description: "Add the Weblyy AI chat assistant to any website with one line of code, or connect it to WhatsApp.", alternates: { canonical: "/integrate" } };
@@ -71,7 +71,7 @@ export default function IntegratePage() {
               <p className="muted">Pick any. They all talk to the same agent and the same inbox.</p>
 
               <div className="folds">
-                <Fold icon="💬" title="Website chat bubble" summary="A chat button in the corner of your website. One line of code." badge="Ready">
+                <Fold icon="01" title="Website chat bubble" summary="A chat button in the corner of your website. One line of code." badge="Ready">
                   <CodeBlock code={WIDGET} label="Paste before </body>" />
                   <ul className={styles.platforms}>
                     {PLATFORMS.map(([p, how]) => (
@@ -82,7 +82,7 @@ export default function IntegratePage() {
                     ))}
                   </ul>
                   <p className={styles.small}>
-                    Your agent ID is shown in the live console after you switch the agent on. Optional: <code>data-color=&quot;#16a34a&quot;</code> and{" "}
+                    Your agent ID is shown in the live console after you switch the agent on. Optional: <code>data-color=&quot;#000000&quot;</code> and{" "}
                     <code>data-label=&quot;Book on chat&quot;</code>.
                   </p>
                   <a className="btn btn-ghost btn-sm" href="/api/demo-agent" target="_blank" rel="noreferrer" style={{ justifySelf: "start" }}>
@@ -90,7 +90,7 @@ export default function IntegratePage() {
                   </a>
                 </Fold>
 
-                <Fold icon="✆" title="WhatsApp number" summary="Customers message your usual WhatsApp number and the assistant replies." badge="Needs Twilio">
+                <Fold icon="02" title="WhatsApp number" summary="Customers message your usual WhatsApp number and the assistant replies." badge="Needs Twilio">
                   <ol className={styles.steps}>
                     <li>
                       <b>Test today (free, ~10 min):</b> create a Twilio account, open Messaging → Try WhatsApp, and join the sandbox from your phone.
@@ -109,14 +109,14 @@ export default function IntegratePage() {
                   </ol>
                 </Fold>
 
-                <Fold icon="▦" title="QR code at the counter" summary="Customers scan it and chat in their phone's browser. Nothing to install." badge="Ready">
+                <Fold icon="03" title="QR code at the counter" summary="Customers scan it and chat in their phone's browser. Nothing to install." badge="Ready">
                   <p className="muted" style={{ margin: 0 }}>
                     Print the QR code from your live console on the counter, menu, visiting cards or posters: &ldquo;Scan to ask us anything, we reply
                     instantly.&rdquo;
                   </p>
                 </Fold>
 
-                <Fold icon="@" title="Instagram & Google profile" summary="Put your chat link in your Instagram bio and Google listing." badge="Link ready">
+                <Fold icon="04" title="Instagram & Google profile" summary="Put your chat link in your Instagram bio and Google listing." badge="Link ready">
                   <p className="muted" style={{ margin: 0 }}>
                     Use it as the website or booking link on your Google Business Profile too. Replying to Instagram DMs directly needs a Meta-approved app, which
                     is on our roadmap.
@@ -124,7 +124,7 @@ export default function IntegratePage() {
                   <CodeBlock code={`{ORIGIN}/chat/YOUR_AGENT_ID`} label="Your chat link" />
                 </Fold>
 
-                <Fold icon="⌘" title="Your own tools" summary="An n8n workflow or one HTTP request, for developers." badge="For developers">
+                <Fold icon="05" title="Your own tools" summary="An n8n workflow or one HTTP request, for developers." badge="For developers">
                   <CodeBlock code={API} label="HTTP API" />
                 </Fold>
               </div>
@@ -167,7 +167,9 @@ export default function IntegratePage() {
           </li>
         </ol>
 
-        <section className={styles.faq} aria-labelledby="faq-h">
+      </main>
+      <div data-tone="dark" className={styles.faqBand}>
+        <section className={`wrap ${styles.faq}`} aria-labelledby="faq-h">
           <h2 id="faq-h" className="h-section" style={{ fontSize: "clamp(1.8rem, 3.4vw, 2.6rem)" }}>
             Questions owners <span className="em">usually ask</span>
           </h2>
@@ -184,7 +186,8 @@ export default function IntegratePage() {
             </details>
           ))}
         </section>
-      </main>
+      </div>
+      <Footer />
     </>
   );
 }

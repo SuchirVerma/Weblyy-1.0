@@ -10,7 +10,7 @@
   inset: -10% -6% 10%;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(37, 99, 235, 0.1), transparent 70%);
+  background: none;
   opacity: 0;
   transform: scale(0.7);
   transition: opacity 1.2s var(--ease-out), transform 1.6s var(--ease-out);
@@ -37,13 +37,13 @@
   transition: stroke 0.25s var(--ease-out);
 }
 .tick[data-on] {
-  stroke: #111827;
+  stroke: #000000;
 }
 .tick[data-accent] {
-  stroke: #2563eb;
+  stroke: #000000;
 }
 .stage[data-phase="checking"] .tick[data-on] {
-  stroke: #2563eb;
+  stroke: #000000;
 }
 .track {
   fill: none;
@@ -58,23 +58,23 @@
 }
 .ghost {
   fill: none;
-  stroke: rgba(37, 99, 235, 0.3);
+  stroke: rgba(0, 0, 0, 0.3);
   stroke-width: 6;
   stroke-linecap: round;
 }
 .halo {
-  fill: rgba(17, 24, 39, 0.35);
+  fill: rgba(0, 0, 0, 0.35);
 }
 .halo[data-accent] {
-  fill: rgba(37, 99, 235, 0.55);
+  fill: rgba(0, 0, 0, 0.55);
 }
 .head {
   fill: #fff;
-  stroke: #111827;
+  stroke: #000000;
   stroke-width: 3;
 }
 .head[data-accent] {
-  stroke: #2563eb;
+  stroke: #000000;
 }
 .center {
   position: absolute;
@@ -161,12 +161,12 @@
   position: absolute;
   translate: -50% -50%;
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--accent);
   color: #fff;
   font-size: 0.85rem;
   font-weight: 700;
-  box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.6);
+  
   pointer-events: none;
 }
 .controls {
@@ -214,7 +214,7 @@
   left: 4px;
   width: calc(50% - 4px);
   border-radius: 999px;
-  background: #111827;
+  background: #000000;
   transition: transform 0.35s var(--ease-out), background-color 0.35s var(--ease-out);
 }
 .pill[data-side="after"] {
@@ -224,7 +224,7 @@
 .replay {
   padding: 8px 12px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 3px;
   background: none;
   color: var(--faint);
   font: inherit;

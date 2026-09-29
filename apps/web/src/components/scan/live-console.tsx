@@ -71,7 +71,7 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
       .then(async (s: { publicOrigin?: string | null }) => {
         const origin = s.publicOrigin || window.location.origin;
         const url = `${origin}${deployment.chatPath}?src=qr`;
-        const data = await QRCode.toDataURL(url, { margin: 1, width: 420, color: { dark: "#111827", light: "#ffffff" } });
+        const data = await QRCode.toDataURL(url, { margin: 1, width: 420, color: { dark: "#000000", light: "#ffffff" } });
         if (!alive) return;
         setChatUrl(url);
         setQr(data);
@@ -184,7 +184,7 @@ export function LiveConsole({ scan, deployment, onBack }: { scan: ScanResult; de
                 exit={{ opacity: 0, y: -16 }}
                 transition={{ type: "spring", stiffness: 360, damping: 26 }}
               >
-                <span aria-hidden="true">🔔</span>
+                <span aria-hidden="true">!</span>
                 <div>
                   <b>Owner alerted</b>
                   <span>&ldquo;{alert.text.slice(0, 80)}&rdquo;</span>

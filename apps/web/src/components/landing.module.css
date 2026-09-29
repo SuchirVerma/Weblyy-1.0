@@ -12,22 +12,30 @@
   gap: 22px;
 }
 .heroTitle {
-  font-size: clamp(2.6rem, 5.6vw, 4.6rem);
-  max-width: 13ch;
+  font-size: clamp(3.2rem, 7.4vw, 7rem);
+  font-weight: 800;
+  max-width: 10ch;
 }
 .heroTitleSoft {
   color: var(--muted);
 }
 .heroVisual {
   position: relative;
-  width: min(100%, 520px);
-  justify-self: center;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  width: 100%;
+  min-height: 520px;
+  padding: clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px) clamp(96px, 10vw, 128px);
+}
+.heroVisual > :first-child {
+  width: min(100%, 440px);
 }
 .bubbleLane {
   position: absolute;
-  left: -8%;
-  right: -8%;
-  bottom: -6%;
+  left: clamp(20px, 3vw, 36px);
+  right: clamp(20px, 3vw, 36px);
+  bottom: clamp(20px, 3vw, 32px);
   display: grid;
   gap: 8px;
   pointer-events: none;
@@ -40,23 +48,24 @@
   justify-self: start;
   max-width: 78%;
   padding: 10px 14px 10px;
-  border-radius: 16px 16px 16px 4px;
-  background: var(--bubble-in);
-  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #ffffff;
   font-size: 0.92rem;
-  box-shadow: 0 14px 34px -14px rgba(17, 24, 39, 0.3);
 }
 .bubbleAgent {
   justify-self: end;
-  border-radius: 16px 16px 4px 16px;
-  background: var(--bubble-good);
-  border-color: rgba(22, 163, 74, 0.25);
+  border-radius: 3px;
+  background: #000000;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.42);
 }
 .bubbleWho {
   display: block;
   font-family: var(--font-mono);
   font-size: 0.64rem;
-  color: var(--muted);
+  color: #6b6b6b;
   margin-bottom: 2px;
 }
 @media (max-width: 900px) {
@@ -163,10 +172,10 @@
   }
 }
 .phone {
-  border-radius: 24px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--chat-bg);
-  box-shadow: var(--shadow);
+  
   overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -196,7 +205,7 @@
   font-family: var(--font-mono);
   font-size: 0.7rem;
   padding: 4px 9px;
-  border-radius: 999px;
+  border-radius: 3px;
   color: var(--tone);
   border: 1px solid color-mix(in oklab, var(--tone) 45%, transparent);
   background: color-mix(in oklab, var(--tone) 12%, transparent);
@@ -220,7 +229,7 @@
 .msgOut {
   max-width: 82%;
   padding: 8px 12px;
-  border-radius: 14px;
+  border-radius: 4px;
   font-size: 0.88rem;
   display: grid;
 }
@@ -234,12 +243,12 @@
 .msgIn {
   justify-self: start;
   background: var(--bubble-in);
-  border-radius: 14px 14px 14px 4px;
+  border-radius: 4px 14px 14px 4px;
 }
 .msgOut {
   justify-self: end;
   background: var(--bubble-good);
-  border-radius: 14px 14px 4px 14px;
+  border-radius: 4px 14px 4px 14px;
 }
 .phone[data-tone="bad"] .msgOut {
   background: var(--bubble-out);
@@ -249,7 +258,7 @@
   display: flex;
   gap: 4px;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: color-mix(in oklab, var(--bad) 10%, var(--surface));
 }
 .typing span {
@@ -281,7 +290,7 @@
   gap: 2px;
   padding: 16px 18px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 4px;
   background: color-mix(in oklab, var(--surface) 55%, transparent);
 }
 .replayStats b {
@@ -324,7 +333,7 @@
 }
 .stepsLineDraw {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--milk));
+  background: var(--text);
   transform-origin: left;
 }
 .step h3 span {
@@ -351,7 +360,7 @@
   place-items: center;
   width: 64px;
   height: 64px;
-  border-radius: 20px;
+  border-radius: 6px;
   background: var(--bg-2);
   border: 1px solid var(--line-strong);
   font-family: var(--font-display);
@@ -375,7 +384,7 @@
   margin: 4px 0 0;
   display: grid;
   gap: 6px;
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--surface-2);
   border: 1px solid var(--line);
   font-family: var(--font-mono);
@@ -418,7 +427,7 @@
 }
 .formula {
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 6px;
   background: color-mix(in oklab, var(--bg-2) 92%, transparent);
   overflow: hidden;
 }
@@ -448,7 +457,7 @@
   color: var(--muted);
   padding: 2px 7px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 3px;
 }
 .formulaBody {
   display: grid;
@@ -539,7 +548,7 @@
   align-content: center;
   gap: 8px;
   border-left: 1px solid var(--line);
-  background: radial-gradient(circle at 70% 20%, color-mix(in oklab, var(--tone) 16%, transparent), transparent 60%);
+  background: none;
   transition: background 0.4s var(--ease-out);
 }
 .result[data-verdict="automate"] {
@@ -590,7 +599,7 @@
   display: grid;
   gap: 4px;
   padding: 20px 22px;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   border-left: 3px solid var(--bad);
   background: color-mix(in oklab, var(--surface) 50%, transparent);
@@ -616,9 +625,9 @@
 .finalCard {
   text-align: center;
   padding: clamp(40px, 7vw, 80px) clamp(20px, 5vw, 60px);
-  border-radius: 28px;
+  border-radius: 6px;
   border: 1px solid var(--line);
-  background: radial-gradient(ellipse at 50% 0%, rgba(37, 99, 235, 0.16), transparent 60%), color-mix(in oklab, var(--bg-2) 90%, transparent);
+  background: color-mix(in oklab, var(--bg-2) 90%, transparent);
 }
 .finalCard h2 {
   max-width: 16ch;
@@ -642,10 +651,10 @@
   gap: 28px 48px;
   align-items: start;
   padding: clamp(24px, 4vw, 44px);
-  border-radius: 28px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
 }
 .plug > :global(.chips) {
   grid-column: 1 / -1;
@@ -661,7 +670,7 @@
   display: grid;
   gap: 2px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: var(--bg-2);
 }
 @media (max-width: 860px) {
@@ -702,10 +711,10 @@
   align-content: start;
   gap: 6px;
   padding: 22px 20px;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
 }
 .module b {
   font-family: var(--font-display);
@@ -756,4 +765,13 @@
 }
 .regions a:hover {
   color: var(--accent);
+}
+
+/* Full-width black band around a section */
+.band {
+  padding: clamp(24px, 4vw, 48px) 0;
+  margin: clamp(24px, 4vw, 48px) 0;
+}
+.bubbleAgent .bubbleWho {
+  color: #a0a0a0;
 }

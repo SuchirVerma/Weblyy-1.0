@@ -19,7 +19,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px 6px 6px;
-  border-radius: 999px;
+  border-radius: 3px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--faint);
@@ -113,7 +113,7 @@
   border-radius: 34px;
   border: 1px solid var(--line-strong);
   background: var(--chat-bg);
-  box-shadow: 0 30px 70px -30px rgba(17, 24, 39, 0.35), inset 0 0 0 6px var(--surface);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.35), inset 0 0 0 6px var(--surface);
   overflow: hidden;
 }
 .ownerPhone {
@@ -131,7 +131,7 @@
   flex: 1;
   text-align: center;
   padding: 5px 0;
-  border-radius: 999px;
+  border-radius: 3px;
   font-size: 0.76rem;
   color: var(--faint);
   border: 1px solid var(--line);
@@ -179,26 +179,26 @@
 .bubble {
   max-width: 85%;
   padding: 8px 12px;
-  border-radius: 16px;
+  border-radius: 6px;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 .bubble[data-role="customer"] {
   align-self: flex-end;
   background: var(--bubble-out);
-  border-radius: 16px 16px 4px 16px;
+  border-radius: 6px 16px 4px 16px;
 }
 .bubble[data-role="agent"] {
   align-self: flex-start;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px 16px 16px 4px;
+  border-radius: 6px 16px 16px 4px;
 }
 .bubble[data-role="owner"] {
   align-self: flex-start;
   background: var(--accent);
   color: var(--accent-ink);
-  border-radius: 16px 16px 16px 4px;
+  border-radius: 6px 16px 16px 4px;
 }
 .from {
   display: block;
@@ -263,10 +263,10 @@
   display: grid;
   gap: 2px;
   padding: 12px 14px;
-  border-radius: 18px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--line);
-  box-shadow: 0 20px 40px -14px rgba(17, 24, 39, 0.35);
+  box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.35);
   font-size: 0.85rem;
 }
 .notice span {
@@ -274,7 +274,7 @@
 }
 .notice[data-tone="urgent"] {
   border-color: color-mix(in oklab, var(--bad) 45%, var(--line));
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--bad) 12%, transparent), 0 20px 40px -14px rgba(17, 24, 39, 0.35);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--bad) 12%, transparent), 0 20px 40px -14px rgba(0, 0, 0, 0.35);
 }
 .notice[data-tone="booking"] {
   border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
@@ -286,7 +286,7 @@
 }
 .fakeBtn {
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: 3px;
   border: 1px solid var(--line-strong);
   font-size: 0.76rem;
   font-weight: 600;
@@ -321,7 +321,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: var(--surface);
   border: 1px solid var(--line);
 }
@@ -355,7 +355,7 @@
   font-size: 0.62rem;
   font-weight: 600;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 3px;
   white-space: nowrap;
 }
 .chip[data-s="agent"],
@@ -405,7 +405,7 @@
   max-width: 88%;
   display: grid;
   padding: 7px 11px;
-  border-radius: 14px;
+  border-radius: 4px;
   font-size: 0.82rem;
   line-height: 1.35;
 }
@@ -441,7 +441,7 @@
   flex: 1;
   min-height: 38px;
   padding: 9px 14px;
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid var(--line-strong);
   font-size: 0.82rem;
   line-height: 1.35;
@@ -485,7 +485,7 @@
   display: grid;
   gap: 2px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: var(--surface);
   border: 1px solid var(--line);
 }
@@ -506,7 +506,7 @@
   justify-content: space-between;
   gap: 14px;
   padding: 20px 24px;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--line));
   background: var(--accent-soft);
 }

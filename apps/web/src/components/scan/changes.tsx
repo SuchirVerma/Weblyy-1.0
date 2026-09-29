@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Audit, AuditCheck, CategoryKey } from "@/lib/audit";
 import styles from "./changes.module.css";
 
-const ICON: Record<CategoryKey, string> = { website: "🖥", agent: "💬", leads: "🙋", search: "🔎", automation: "⚙" };
+const ICON: Record<CategoryKey, string> = { website: "01", agent: "02", leads: "03", search: "04", automation: "05" };
 const SHORT: Record<CategoryKey, string> = { website: "Website", agent: "AI assistant", leads: "Lead capture", search: "Found online", automation: "Autopilot" };
 
 /** The new website's checks are worded for the rebuilt site; these point each one at its old counterpart. */

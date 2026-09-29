@@ -35,7 +35,7 @@
   gap: 10px;
   align-items: center;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: var(--bg-2);
 }
 .biz > div {
@@ -59,7 +59,7 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--accent);
   color: var(--accent-ink);
   font-weight: 700;
@@ -73,7 +73,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 4px;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -106,7 +106,7 @@
   display: grid;
   place-items: center;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--accent);
   color: var(--accent-ink);
 }
@@ -200,10 +200,10 @@
 }
 .panel {
   padding: 20px 22px;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
   min-width: 0;
 }
 .two {
@@ -224,10 +224,10 @@
   gap: clamp(20px, 4vw, 48px);
   align-items: center;
   padding: 24px 28px;
-  border-radius: 24px;
+  border-radius: 6px;
   border: 1px solid var(--line);
-  background: linear-gradient(135deg, var(--surface), color-mix(in oklab, var(--accent) 5%, var(--surface)));
-  box-shadow: var(--shadow);
+  background: var(--surface);
+  
 }
 @media (max-width: 800px) {
   .hero {
@@ -326,7 +326,7 @@
 .dualTrack {
   position: relative;
   height: 10px;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--line);
   overflow: hidden;
 }
@@ -337,7 +337,7 @@
   bottom: 0;
   width: 100%;
   transform-origin: left;
-  border-radius: 10px;
+  border-radius: 4px;
 }
 .trackBefore {
   background: color-mix(in oklab, var(--faint) 45%, transparent);
@@ -360,10 +360,10 @@
   align-content: start;
   text-align: left;
   padding: 16px 18px;
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
   font: inherit;
   color: inherit;
 }
@@ -398,7 +398,7 @@ button.stat:hover {
   font-size: 0.72rem;
   font-weight: 600;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: 3px;
   white-space: nowrap;
 }
 .status::before {
@@ -438,7 +438,7 @@ button.stat:hover {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: var(--bg-2);
 }
 .journey li > span {
@@ -508,7 +508,7 @@ button.stat:hover {
   position: relative;
   font-size: 0.7rem;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--accent-soft);
   color: var(--accent);
   font-weight: 600;
@@ -528,10 +528,10 @@ button.stat:hover {
 
 /* ---------------------------------------------------------------- website */
 .preview {
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
   overflow: hidden;
 }
 .previewBar {
@@ -547,7 +547,7 @@ button.stat:hover {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--surface);
   border: 1px solid var(--line);
   color: var(--muted);
@@ -565,7 +565,7 @@ button.stat:hover {
   width: 100%;
   height: 640px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 4px;
   background: #fff;
   transition: width 0.4s var(--ease-out);
 }
@@ -573,7 +573,7 @@ button.stat:hover {
   width: 390px;
   max-width: 100%;
   height: 720px;
-  border-radius: 28px;
+  border-radius: 6px;
 }
 .checks {
   list-style: none;
@@ -662,7 +662,7 @@ button.stat:hover {
   place-items: center;
   width: 26px;
   height: 26px;
-  border-radius: 8px;
+  border-radius: 3px;
   background: var(--accent-soft);
   color: var(--accent);
   font-size: 0.8rem;
@@ -693,7 +693,7 @@ button.stat:hover {
   grid-template-columns: 110px 1fr;
   gap: 12px;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--bg-2);
   font-size: 0.88rem;
 }
@@ -725,7 +725,7 @@ button.stat:hover {
 }
 .faqs details {
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--bg-2);
 }
 .faqs summary {
@@ -746,7 +746,7 @@ button.stat:hover {
   justify-items: center;
   text-align: center;
   padding: 40px 20px;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px dashed var(--line-strong);
 }
 .empty p {
@@ -757,7 +757,7 @@ button.stat:hover {
   margin: 0;
   justify-self: start;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: 3px;
   background: color-mix(in oklab, var(--ok) 12%, transparent);
   color: var(--ok);
   font-size: 0.85rem;
@@ -765,10 +765,10 @@ button.stat:hover {
 }
 .table {
   display: grid;
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
   overflow: hidden;
 }
 .tr {
@@ -818,7 +818,7 @@ button.tr:hover {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: 3px;
   text-transform: capitalize;
 }
 .temp[data-t="hot"] {
@@ -877,7 +877,7 @@ button.tr:hover {
 .followUp {
   margin: 0 0 12px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--surface);
   border: 1px solid var(--line);
   font-size: 0.88rem;
@@ -913,10 +913,10 @@ button.tr:hover {
   gap: 10px;
   align-content: start;
   padding: 18px 20px;
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
 }
 .auto[data-state="off"] {
   opacity: 0.65;
@@ -979,7 +979,7 @@ button.tr:hover {
   list-style: none;
   margin: 0;
   padding: 0 24px;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
 }
@@ -1076,7 +1076,7 @@ button.tr:hover {
 }
 .bars li > div {
   height: 10px;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--line);
   overflow: hidden;
 }
@@ -1119,7 +1119,7 @@ button.tr:hover {
   justify-content: space-between;
   gap: 14px;
   padding: 18px 22px;
-  border-radius: 18px;
+  border-radius: 6px;
   background: var(--accent);
   color: #fff;
 }
@@ -1153,7 +1153,7 @@ button.tr:hover {
   display: grid;
   gap: 4px;
   padding: 28px 24px;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px dashed var(--line-strong);
   text-align: center;
   color: var(--muted);
@@ -1189,10 +1189,10 @@ button.tr:hover {
   display: grid;
   gap: 18px;
   padding: 26px 28px 24px;
-  border-radius: 24px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  
 }
 .jLabel {
   margin: 0;
@@ -1317,7 +1317,7 @@ button.tr:hover {
   display: grid;
   gap: 18px;
   padding: 24px 28px;
-  border-radius: 24px;
+  border-radius: 6px;
   border: 1.5px solid color-mix(in oklab, var(--accent) 35%, var(--line));
   background: var(--surface);
   box-shadow: 0 0 0 5px var(--accent-soft), var(--shadow);
@@ -1351,7 +1351,7 @@ button.tr:hover {
   place-items: center;
   width: 52px;
   height: 52px;
-  border-radius: 16px;
+  border-radius: 6px;
   background: var(--bg-2);
   font-size: 1.6rem;
 }
@@ -1380,7 +1380,7 @@ button.tr:hover {
   align-content: start;
   gap: 8px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: var(--bg-2);
   font-size: 0.88rem;
   line-height: 1.4;
@@ -1528,4 +1528,36 @@ button.tr:hover {
     top: auto;
     bottom: -12px;
   }
+}
+
+/* Monochrome step numbers instead of icons */
+.jnIcon,
+.jdIcon,
+.tlIcon,
+.apIcon {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.jnIcon {
+  font-size: 1.3rem;
+}
+.jnSmall .jnIcon {
+  font-size: 1rem;
+}
+.jdIcon {
+  font-size: 1.2rem;
+  background: var(--text);
+  color: var(--bg);
+}
+.tlIcon {
+  font-size: 0.78rem;
+}
+.jn[aria-pressed="true"] .jnIcon,
+.jnSmall[aria-pressed="true"] .jnIcon {
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: none;
 }

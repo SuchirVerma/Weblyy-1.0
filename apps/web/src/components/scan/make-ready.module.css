@@ -5,16 +5,14 @@
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.45);
 }
 .modal {
   width: min(520px, 100%);
   padding: 28px;
-  border-radius: 24px;
+  border-radius: 6px;
   background: var(--surface);
-  box-shadow: 0 40px 100px -30px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.5);
   display: grid;
   gap: 16px;
 }
@@ -85,7 +83,7 @@
   display: grid;
   gap: 2px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: color-mix(in oklab, var(--ok) 10%, transparent);
   font-size: 1rem;
 }

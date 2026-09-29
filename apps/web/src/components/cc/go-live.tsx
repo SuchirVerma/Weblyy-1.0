@@ -16,9 +16,9 @@ function useOrigin() {
 }
 
 const CHOICES = [
-  { key: "us" as const, icon: "☎", title: "We set it up for you", line: "Our team calls you and does everything. Free.", tag: "Recommended" },
-  { key: "share" as const, icon: "🔗", title: "Share your links", line: "Links and a QR code for Instagram, Google and your shop.", tag: "1 minute" },
-  { key: "helper" as const, icon: "✉", title: "Send to your web person", line: "We write the message. You press send.", tag: "" },
+  { key: "us" as const, icon: "01", title: "We set it up for you", line: "Our team calls you and does everything. Free.", tag: "Recommended" },
+  { key: "share" as const, icon: "02", title: "Share your links", line: "Links and a QR code for Instagram, Google and your shop.", tag: "1 minute" },
+  { key: "helper" as const, icon: "03", title: "Send to your web person", line: "We write the message. You press send.", tag: "" },
 ];
 
 const GOALS = [

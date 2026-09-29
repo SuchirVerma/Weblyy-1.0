@@ -1,6 +1,6 @@
 import { SaturdayReplay } from "@/components/saturday-replay";
 import { Steps } from "@/components/steps";
-import { CountUp, Nav, Reveal, ScanBar } from "@/components/ui";
+import { CountUp, Footer, Nav, Reveal, ScanBar } from "@/components/ui";
 import styles from "@/components/landing.module.css";
 
 export const metadata = { title: "How it works | Weblyy", description: "How Weblyy reads a business website, scores its AI readiness, rebuilds the website from its own content and switches on an AI customer agent, lead center and automations.", alternates: { canonical: "/how" } };
@@ -20,6 +20,7 @@ export default function HowPage() {
           <Steps />
         </section>
 
+        <div className={styles.band} data-tone="dark">
         <section id="platform" className={`wrap ${styles.section}`} aria-labelledby="platform-h">
           <Reveal>
             <p className="kicker">One platform, five modules</p>
@@ -44,6 +45,7 @@ export default function HowPage() {
             ))}
           </ul>
         </section>
+        </div>
 
         <section className={`wrap ${styles.strip}`} aria-label="A typical salon">
           <Reveal className={styles.stat}>
@@ -79,6 +81,7 @@ export default function HowPage() {
           </Reveal>
         </section>
 
+        <div className={styles.band} data-tone="dark">
         <section className={`wrap ${styles.section} ${styles.never}`} aria-labelledby="never-h">
           <Reveal className={styles.neverStatement}>
             <p className="kicker">What we refuse to automate</p>
@@ -101,6 +104,7 @@ export default function HowPage() {
             ))}
           </ul>
         </section>
+        </div>
 
         <section className={`wrap ${styles.final}`} aria-labelledby="final-h">
           <Reveal className={styles.finalCard}>
@@ -121,10 +125,7 @@ export default function HowPage() {
           </Reveal>
         </section>
       </main>
-      <footer className={`wrap ${styles.footer}`}>
-        <span>Weblyy · a B.Tech project</span>
-        <span className="muted">The demo salon is a fictional business.</span>
-      </footer>
+      <Footer />
     </>
   );
 }

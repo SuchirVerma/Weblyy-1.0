@@ -40,7 +40,7 @@
 }
 .kind {
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: 3px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -50,7 +50,7 @@
   background: var(--accent-soft);
 }
 .kind[data-kind="better"] {
-  color: #b45309;
+  color: #3d3d3d;
   background: color-mix(in oklab, var(--warn) 14%, var(--surface));
 }
 .tabs {
@@ -64,7 +64,7 @@
   justify-items: start;
   gap: 10px;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1.5px solid var(--line);
   background: var(--surface);
   color: inherit;
@@ -92,7 +92,7 @@
   place-items: center;
   width: 36px;
   height: 36px;
-  border-radius: 11px;
+  border-radius: 4px;
   background: var(--bg-2);
   font-size: 1.05rem;
 }
@@ -118,7 +118,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 3px;
   color: #fff;
   background: var(--accent);
 }
@@ -140,7 +140,7 @@
   align-items: start;
 }
 .card {
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid var(--line);
   background: var(--surface);
   transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
@@ -149,7 +149,7 @@
   border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
 }
 .card[open] {
-  box-shadow: var(--shadow);
+  
   border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
 }
 .cardTop {
@@ -169,7 +169,7 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--bg-2);
   font-size: 1rem;
 }
@@ -216,7 +216,7 @@
   gap: 10px;
   margin: 0;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 4px;
   font-size: 0.86rem;
   line-height: 1.45;
 }
@@ -253,7 +253,7 @@
   color: var(--faint);
 }
 .compare [data-side="before"] i {
-  background: #9ca3af;
+  background: #a0a0a0;
 }
 .compare [data-side="after"] {
   background: color-mix(in oklab, var(--ok) 9%, var(--surface));
@@ -273,7 +273,7 @@
 }
 .none {
   padding: 18px;
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px dashed var(--line-strong);
   text-align: center;
 }
@@ -298,4 +298,13 @@
   .cards {
     grid-template-columns: 1fr;
   }
+}
+
+.tabIcon,
+.cardIcon {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
 }
