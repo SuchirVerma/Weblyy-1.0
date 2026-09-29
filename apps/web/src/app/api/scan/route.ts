@@ -57,12 +57,25 @@ export async function POST(req: Request) {
 
         // Open the site like a customer would, on a laptop and a phone, while the rest of the scan carries on.
         const own = internalOrigin(req);
+        const captureStart = Date.now();
         const isDemo = knowledge.url === DEMO_URL;
         const capturing = /instagram\.com/.test(knowledge.url)
           ? Promise.resolve(null)
           : Promise.race([
-              capturePage(isDemo ? `${own}/demo/kesar/index.html` : knowledge.url, { allowOrigin: isDemo ? own : undefined }).catch(() => null),
-              pause(40_000).then(() => null),
+              capturePage(isDemo ? `${own}/demo/kesar/index.html` : knowledge.url, { allowOrigin: isDemo ? own : undefined })
+                .then((c) => {
+                  console.info(`[capture] ${knowledge.url}: ${c ? "done" : "no browser"} in ${Date.now() - captureStart} ms`);
+                  return c;
+                })
+                .catch((e) => {
+                  console.error(`[capture] ${knowledge.url} failed:`, e instanceof Error ? e.message : e);
+                  return null;
+                }),
+              // A serverless function starts Chromium cold, so it gets longer than a laptop.
+              pause(process.env.VERCEL ? 80_000 : 40_000).then(() => {
+                console.warn(`[capture] ${knowledge.url}: gave up after ${Date.now() - captureStart} ms`);
+                return null;
+              }),
             ]);
 
         send({ type: "stage", stage: "extract" });
