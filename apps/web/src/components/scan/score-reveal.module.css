@@ -37,13 +37,13 @@
   transition: stroke 0.25s var(--ease-out);
 }
 .tick[data-on] {
-  stroke: #111111;
+  stroke: #000000;
 }
 .tick[data-accent] {
-  stroke: #111111;
+  stroke: #000000;
 }
 .stage[data-phase="checking"] .tick[data-on] {
-  stroke: #111111;
+  stroke: #000000;
 }
 .track {
   fill: none;
@@ -58,23 +58,23 @@
 }
 .ghost {
   fill: none;
-  stroke: rgba(17, 17, 17, 0.3);
+  stroke: rgba(0, 0, 0, 0.3);
   stroke-width: 6;
   stroke-linecap: round;
 }
 .halo {
-  fill: rgba(17, 17, 17, 0.35);
+  fill: rgba(0, 0, 0, 0.35);
 }
 .halo[data-accent] {
-  fill: rgba(17, 17, 17, 0.55);
+  fill: rgba(0, 0, 0, 0.55);
 }
 .head {
   fill: #fff;
-  stroke: #111111;
+  stroke: #000000;
   stroke-width: 3;
 }
 .head[data-accent] {
-  stroke: #111111;
+  stroke: #000000;
 }
 .center {
   position: absolute;
@@ -214,7 +214,7 @@
   left: 4px;
   width: calc(50% - 4px);
   border-radius: 999px;
-  background: #111111;
+  background: #000000;
   transition: transform 0.35s var(--ease-out), background-color 0.35s var(--ease-out);
 }
 .pill[data-side="after"] {

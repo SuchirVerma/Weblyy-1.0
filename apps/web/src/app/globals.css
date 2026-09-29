@@ -2,77 +2,75 @@
 
 :root {
   color-scheme: light;
-  /* Warm editorial system: cream canvas, warm black, one red accent used sparingly. */
-  --black: #111111;
-  --cream: #f5f0e8;
-  --red: #e53935;
-  --gray: #555555;
-  --beige: #ded8cc;
+  /* Monochrome editorial system: black, white, two greys. No accent hues anywhere. */
+  --black: #000000;
   --white: #ffffff;
+  --gray: #a0a0a0;
+  --gray-light: #e5e5e5;
 
-  --bg: #f5f0e8;
-  --bg-2: #ede7dc;
+  --bg: #ffffff;
+  --bg-2: #f4f4f4;
   --surface: #ffffff;
-  --surface-2: #f5f0e8;
-  --term: #111111;
-  --chat-bg: #f5f0e8;
-  --line: #ded8cc;
-  --line-strong: #b9b2a4;
-  --text: #111111;
-  --milk: #ded8cc;
-  --muted: #555555;
-  --faint: #555555;
-  /* Red is the accent: main buttons, active states, key numbers, small labels. */
-  --accent: #e53935;
-  --accent-hover: #c62828;
+  --surface-2: #f4f4f4;
+  --term: #000000;
+  --chat-bg: #f4f4f4;
+  --line: #e5e5e5;
+  --line-strong: #a0a0a0;
+  --text: #000000;
+  --milk: #a0a0a0;
+  /* Secondary text is darker than #A0A0A0 on white so it stays readable (AA); #A0A0A0 is used on black. */
+  --muted: #3d3d3d;
+  --faint: #6b6b6b;
+  --accent: #000000;
+  --accent-hover: #262626;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(229, 57, 53, 0.08);
+  --accent-soft: #f0f0f0;
   --shadow: none;
 
   --bubble-in: #ffffff;
-  --bubble-out: #ede7dc;
-  --bubble-good: #ede7dc;
+  --bubble-out: #ececec;
+  --bubble-good: #e5e5e5;
 
-  --ch-whatsapp: #111111;
-  --ch-email: #555555;
-  --ch-phone: #111111;
-  --ch-form: #555555;
-  --ch-booking: #111111;
-  --ch-chat: #555555;
-  --ch-social: #111111;
-  --ch-web: #555555;
+  --ch-whatsapp: #000000;
+  --ch-email: #3d3d3d;
+  --ch-phone: #000000;
+  --ch-form: #3d3d3d;
+  --ch-booking: #000000;
+  --ch-chat: #3d3d3d;
+  --ch-social: #000000;
+  --ch-web: #6b6b6b;
 
-  /* Good and warning stay neutral; red is saved for what needs attention. */
-  --ok: #111111;
-  --warn: #555555;
-  --bad: #e53935;
+  /* States are told apart by their ✓ / ! / ✕ marks and words, never by hue. */
+  --ok: #000000;
+  --warn: #6b6b6b;
+  --bad: #000000;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --radius: 8px;
+  --radius: 6px;
   --gutter: clamp(20px, 5vw, 72px);
 }
 
-/* Warm black sections: everything inside flips to cream on black by itself. */
+/* Black sections: everything inside flips to white on black by itself. */
 [data-tone="dark"] {
-  --bg: #111111;
-  --bg-2: #1c1c1c;
-  --surface: #111111;
-  --surface-2: #1c1c1c;
-  --line: rgba(245, 240, 232, 0.16);
-  --line-strong: rgba(245, 240, 232, 0.4);
-  --text: #f5f0e8;
-  --muted: #ded8cc;
-  --faint: #b9b2a4;
-  --accent: #e53935;
-  --accent-hover: #ef5350;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(229, 57, 53, 0.14);
-  --ok: #f5f0e8;
-  --warn: #b9b2a4;
-  --bad: #e53935;
-  background: #111111;
-  color: #f5f0e8;
+  --bg: #000000;
+  --bg-2: #111111;
+  --surface: #000000;
+  --surface-2: #111111;
+  --line: rgba(255, 255, 255, 0.16);
+  --line-strong: rgba(255, 255, 255, 0.42);
+  --text: #ffffff;
+  --muted: #d4d4d4;
+  --faint: #a0a0a0;
+  --accent: #ffffff;
+  --accent-hover: #e5e5e5;
+  --accent-ink: #000000;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --ok: #ffffff;
+  --warn: #a0a0a0;
+  --bad: #ffffff;
+  background: #000000;
+  color: #ffffff;
 }
 
 @theme inline {
@@ -103,8 +101,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 ::selection {
-  background: #e53935;
+  background: #000000;
   color: #ffffff;
+}
+[data-tone="dark"] ::selection {
+  background: #ffffff;
+  color: #000000;
 }
 a {
   color: inherit;
@@ -303,7 +305,7 @@ body.paused *::after {
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--faint);
 }
 .h-display {
   font-family: var(--font-display);
@@ -316,7 +318,7 @@ body.paused *::after {
 .h-display .em,
 .h-section .em {
   font-weight: inherit;
-  color: var(--muted);
+  color: var(--faint);
 }
 .h-section {
   font-family: var(--font-display);
@@ -945,9 +947,4 @@ body.paused *::after {
     font-size: 0;
     gap: 0;
   }
-}
-
-/* Current page in the menu */
-.nav-links a[aria-current="page"] {
-  color: var(--accent);
 }

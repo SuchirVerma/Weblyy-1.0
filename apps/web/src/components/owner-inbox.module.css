@@ -205,8 +205,8 @@
 }
 .msg[data-role="owner"] {
   align-self: flex-end;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 .msg[data-role="owner"] small,
 .msg[data-role="owner"] .who {

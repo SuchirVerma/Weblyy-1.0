@@ -50,14 +50,14 @@
   padding: 10px 14px 10px;
   border-radius: 3px;
   background: #ffffff;
-  color: #111111;
+  color: #000000;
   border: 1px solid #ffffff;
   font-size: 0.92rem;
 }
 .bubbleAgent {
   justify-self: end;
   border-radius: 3px;
-  background: #111111;
+  background: #000000;
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.42);
 }
@@ -65,7 +65,7 @@
   display: block;
   font-family: var(--font-mono);
   font-size: 0.64rem;
-  color: #555555;
+  color: #6b6b6b;
   margin-bottom: 2px;
 }
 @media (max-width: 900px) {
@@ -773,13 +773,5 @@
   margin: clamp(24px, 4vw, 48px) 0;
 }
 .bubbleAgent .bubbleWho {
-  color: #b9b2a4;
-}
-
-/* Red highlights: the hero's key words and the key numbers */
-.heroTitle :global(.em) {
-  color: var(--accent);
-}
-.stat b {
-  color: var(--accent);
+  color: #a0a0a0;
 }

@@ -82,7 +82,7 @@ export default function IntegratePage() {
                     ))}
                   </ul>
                   <p className={styles.small}>
-                    Your agent ID is shown in the live console after you switch the agent on. Optional: <code>data-color=&quot;#111111&quot;</code> and{" "}
+                    Your agent ID is shown in the live console after you switch the agent on. Optional: <code>data-color=&quot;#000000&quot;</code> and{" "}
                     <code>data-label=&quot;Book on chat&quot;</code>.
                   </p>
                   <a className="btn btn-ghost btn-sm" href="/api/demo-agent" target="_blank" rel="noreferrer" style={{ justifySelf: "start" }}>

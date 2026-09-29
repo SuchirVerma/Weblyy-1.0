@@ -21,7 +21,7 @@ export function QrCard({ chatPath, name }: { chatPath: string; name: string }) {
       .then(async (s: { publicOrigin?: string | null }) => {
         const origin = s.publicOrigin || window.location.origin;
         const link = `${origin}${chatPath}?src=qr`;
-        const data = await QRCode.toDataURL(link, { margin: 1, width: 720, color: { dark: "#111111", light: "#ffffff" } });
+        const data = await QRCode.toDataURL(link, { margin: 1, width: 720, color: { dark: "#000000", light: "#ffffff" } });
         if (!alive) return;
         setUrl(link);
         setPng(data);
@@ -46,15 +46,15 @@ export function QrCard({ chatPath, name }: { chatPath: string; name: string }) {
 <style>
   @page { size: A5; margin: 0 }
   * { box-sizing: border-box }
-  body { margin: 0; font-family: "Albert Sans", system-ui, sans-serif; color: #111111; background: #fff }
+  body { margin: 0; font-family: "Albert Sans", system-ui, sans-serif; color: #000000; background: #fff }
   .p { width: 148mm; height: 210mm; margin: auto; padding: 16mm 14mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center }
-  .k { font: 600 11px/1 ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: #111111 }
+  .k { font: 600 11px/1 ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: #000000 }
   h1 { font-size: 30px; line-height: 1.1; margin: 10px 0 0; letter-spacing: -.02em }
-  .q { width: 92mm; height: 92mm; padding: 5mm; border: 2px solid #111111; border-radius: 8mm }
+  .q { width: 92mm; height: 92mm; padding: 5mm; border: 2px solid #000000; border-radius: 8mm }
   .q img { width: 100%; height: 100%; display: block }
   h2 { font-size: 22px; margin: 0 }
-  p { margin: 6px 0 0; font-size: 14px; color: #555555 }
-  .u { font: 11px ui-monospace, monospace; color: #555555; word-break: break-all }
+  p { margin: 6px 0 0; font-size: 14px; color: #3d3d3d }
+  .u { font: 11px ui-monospace, monospace; color: #6b6b6b; word-break: break-all }
 </style></head><body><div class="p">
   <div><div class="k">Ask us anything</div><h1>${esc(name)}</h1></div>
   <div class="q"><img src="${png}" alt="QR code"></div>

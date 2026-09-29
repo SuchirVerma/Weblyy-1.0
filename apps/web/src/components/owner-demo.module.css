@@ -113,7 +113,7 @@
   border-radius: 34px;
   border: 1px solid var(--line-strong);
   background: var(--chat-bg);
-  box-shadow: 0 30px 70px -30px rgba(17, 17, 17, 0.35), inset 0 0 0 6px var(--surface);
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.35), inset 0 0 0 6px var(--surface);
   overflow: hidden;
 }
 .ownerPhone {
@@ -196,8 +196,8 @@
 }
 .bubble[data-role="owner"] {
   align-self: flex-start;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--accent);
+  color: var(--accent-ink);
   border-radius: 6px 16px 16px 4px;
 }
 .from {
@@ -266,7 +266,7 @@
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--line);
-  box-shadow: 0 20px 40px -14px rgba(17, 17, 17, 0.35);
+  box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.35);
   font-size: 0.85rem;
 }
 .notice span {
@@ -274,7 +274,7 @@
 }
 .notice[data-tone="urgent"] {
   border-color: color-mix(in oklab, var(--bad) 45%, var(--line));
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--bad) 12%, transparent), 0 20px 40px -14px rgba(17, 17, 17, 0.35);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--bad) 12%, transparent), 0 20px 40px -14px rgba(0, 0, 0, 0.35);
 }
 .notice[data-tone="booking"] {
   border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
@@ -426,8 +426,8 @@
 }
 .tMsg[data-role="owner"] {
   align-self: flex-end;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 .compose {
   display: flex;

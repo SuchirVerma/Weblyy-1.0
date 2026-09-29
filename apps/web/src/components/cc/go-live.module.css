@@ -126,7 +126,7 @@
   padding: 16px 18px;
   border-radius: 4px;
   background: color-mix(in oklab, var(--ok) 10%, transparent);
-  color: #111111;
+  color: #000000;
 }
 .links {
   display: grid;

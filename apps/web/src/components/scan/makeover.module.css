@@ -172,7 +172,7 @@
 .seg button[aria-pressed="true"] {
   background: var(--surface);
   color: var(--text);
-  box-shadow: 0 1px 3px rgba(17, 17, 17, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 .scroller {
   height: min(620px, 72vh);
@@ -220,7 +220,7 @@
   width: 3px;
   margin-left: -1.5px;
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.25);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 .handle span {
   position: sticky;
@@ -234,14 +234,14 @@
   background: #fff;
   color: var(--text);
   font-size: 1.1rem;
-  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 .tag {
   position: absolute;
   top: 12px;
   padding: 4px 10px;
   border-radius: 3px;
-  background: rgba(17, 17, 17, 0.78);
+  background: rgba(0, 0, 0, 0.78);
   color: #fff;
   font-size: 0.78rem;
   font-weight: 600;
@@ -478,7 +478,7 @@
   text-transform: uppercase;
 }
 .badge[data-kind="keep"] {
-  background: #ded8cc;
+  background: #e5e5e5;
   color: #14532d;
 }
 .badge[data-kind="improve"] {
@@ -534,7 +534,7 @@
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 .keepLogo {
   max-height: 28px;
