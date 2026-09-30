@@ -4,16 +4,24 @@ const HINGLISH =
 const PATTERNS = [
   ["refund", /refund|money back|paise? wapas|paisa wapas|return my/i],
   [
+    "services",
+    /what (all )?(services|treatments|courses|facilities|classes|programs|products|dishes)|which (services|treatments|courses|classes|programs)|(services|treatments|courses|facilities|classes) (do|you|offer|provide|available)|kya kya|kaun kaun|kaunsi services|list of (services|treatments|courses)|\b(your|the) menu\b/i,
+  ],
+  [
     "complaint",
     /complain|not happy|unhappy|worst|terrible|bad (service|experience)|kharab|bekaar|bakwas|bura|galat|angry|disappoint|rude|burn|rash|allerg|itch|pain|hurt/i,
   ],
   [
     "booking",
-    /\bbook|appointment|slot|reserv|schedule|\bfree hai|available|availability|khali|aana hai|aa sakt|aa jau|kal |aaj |tomorrow|today|sunday|monday|tuesday|wednesday|thursday|friday|saturday|\d\s?(am|pm|baje)/i,
+    /\bbook|appointment|admission|enrol|dakhila|slot|reserv|schedule|\bfree hai|available|availability|khali|aana hai|aa sakt|aa jau|kal |aaj |tomorrow|today|sunday|monday|tuesday|wednesday|thursday|friday|saturday|\d\s?(am|pm|baje)/i,
   ],
   ["price", /price|cost|rate|charge|kitn[aei]|how much|fee|₹|\brs\b|package|offer|discount/i],
   ["hours", /timing|\btime\b|open|close|khul|band |kab tak|kab se|hours|sunday|holiday/i],
   ["location", /where|address|location|kaha|kahan|map|direction|parking|reach|metro/i],
+  ["contact", /phone|\bnumber\b|contact|\bcall\b|mobile|whatsapp|e-?mail|mail id|baat kar/i],
+  ["reviews", /review|rating|testimonial|feedback|\bstars?\b|log kya kehte/i],
+  ["social", /instagram|\binsta\b|facebook|\bfb\b|youtube|linkedin|social media/i],
+  ["about", /about (you|the|your|us)|who (are you|is|runs|owns)|owner|founder|doctor|\bdr\.?\s|experience|since when|established|qualification|staff|\bteam\b|faculty|teachers?|trainers?|chef/i],
   ["greeting", /^(hi+|hello|hey|namaste|namaskar|good (morning|evening|afternoon)|hlo|helo)\b[\s!.]*$/i],
   ["thanks", /^(thanks?|thank you|thx|ty|ok+|okay|shukriya|dhanyavad|great|cool|perfect|done|theek hai|thik hai)\b[\s!.🙏👍]*$/i],
 ];
@@ -47,6 +55,13 @@ const SYNONYMS = {
   bridal: ["bride"],
   shaadi: ["bride", "wedding"],
   ghar: ["home"],
+  doctor: ["dr", "dentist"],
+  doctors: ["dr", "dentist"],
+  principal: ["head"],
+  clean: ["hygiene", "steril"],
+  safai: ["clean", "hygiene"],
+  brand: ["product"],
+  brands: ["product"],
 };
 const GENERIC = new Set(["cost", "price", "much", "kya", "service", "treatment", "list", "all", "your", "rate", "charge"]);
 const stem = (w) => w.replace(/(ful|ing)$/, "").replace(/([^s])s$/, "$1");
@@ -109,7 +124,10 @@ export function rulesReply(k, message) {
   const hoursQ =
     /\b(open|opening|close|closed|khul|khula|khule|band|timing|timings|kab tak|kab se|holiday|chutti)\b/i.test(message) &&
     !/\bbook|appointment|slot\b/i.test(message);
-  const intent = medical ? "medical" : hoursQ ? "hours" : (PATTERNS.find(([, re]) => re.test(message))?.[0] ?? "other");
+  // A message carrying their phone or email is a lead; the lead step thanks them, so don't answer it as a question.
+  const sharing = /\d{10}/.test(message.replace(/[\s-]/g, "")) || /\S+@\S+\.\w/.test(message);
+  const matched = PATTERNS.find(([, re]) => re.test(message))?.[0] ?? "other";
+  const intent = medical ? "medical" : hoursQ ? "hours" : matched === "contact" && sharing ? "other" : matched;
   const T = (en, hin) => (hi ? hin : en);
   const offer = () => T(...(OFFER[P.goal.id] ?? OFFER.enquiry));
   const base = { intent, engine: "rules" };
@@ -174,6 +192,8 @@ export function rulesReply(k, message) {
       }
       const costFaq = matchFaq(message, { ...k, faqs: k.faqs.filter((f) => /cost|price|fee|charge|₹|rs\.?\s?\d/i.test(`${f.q} ${f.a}`)) }, 0.3);
       if (costFaq) return { ...base, reply: costFaq, escalate: false, source: "FAQ" };
+      const priced = searchSite(k, message, { price: true });
+      if (priced) return { ...base, reply: `${quote(priced, T)} ${offer()}`, escalate: false, source: priced.source };
       const specific = tokens(message).filter((w) => !GENERIC.has(w));
       if (specific.length && k.prices.length) {
         return {
@@ -242,6 +262,70 @@ export function rulesReply(k, message) {
         source: k.hours.length ? "Opening hours" : "Booking rule",
       };
     }
+    case "services": {
+      const list = serviceNames(k);
+      if (list.length)
+        return {
+          ...base,
+          reply: T(
+            `We offer ${joinList(list.slice(0, 8))}${list.length > 8 ? ", and more" : ""}. Ask me about any of them.`,
+            `Hum ye services dete hain: ${joinList(list.slice(0, 8))}${list.length > 8 ? ", aur bhi" : ""}. Kisi ke baare mein bhi puchiye.`,
+          ),
+          escalate: false,
+          source: k.prices.length ? "Price list" : "Services",
+        };
+      const intro = aboutText(k);
+      if (intro) return { ...base, reply: T(`From our website: ${clip(intro, 300)}`, `Website pe likha hai: ${clip(intro, 300)}`), escalate: false, source: "About" };
+      break;
+    }
+    case "contact": {
+      const ways = [
+        k.phones[0] && T(`call ${phone(k.phones[0])}`, `call karein ${phone(k.phones[0])}`),
+        k.whatsapp[0] && k.whatsapp[0] !== "WhatsApp link" && phone(k.whatsapp[0]) !== phone(k.phones[0] ?? "") && `WhatsApp ${phone(k.whatsapp[0])}`,
+        k.emails[0] && T(`email ${k.emails[0]}`, `email ${k.emails[0]}`),
+      ].filter(Boolean);
+      if (ways.length)
+        return {
+          ...base,
+          reply: T(`You can ${joinList(ways, "or")}. Or just ask me here!`, `Aap ${joinList(ways, "ya")}. Ya yahin puchiye!`),
+          escalate: false,
+          source: "Contact details",
+        };
+      break;
+    }
+    case "reviews": {
+      const t = k.content?.testimonials ?? [];
+      if (t.length) {
+        const pick = t.slice(0, 2).map((x) => `"${clip(x.quote, 140)}"${x.name ? ` (${x.name})` : ""}`);
+        return {
+          ...base,
+          reply: T(`Here's what our customers say: ${pick.join(" ")}`, `Hamare customers kehte hain: ${pick.join(" ")}`),
+          escalate: false,
+          source: "Testimonials",
+        };
+      }
+      break;
+    }
+    case "social": {
+      const links = k.socialLinks ?? [];
+      const want = links.find((l) => new RegExp(l.name.slice(0, 4), "i").test(message)) ?? null;
+      const show = want ? [want] : links.slice(0, 3);
+      if (show.length)
+        return {
+          ...base,
+          reply: T(`Find us here: ${show.map((l) => `${l.name} ${l.url}`).join(" · ")}`, `Yaha follow karein: ${show.map((l) => `${l.name} ${l.url}`).join(" · ")}`),
+          escalate: false,
+          source: "Social links",
+        };
+      break;
+    }
+    case "about": {
+      const general = /tell me about|about (you|us|your|the (clinic|school|salon|business|place|restaurant|gym|shop|store|centre|center|studio|academy|institute))|who are you|kaun ho/i.test(message);
+      if (general && aboutText(k)) return { ...base, reply: clip(aboutText(k), 320), escalate: false, source: "About" };
+      const hit = searchSite(k, message);
+      if (hit) return { ...base, reply: quote(hit, T), escalate: false, source: hit.source };
+      break;
+    }
     case "hours":
       if (k.hours.length) return { ...base, reply: T(`We're open ${k.hours[0]}.`, `Hum ${k.hours[0]} khule hain.`), escalate: false, source: "Opening hours" };
       break;
@@ -250,8 +334,8 @@ export function rulesReply(k, message) {
         return {
           ...base,
           reply: T(
-            `We're at ${k.address}. Maps: https://maps.google.com/?q=${encodeURIComponent(k.address)}`,
-            `Hum yaha hain: ${k.address}. Maps: https://maps.google.com/?q=${encodeURIComponent(k.address)}`,
+            `We're at ${k.address}. Maps: ${k.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(k.address)}`}`,
+            `Hum yaha hain: ${k.address}. Maps: ${k.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(k.address)}`}`,
           ),
           escalate: false,
           source: "Address",
@@ -274,10 +358,126 @@ export function rulesReply(k, message) {
       escalate: false,
       source: "Price list",
     };
+  const hit = sharing ? null : searchSite(k, message);
+  if (hit) return { ...base, intent: "service_info", reply: quote(hit, T), escalate: false, source: hit.source };
   return {
     ...base,
     reply: T(`Good question! Let me check with the team and reply in a few minutes.`, `Acha sawaal hai! Main team se check karke thodi der mein batata hu.`),
     escalate: true,
     source: "none",
   };
+}
+
+/* ------------------------------------------------------------------ the rest of the website */
+const QUESTION = new Set(
+  "what which who whom whose when where why how tell about any there have has get want need know give also bhi koi hota hoti hote karte karti ho kaun kaunsa kaunsi kab kaise kyu kyun kis se mein par aur sab you your we our us do does did can could would will should".split(" "),
+);
+const phone = (p) => {
+  const d = p.replace(/\D/g, "");
+  const n = d.length === 12 && d.startsWith("91") ? d.slice(2) : d.length === 10 ? d : "";
+  return n && /^[6-9]/.test(n) ? `+91 ${n.slice(0, 5)} ${n.slice(5)}` : p;
+};
+const aboutText = (k) => (k.content?.about ?? []).find((a) => a.length > 60) || k.description || "";
+// Split into sentences without breaking "Mrs. Sharma" or "Dr. Kalra".
+const SENTENCE = /(?<!\b(?:Mr|Mrs|Ms|Dr|Prof|St|No|Sr|Jr|vs|etc)\.)(?<=[.!?])\s+/;
+/** Menus and button rows ("LOGIN Home Photo Gallery About") aren't answers: real sentences have lowercase words. */
+function isProse(t) {
+  const words = t.split(/\s+/).filter((w) => /[a-z]/i.test(w));
+  if (words.length < 3) return false;
+  const caps = words.filter((w) => w.length > 1 && w === w.toUpperCase()).length;
+  if (caps / words.length >= 0.5) return false;
+  const lower = words.filter((w) => /^[a-z]/.test(w)).length;
+  return words.length <= 12 || lower / words.length >= 0.4;
+}
+/** One group per word of the question: the word and its synonyms. A group counts once, however many members match. */
+function groupsOf(message) {
+  const out = [];
+  for (const w of message.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/)) {
+    if (w.length < 2) continue;
+    const g = [...new Set([...(STOP.has(w) ? [] : [stem(w)]), ...(SYNONYMS[w] ?? []).map(stem)])].filter((x) => !GENERIC.has(x) && !QUESTION.has(x));
+    if (g.length && !out.some((o) => o[0] === g[0])) out.push(g);
+  }
+  return out;
+}
+const near = (w, t) => t === w || (w.length >= 5 && t.startsWith(w)) || (w.length >= 6 && t.startsWith(w.slice(0, 6)));
+const clip = (t, n) => (t.length > n ? `${t.slice(0, n - 1).replace(/\s+\S*$/, "")}…` : t);
+function joinList(xs, word = "and") {
+  return xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} ${word} ${xs[xs.length - 1]}`;
+}
+function serviceNames(k) {
+  const seen = new Set();
+  return [...k.prices.map((p) => p.name), ...(k.services ?? [])].filter((n) => {
+    const key = n.toLowerCase().trim();
+    if (!key || key.length > 60 || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+/** Everything readable the scan kept, cut into short passages the assistant can quote. Built once per business. */
+const indexes = new WeakMap();
+function siteIndex(k) {
+  let idx = indexes.get(k);
+  if (idx) return idx;
+  const passages = [];
+  const add = (text, source) => {
+    const t = text.replace(/\s+/g, " ").trim();
+    if (t.length >= 30 && isProse(t) && !passages.some((p) => p.text === t)) {
+      const toks = new Set(tokens(t));
+      passages.push({ text: t, source, toks, list: [...toks] });
+    }
+  };
+  if (k.description) add(k.description, "About");
+  for (const a of k.content?.about ?? []) add(a, "About");
+  for (const sec of k.content?.sections ?? []) add(`${sec.heading}: ${sec.text}`, sec.heading);
+  // The raw page text, two sentences at a time, catches what the structured parts missed.
+  const sentences = (k.text ?? "").split(new RegExp(`${SENTENCE.source}|\\n+`)).map((x) => x.trim()).filter((x) => x.split(" ").length >= 5);
+  for (let i = 0; i < sentences.length; i += 2) add(sentences.slice(i, i + 2).join(" "), "Website");
+  const df = new Map();
+  for (const p of passages) for (const w of p.toks) df.set(w, (df.get(w) ?? 0) + 1);
+  idx = { passages, df, n: passages.length };
+  indexes.set(k, idx);
+  return idx;
+}
+/**
+ * The passage that best answers the question, or null. Most of the question's specific words must appear in it,
+ * and at least one of them must be rare on the site, so the business's own name alone never counts as an answer.
+ */
+export function searchSite(k, message, { price = false } = {}) {
+  const idx = siteIndex(k);
+  if (!idx.n) return null;
+  const groups = groupsOf(message);
+  if (!groups.length) return null;
+  const df = (w) => idx.passages.filter((p) => p.list.some((t) => near(w, t))).length;
+  const gdf = groups.map((g) => Math.max(...g.map(df)));
+  // A word the website never uses means the website can't answer this ("transport" on a site with no transport page).
+  const missing = gdf.filter((d) => d === 0).length;
+  const need = groups.length >= 3 ? Math.ceil(groups.length * 0.6) : groups.length;
+  let best = null;
+  for (const p of idx.passages) {
+    if (price && !/₹|\brs\.?\s?\d|\binr\b|\d+\s?\/-/i.test(p.text)) continue;
+    const hitGroups = groups.map((g, i) => (g.some((w) => p.list.some((t) => near(w, t))) ? i : -1)).filter((i) => i >= 0);
+    if (hitGroups.length < need) continue;
+    if (missing && hitGroups.length < 2) continue;
+    if (!hitGroups.some((i) => gdf[i] / idx.n < 0.35)) continue;
+    const score = hitGroups.reduce((a, i) => a + Math.log(1 + idx.n / gdf[i]), 0) + (p.source === "Website" ? 0 : 0.3);
+    if (!best || score > best.score) best = { ...p, hit: hitGroups.flatMap((i) => groups[i]), score };
+  }
+  if (!best) return null;
+  // Quote the sentence(s) that carry the matched words, not the whole passage.
+  const parts = best.text.split(SENTENCE);
+  const has = (t, w) => tokens(t).some((x) => near(w, x));
+  const ranked = parts.map((t, i) => ({ t, i, n: best.hit.filter((w) => has(t, w)).length })).filter((x) => x.n);
+  const keep = ranked.sort((a, b) => b.n - a.n).slice(0, 2).sort((a, b) => a.i - b.i).map((x) => x.t);
+  let text = (keep.length ? keep : parts).join(" ").replace(/#+\s*/g, "").trim();
+  // A run-on block with no full stops: quote the words around the match, not the whole block.
+  if (text.length > 240) {
+    const words = text.split(/\s+/);
+    const at = Math.max(0, words.findIndex((w) => best.hit.some((h) => tokens(w).some((x) => near(h, x)))));
+    const from = Math.max(0, at - 8);
+    text = `${from ? "…" : ""}${words.slice(from, from + 32).join(" ")}${from + 32 < words.length ? "…" : ""}`;
+  }
+  return { text, source: best.source === "Website" ? "Website" : `Website: ${best.source}` };
+}
+function quote(hit, T) {
+  return T(`From our website: ${hit.text}`, `Website pe likha hai: ${hit.text}`);
 }
