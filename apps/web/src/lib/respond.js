@@ -3,6 +3,8 @@ import { aiReply } from "./ai";
 import { rulesReply } from "./rules-agent";
 import { leadStep } from "./leads";
 import { historyFor, recordCustomerOnly, recordMessage } from "./store";
+import { claimRefresh, isStale, refreshAgentKnowledge } from "./site-library";
+import { after } from "next/server";
 /**
  * One customer message in, one agent reply out. AI when available, rules otherwise. Never throws.
  * If the owner has taken over this customer's chat, the agent stays quiet and the message waits in the owner's inbox.
@@ -27,5 +29,17 @@ export async function respond(agent, from, message, source = "Chat link") {
     console.error("[leads]", e instanceof Error ? e.message : e);
   }
   recordMessage(agent, { at: Date.now(), from, text: message, ...reply });
+  keepFresh(agent);
   return reply;
+}
+/** Once a day at most, re-read the business's website after replying, so the next answers use today's prices and hours. */
+function keepFresh(agent) {
+  if (!isStale(agent.knowledge)) return;
+  try {
+    after(async () => {
+      if (await claimRefresh(agent)) await refreshAgentKnowledge(agent.id);
+    });
+  } catch {
+    // Not inside a request (scripts, tests): skip.
+  }
 }

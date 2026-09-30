@@ -4,6 +4,8 @@ import { auditBusiness } from "@/lib/audit";
 import { allow, clientIp } from "@/lib/ratelimit";
 import { ensureMakeover, internalOrigin } from "@/lib/makeover-run";
 import { createAgent, getScan, recordRun, savePersist } from "@/lib/store";
+import { attachLibrary } from "@/lib/site-library";
+import { after } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -25,6 +27,8 @@ export async function POST(req) {
     new Promise((r) => setTimeout(r, 30_000)),
   ]);
   const agent = await createAgent(scan.knowledge, "AI Customer Agent");
+  // The scan read a few pages to score the site; the assistant reads the rest in the background.
+  after(() => attachLibrary(agent.id).catch((e) => console.error("[library]", e)));
   const origin = process.env.APP_URL || new URL(req.url).origin;
   const sitePath = `/site/${agent.id}`;
   agent.workspace = {

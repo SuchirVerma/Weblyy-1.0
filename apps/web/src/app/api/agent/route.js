@@ -3,6 +3,8 @@ import { respond } from "@/lib/respond";
 import { getAgent } from "@/lib/store";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Room for the daily website re-read that runs after the reply is sent.
+export const maxDuration = 60;
 export async function POST(req) {
   let body;
   try {

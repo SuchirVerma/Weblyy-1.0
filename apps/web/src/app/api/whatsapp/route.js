@@ -3,6 +3,7 @@ import { respond } from "@/lib/respond";
 import { getAgent, latestAgent } from "@/lib/store";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 const xml = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const twiml = (text) =>
   new Response(`<?xml version="1.0" encoding="UTF-8"?><Response>${text ? `<Message>${xml(text)}</Message>` : ""}</Response>`, {

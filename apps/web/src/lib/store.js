@@ -199,6 +199,12 @@ export const newId = () => randomBytes(6).toString("hex");
 export function savePersist() {
   persist();
 }
+/** Saves now and waits for it: for work that runs after the response, when nothing else keeps the function alive. */
+export async function flushAgent(id) {
+  touched.add(id);
+  persist();
+  await queue.get(id);
+}
 export function recordRun(agent, automation, steps, detail) {
   agent.runs.push({ id: newId(), at: Date.now(), automation, steps, detail });
   if (agent.runs.length > 200) agent.runs.splice(0, agent.runs.length - 200);

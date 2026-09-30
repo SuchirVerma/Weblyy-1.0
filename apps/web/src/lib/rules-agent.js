@@ -61,6 +61,8 @@ const SYNONYMS = {
   clean: ["hygiene", "steril"],
   safai: ["clean", "hygiene"],
   brand: ["product"],
+  // Schools write classes in Roman numerals.
+  ...Object.fromEntries(["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii"].map((r, i) => [String(i + 1), [r]])),
   brands: ["product"],
 };
 const GENERIC = new Set(["cost", "price", "much", "kya", "service", "treatment", "list", "all", "your", "rate", "charge"]);
@@ -83,6 +85,9 @@ function matchPrices(msg, prices) {
   return prices
     .map((p) => {
       const t = tokens(p.name);
+      const real = t.filter((w) => q.has(w) && !GENERIC.has(w)).length;
+      // "registration fee" must not match "transport charges" just because both mean price.
+      if (!real) return { p, s: 0 };
       const hits = t.filter((w) => q.has(w)).length;
       return { p, s: hits / Math.max(1, t.length) + hits * 0.5 };
     })
@@ -117,7 +122,8 @@ const OFFER = {
   enquiry: ["Anything else you'd like to know?", "Aur kuch jaanna hai?"],
   quote: ["Shall I have the team call you back?", "Team se call back karwa du?"],
 };
-export function rulesReply(k, message) {
+export function rulesReply(site, message) {
+  const k = withLibrary(site);
   const P = profileOf(k);
   const hi = HINGLISH.test(message);
   const medical = k.businessType === "clinic" && MEDICAL.test(message);
@@ -232,6 +238,11 @@ export function rulesReply(k, message) {
       };
     }
     case "booking": {
+      // "What documents are needed for admission?" is a question the website may answer; answer it, then offer the next step.
+      if (/\b(what|which|how|criteria|eligib\w*|documents?|process|procedure|age|last date|dates?|required|requirements?|rules|kya|kaise|kaun|konsa|kitne)\b/i.test(message)) {
+        const hit = searchSite(k, message);
+        if (hit) return { ...base, intent: "service_info", reply: `${quote(hit, T)} ${offer()}`, escalate: false, source: hit.source };
+      }
       const slot = when(message);
       if (P.goal.id === "admission")
         return {
@@ -370,7 +381,7 @@ export function rulesReply(k, message) {
 
 /* ------------------------------------------------------------------ the rest of the website */
 const QUESTION = new Set(
-  "what which who whom whose when where why how tell about any there have has get want need know give also bhi koi hota hoti hote karte karti ho kaun kaunsa kaunsi kab kaise kyu kyun kis se mein par aur sab you your we our us do does did can could would will should".split(" "),
+  "what which who whom whose when where why how tell about any there have has get want need needed required require know give also bhi koi hota hoti hote karte karti ho kaun kaunsa kaunsi kab kaise kyu kyun kis se mein par aur sab hoga hogi hoge tha thi raha rahi chahiye milega milegi you your we our us do does did can could would will should".split(" "),
 );
 const phone = (p) => {
   const d = p.replace(/\D/g, "");
@@ -419,10 +430,15 @@ function siteIndex(k) {
   let idx = indexes.get(k);
   if (idx) return idx;
   const passages = [];
-  const add = (text, source) => {
-    const t = text.replace(/\s+/g, " ").trim();
+  // `context` (the page's title) counts for matching but is never quoted: "Class XI" on the page title, "criteria" in the text.
+  const add = (text, source, context = "") => {
+    // A run of eight or more Capitalised Words is a menu ("Safety And Security Measures School Rules School Calendar…").
+    const t = text
+      .replace(/(?:(?:[A-Z][\w'’&/().-]*|of|and|&|\/|\(|\)|-|\d+\.?)\s+){8,}/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
     if (t.length >= 30 && isProse(t) && !passages.some((p) => p.text === t)) {
-      const toks = new Set(tokens(t));
+      const toks = new Set(tokens(`${context} ${t}`));
       passages.push({ text: t, source, toks, list: [...toks] });
     }
   };
@@ -432,6 +448,13 @@ function siteIndex(k) {
   // The raw page text, two sentences at a time, catches what the structured parts missed.
   const sentences = (k.text ?? "").split(new RegExp(`${SENTENCE.source}|\\n+`)).map((x) => x.trim()).filter((x) => x.split(" ").length >= 5);
   for (let i = 0; i < sentences.length; i += 2) add(sentences.slice(i, i + 2).join(" "), "Website");
+  // Every other page the assistant read, credited to its page.
+  for (const pg of k.library?.pages ?? []) {
+    const ctx = pg.title === "Home" ? "" : pg.title;
+    for (const sec of pg.sections ?? []) add(`${sec.heading}: ${sec.text}`, `page:${pg.title}`, ctx);
+    const ss = (pg.text ?? "").split(new RegExp(`${SENTENCE.source}|\\n+`)).map((x) => x.trim()).filter((x) => x.split(" ").length >= 5);
+    for (let i = 0; i < ss.length; i += 2) add(ss.slice(i, i + 2).join(" "), `page:${pg.title}`, ctx);
+  }
   const df = new Map();
   for (const p of passages) for (const w of p.toks) df.set(w, (df.get(w) ?? 0) + 1);
   idx = { passages, df, n: passages.length };
@@ -452,14 +475,17 @@ export function searchSite(k, message, { price = false } = {}) {
   // A word the website never uses means the website can't answer this ("transport" on a site with no transport page).
   const missing = gdf.filter((d) => d === 0).length;
   const need = groups.length >= 3 ? Math.ceil(groups.length * 0.6) : groups.length;
+  // An answer may skip a common word, never a specific one ("nursery", "implants"): that would be about something else.
+  const specific = gdf.map((d) => d > 0 && d / idx.n < 0.2);
   let best = null;
   for (const p of idx.passages) {
     if (price && !/₹|\brs\.?\s?\d|\binr\b|\d+\s?\/-/i.test(p.text)) continue;
     const hitGroups = groups.map((g, i) => (g.some((w) => p.list.some((t) => near(w, t))) ? i : -1)).filter((i) => i >= 0);
     if (hitGroups.length < need) continue;
-    if (missing && hitGroups.length < 2) continue;
+    if (missing) return null;
+    if (specific.some((sp, i) => sp && !hitGroups.includes(i))) continue;
     if (!hitGroups.some((i) => gdf[i] / idx.n < 0.35)) continue;
-    const score = hitGroups.reduce((a, i) => a + Math.log(1 + idx.n / gdf[i]), 0) + (p.source === "Website" ? 0 : 0.3);
+    const score = hitGroups.reduce((a, i) => a + Math.log(1 + idx.n / gdf[i]), 0) + (p.source === "Website" || p.source.startsWith("page:") ? 0 : 0.3);
     if (!best || score > best.score) best = { ...p, hit: hitGroups.flatMap((i) => groups[i]), score };
   }
   if (!best) return null;
@@ -476,8 +502,26 @@ export function searchSite(k, message, { price = false } = {}) {
     const from = Math.max(0, at - 8);
     text = `${from ? "…" : ""}${words.slice(from, from + 32).join(" ")}${from + 32 < words.length ? "…" : ""}`;
   }
-  return { text, source: best.source === "Website" ? "Website" : `Website: ${best.source}` };
+  const page = best.source.startsWith("page:") ? best.source.slice(5) : "";
+  return { text, page: page && page !== "Home" ? page : "", source: page ? `Website: ${page} page` : best.source === "Website" ? "Website" : `Website: ${best.source}` };
 }
 function quote(hit, T) {
+  if (hit.page) return T(`From our ${hit.page} page: ${hit.text}`, `Hamare ${hit.page} page pe likha hai: ${hit.text}`);
   return T(`From our website: ${hit.text}`, `Website pe likha hai: ${hit.text}`);
+}
+/** The scan's knowledge plus the prices and FAQs found on every other page the assistant read. Built once per copy. */
+const expanded = new WeakMap();
+function withLibrary(k) {
+  const pages = k.library?.pages;
+  if (!pages?.length) return k;
+  let out = expanded.get(k);
+  if (out) return out;
+  const byKey = (xs, key) => xs.filter((x, i) => xs.findIndex((y) => key(y) === key(x)) === i);
+  out = {
+    ...k,
+    prices: byKey([...k.prices, ...pages.flatMap((p) => p.prices ?? [])], (p) => p.name.toLowerCase()).slice(0, 120),
+    faqs: byKey([...k.faqs, ...pages.flatMap((p) => p.faqs ?? [])], (f) => f.q.toLowerCase()).slice(0, 80),
+  };
+  expanded.set(k, out);
+  return out;
 }
