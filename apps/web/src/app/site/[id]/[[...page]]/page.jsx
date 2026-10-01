@@ -31,6 +31,9 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description: d.search.metaDescription,
+    // Anyone can generate a redesign of any business's site, so these pages stay out of search engines.
+    // They can be indexed once ownership is verified (a later step); until then the real website keeps its place.
+    robots: { index: false, follow: false },
     alternates: { canonical: `/site/${id}${slug ? `/${slug}` : ""}` },
     openGraph: { title, description: d.search.metaDescription, ...(image && { images: [image] }) },
     icons: d.k.content?.favicon ? { icon: d.k.content.favicon } : undefined,
@@ -51,5 +54,5 @@ export default async function TransformedSite({ params, searchParams }) {
   }
   const slug = pageOf(page, d);
   if (slug === null) notFound();
-  return <SiteView k={d.k} search={d.search} brand={d.brand} agentId={d.agent.id} page={slug} base={`/site/${id}`} scene={typeof scene === "string" ? scene : undefined} />;
+  return <SiteView k={d.k} search={d.search} brand={d.brand} agentId={d.agent.id} page={slug} base={`/site/${id}`} claimed={Boolean(d.agent.published)} scene={typeof scene === "string" ? scene : undefined} />;
 }

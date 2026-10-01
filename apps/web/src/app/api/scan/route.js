@@ -17,7 +17,7 @@ export async function POST(req) {
   } catch {
     return Response.json({ error: "Send a JSON body with a url." }, { status: 400 });
   }
-  if (!allow(`scan:${clientIp(req)}`, 12, 60_000)) {
+  if (!(await allow(`scan:${clientIp(req)}`, 12, 60_000))) {
     return Response.json({ error: "Too many scans. Give it a minute." }, { status: 429 });
   }
   const encoder = new TextEncoder();

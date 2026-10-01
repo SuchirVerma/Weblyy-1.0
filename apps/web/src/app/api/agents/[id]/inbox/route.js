@@ -54,7 +54,7 @@ export async function POST(req, ctx) {
   if (!keyOk(agent, typeof body.key === "string" ? body.key : null)) return Response.json({ error: "This inbox link isn't valid." }, { status: 403 });
   const to = typeof body.to === "string" ? body.to.slice(0, 60) : "";
   if (!to || !agent.conversations[to]) return Response.json({ error: "That conversation doesn't exist." }, { status: 404 });
-  if (!allow(`owner:${clientIp(req)}`, 40, 60_000)) return Response.json({ error: "Slow down a little." }, { status: 429 });
+  if (!(await allow(`owner:${clientIp(req)}`, 40, 60_000))) return Response.json({ error: "Slow down a little." }, { status: 429 });
   if (body.action === "handback" || body.action === "takeover") {
     setOwnerHandling(agent, to, body.action === "takeover");
     return Response.json({ ok: true });

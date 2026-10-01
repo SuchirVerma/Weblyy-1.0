@@ -52,7 +52,7 @@ async function pushToN8n(workflow) {
   }
 }
 export async function POST(req) {
-  if (!allow(`deploy:${clientIp(req)}`, 10, 60_000)) return Response.json({ error: "Too many deploys. Give it a minute." }, { status: 429 });
+  if (!(await allow(`deploy:${clientIp(req)}`, 10, 60_000))) return Response.json({ error: "Too many deploys. Give it a minute." }, { status: 429 });
   let body;
   try {
     body = await req.json();

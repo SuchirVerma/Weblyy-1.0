@@ -1,7 +1,7 @@
 import "server-only";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { getJSON, serverless, setJSON, useRedis } from "./kv";
+import { getJSON, redis, serverless, setJSON, useRedis } from "./kv";
 import { appendRow, sheetConfigured } from "./sheet";
 import { NotConfigured, sendSms, smsProvider } from "./sms";
 const DIR = process.env.DATA_DIR || path.join(process.cwd(), ".data");
@@ -146,6 +146,22 @@ function startTimer() {
   state.timer.unref?.();
 }
 /** Called once when the server starts: delivers anything left over from before a restart. */
+/**
+ * On Vercel there are no background timers, so pending deliveries are retried alongside normal traffic:
+ * at most once every 2 minutes across all instances (a Redis lock), after the response has been sent.
+ */
+export async function maybeProcessOutbox() {
+  if (!serverless) return; // a normal server has its own once-a-minute timer
+  try {
+    if (redis) {
+      const got = await redis.set("outbox:tick", "1", { nx: true, ex: 120 });
+      if (!got) return;
+    }
+    await processOutbox();
+  } catch (e) {
+    console.error("[outbox] background retry failed", e instanceof Error ? e.message : e);
+  }
+}
 export function startOutbox() {
   startTimer();
   processOutbox().catch((e) => console.error("[outbox] startup run failed", e));

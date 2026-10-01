@@ -16,5 +16,11 @@
     "src/app/api/search/route.js": {
       "memory": 2048
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/outbox",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }

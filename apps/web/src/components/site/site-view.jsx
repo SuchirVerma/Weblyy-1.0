@@ -14,6 +14,13 @@ import styles from "./site.module.css";
  * The home page carries every fact on its own (it is what gets measured); the inner pages go deeper.
  */
 const digits = (s) => s.replace(/\D/g, "");
+const hostOf = (u) => {
+  try {
+    return new URL(u).hostname.replace(/^www\./, "");
+  } catch {
+    return "the business";
+  }
+};
 const telOf = (p) => {
   const d = digits(p);
   return d.length === 10 ? `+91${d}` : `+${d}`;
@@ -91,7 +98,7 @@ function WeblyyMark() {
     </svg>
   );
 }
-export function SiteView({ k, search, brand, agentId, preview, page = "", base, scene, branded = true }) {
+export function SiteView({ k, search, brand, agentId, preview, page = "", base, scene, branded = true, claimed = true }) {
   const m = siteModel(k, search, brand);
   const t = m.identity.theme;
   const href = (slug) => (slug ? `${base}/${slug}` : base || "/");
@@ -119,6 +126,11 @@ export function SiteView({ k, search, brand, agentId, preview, page = "", base, 
       <style>{`@view-transition{navigation:auto}::view-transition-old(root){animation:.35s cubic-bezier(.22,1,.36,1) both wbSiteOut}::view-transition-new(root){animation:.55s cubic-bezier(.22,1,.36,1) both wbSiteIn}@keyframes wbSiteOut{to{opacity:0;transform:translateY(-12px)}}@keyframes wbSiteIn{from{opacity:0;transform:translateY(18px)}}html:has([data-fs-site]){scrollbar-color:${t.accent} ${t.bg};scrollbar-width:thin}html:has([data-fs-site])::-webkit-scrollbar{width:10px}html:has([data-fs-site])::-webkit-scrollbar-track{background:${t.bg}}html:has([data-fs-site])::-webkit-scrollbar-thumb{background:${t.accent};border-radius:10px;border:2px solid ${t.bg}}`}</style>
       {!page &&
         search.jsonLd.map((ld, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />)}
+      {!preview && !claimed && (
+        <p className={styles.draftBar} role="note">
+          Preview of a redesign made with Weblyy from {hostOf(k.url)}&apos;s public website. Not the official site until the owner publishes it.
+        </p>
+      )}
       {preview && (
         <p className={styles.draftBar} role="note">
           Preview of the redesigned website. Every detail comes from {new URL(k.url).hostname}.

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 /** "Make my business AI-ready": switches on the agent, the AI-ready website, AI Search assets, Lead Center and automations. */
 export async function POST(req) {
-  if (!allow(`workspace:${clientIp(req)}`, 8, 60_000)) return Response.json({ error: "Too many requests. Give it a minute." }, { status: 429 });
+  if (!(await allow(`workspace:${clientIp(req)}`, 8, 60_000))) return Response.json({ error: "Too many requests. Give it a minute." }, { status: 429 });
   let body;
   try {
     body = await req.json();

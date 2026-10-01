@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { AUTOMATIONS, automationDef } from "@/lib/automations";
+import { maybeProcessOutbox } from "@/lib/outbox";
 import { ownerKeyOk } from "@/lib/owner-auth";
 import { getAgent, recordOwnerReply, recordRun, savePersist } from "@/lib/store";
 import { sendWhatsApp } from "@/lib/twilio";
@@ -8,6 +10,8 @@ export const dynamic = "force-dynamic";
 /** Everything the AI Business Command Center shows. Owner key required. */
 export async function GET(req, ctx) {
   const { id } = await ctx.params;
+  // The dashboard checks in every few seconds; use that to retry any pending SMS / Google Sheet deliveries.
+  after(maybeProcessOutbox);
   const agent = await getAgent(id);
   if (!agent) return Response.json({ error: "Not found" }, { status: 404 });
   if (!ownerKeyOk(agent, new URL(req.url).searchParams.get("key"))) return Response.json({ error: "This link isn't valid." }, { status: 403 });

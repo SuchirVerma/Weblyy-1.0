@@ -14,7 +14,7 @@ export async function POST(req) {
   }
   const agent = typeof body.agentId === "string" ? await getAgent(body.agentId) : null;
   if (!agent) return Response.json({ error: "This form isn't connected anymore." }, { status: 404 });
-  if (!allow(`lead:${clientIp(req)}`, 6, 60_000)) return Response.json({ error: "Please wait a minute before sending again." }, { status: 429 });
+  if (!(await allow(`lead:${clientIp(req)}`, 6, 60_000))) return Response.json({ error: "Please wait a minute before sending again." }, { status: 429 });
   if (str(body.website, 100)) return Response.json({ ok: true }); // honeypot
   const name = str(body.name, 60);
   const phone = str(body.phone, 20);

@@ -17,7 +17,7 @@ export async function POST(req) {
   const agent = typeof body.id === "string" ? await getAgent(body.id) : null;
   if (!agent) return Response.json({ error: "Not found" }, { status: 404 });
   if (!ownerKeyOk(agent, str(body.key, 64))) return Response.json({ error: "This link isn't valid." }, { status: 403 });
-  if (!allow(`setup:${clientIp(req)}`, 5, 60_000)) return Response.json({ error: "Please wait a minute and try again." }, { status: 429 });
+  if (!(await allow(`setup:${clientIp(req)}`, 5, 60_000))) return Response.json({ error: "Please wait a minute and try again." }, { status: 429 });
   const name = str(body.name, 60);
   const phone = str(body.phone, 20);
   if (!name) return Response.json({ error: "Please add your name." }, { status: 400 });

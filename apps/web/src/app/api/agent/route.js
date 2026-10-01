@@ -17,7 +17,7 @@ export async function POST(req) {
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 500) : "";
   if (!message) return Response.json({ error: "Type a message first." }, { status: 400 });
   const ip = clientIp(req);
-  if (!allow(`agent:${ip}`, 15, 60_000) || !allow(`agent-total:${agent.id}`, 400, 60 * 60_000)) {
+  if (!(await allow(`agent:${ip}`, 15, 60_000)) || !(await allow(`agent-total:${agent.id}`, 400, 60 * 60_000))) {
     return Response.json({ error: "Slow down a little, the agent is catching its breath." }, { status: 429 });
   }
   const from = typeof body.from === "string" && body.from ? body.from.slice(0, 60) : `web-${ip}`;

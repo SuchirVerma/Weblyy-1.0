@@ -9,7 +9,7 @@ export async function GET(req, ctx) {
   const { scanId } = await ctx.params;
   const scan = await getScan(scanId);
   if (!scan) return Response.json({ error: "This scan expired. Please analyze the website again." }, { status: 404 });
-  if (!allow(`makeover:${clientIp(req)}`, 20, 60_000)) return Response.json({ error: "Too many requests. Give it a minute." }, { status: 429 });
+  if (!(await allow(`makeover:${clientIp(req)}`, 20, 60_000))) return Response.json({ error: "Too many requests. Give it a minute." }, { status: 429 });
   try {
     const m = await ensureMakeover(scanId, scan, internalOrigin(req));
     return Response.json({ ...m, previewPath: `/preview/${scanId}` }, { headers: { "cache-control": "no-store" } });
