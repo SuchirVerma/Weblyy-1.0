@@ -38,4 +38,4 @@ No keys needed to try it: click **Try the demo salon**. Details in [apps/web/REA
 | [Progress log](docs/progress.md) | Running log of what's done |
 
 ## Tech
-Next.js 16 · React 19 · Tailwind 4 · Motion · Cheerio · AI API (optional) · Twilio WhatsApp · n8n
+Next.js 16 · React 19 · Tailwind 4 · Motion · Cheerio · Twilio WhatsApp · n8n

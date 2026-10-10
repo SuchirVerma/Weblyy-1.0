@@ -18,9 +18,9 @@
 ## Architecture
 ```
  Browser ──NDJSON──► /api/scan ──► crawl.ts (fetch + Cheerio) ──► detect.ts (touchpoints, gaps)
-         ──JSON────► /api/analyze ──► score.ts (rules) ──► ai.ts (optional refine)
+         ──JSON────► /api/analyze ──► score.ts (rules) ──► ai.js (optional hook, off)
          ──JSON────► /api/deploy ──► store.ts (agent) + n8n.ts (workflow JSON) ──► n8n API (optional)
- Customer phones ──► /chat/[id] ──► /api/agent ──► respond.ts ──► ai.ts or rules-agent.ts
+ Customer phones ──► /chat/[id] ──► /api/agent ──► respond.ts ──► rules-agent.ts
  WhatsApp (Twilio) ─► /api/whatsapp ─┘
  Console polls /api/agents/[id] every 2s for live counters and the audience feed
 ```

@@ -23,7 +23,6 @@ Add newest entries at the top.
 - [x] Roast mode
 - [x] Before/after "Saturday replay"
 - [x] Built-in demo salon (works offline)
-- [ ] Test AI path with a real API key
 - [ ] Test Twilio sandbox end to end
 - [ ] Deploy publicly (Vercel/Railway) and set APP_URL
 - [ ] Shareable report card
