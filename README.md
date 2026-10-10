@@ -39,3 +39,6 @@ No keys needed to try it: click **Try the demo salon**. Details in [apps/web/REA
 
 ## Tech
 Next.js 16 · React 19 · Tailwind 4 · Motion · Cheerio · Twilio WhatsApp · n8n
+
+## Team
+Built together by Palash Kuchroo, Pranav Verma and Suchir Verma.
