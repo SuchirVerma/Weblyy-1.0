@@ -990,7 +990,59 @@ export function AnalyticsTab({ data }) {
   );
 }
 /* ---------------------------------------------------------------- Settings */
-export function SettingsTab({ data, ownerKey }) {
+function AlertEmail({ data, act }) {
+  const [email, setEmail] = useState(data.alertEmail ?? "");
+  const [state, setState] = useState("");
+  const save = async (e) => {
+    e.preventDefault();
+    setState("saving");
+    try {
+      await act({ action: "alertEmail", email });
+      setState("saved");
+    } catch (err) {
+      setState(err instanceof Error ? err.message : "That didn't work.");
+    }
+  };
+  return (
+    <section className={styles.panel}>
+      <h2>Refund alerts by email</h2>
+      <p style={{ margin: "0 0 12px" }}>
+        When a customer asks for their money back, the assistant only tells them you will contact them. Add your email and the request is sent to you
+        straight away, with their message and their number if they gave one.
+      </p>
+      <form onSubmit={save} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setState("");
+          }}
+          placeholder="you@yourbusiness.com"
+          maxLength={120}
+          autoComplete="email"
+          aria-label="Email for refund alerts"
+          style={{ flex: "1 1 220px", minHeight: 40, padding: "0 12px", border: "1px solid var(--line, #d1d5db)", borderRadius: 10, font: "inherit" }}
+        />
+        <button className="btn btn-sm" type="submit" disabled={state === "saving"}>
+          {state === "saving" ? "Saving…" : "Save"}
+        </button>
+      </form>
+      <small role="status" style={{ display: "block", marginTop: 8 }}>
+        {state === "saved"
+          ? email
+            ? `Saved. Refund requests will be emailed to ${email}.`
+            : "Saved. Email alerts are off."
+          : state && state !== "saving"
+            ? state
+            : data.alertEmail
+              ? `Alerts go to ${data.alertEmail}. Clear the box and save to turn them off.`
+              : "No email added yet. Refund requests still show in your inbox as Needs you."}
+      </small>
+    </section>
+  );
+}
+export function SettingsTab({ data, ownerKey, act }) {
   const origin = useOrigin();
   const k = data.business;
   return (
@@ -1076,6 +1128,7 @@ export function SettingsTab({ data, ownerKey }) {
           </ul>
         </section>
       </div>
+      <AlertEmail data={data} act={act} />
       <Fold
         icon="⌘"
         title="Put the assistant on your old website too"

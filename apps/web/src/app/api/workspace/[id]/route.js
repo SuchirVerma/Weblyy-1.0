@@ -36,6 +36,14 @@ export async function PATCH(req, ctx) {
     savePersist();
     return Response.json({ ok: true });
   }
+  if (body.action === "alertEmail") {
+    // Where this business's refund alerts are emailed. Empty switches them off.
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase().slice(0, 120) : "";
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return Response.json({ error: "That email doesn't look right." }, { status: 400 });
+    agent.alertEmail = email;
+    savePersist();
+    return Response.json({ ok: true, alertEmail: email });
+  }
   if (body.action === "publish") {
     // The new website is already served by Weblyy; publishing marks it as the business's live site.
     const prev = agent.published;

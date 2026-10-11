@@ -9,7 +9,8 @@ import { NotConfigured } from "./sms";
 export function sheetConfigured() {
   return Boolean(process.env.SHEETS_WEBHOOK_URL && process.env.SHEETS_SECRET);
 }
-export async function appendRow(row) {
+/** `ownerEmail`: for a refund request, the business owner who should get the email too (needs the current script). */
+export async function appendRow(row, ownerEmail = "") {
   const url = process.env.SHEETS_WEBHOOK_URL;
   const secret = process.env.SHEETS_SECRET;
   if (!url || !secret) throw new NotConfigured("Google Sheet not connected. Add SHEETS_WEBHOOK_URL and SHEETS_SECRET to .env.local.");
@@ -20,7 +21,7 @@ export async function appendRow(row) {
   const res = await fetch(url, {
     method: "POST",
     headers: { "content-type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ secret, row }),
+    body: JSON.stringify(ownerEmail ? { secret, row, ownerEmail } : { secret, row }),
     redirect: "follow",
     signal: AbortSignal.timeout(20_000),
   });

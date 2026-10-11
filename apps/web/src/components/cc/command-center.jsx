@@ -129,7 +129,7 @@ export function CommandCenter({ id, ownerKey, initial }) {
             {tab === "leads" && <LeadsTab data={data} act={act} />}
             {tab === "automations" && <AutomationsTab data={data} act={act} />}
             {tab === "analytics" && <AnalyticsTab data={data} />}
-            {tab === "settings" && <SettingsTab data={data} ownerKey={ownerKey} />}
+            {tab === "settings" && <SettingsTab data={data} ownerKey={ownerKey} act={act} />}
           </div>
         )}
       </main>

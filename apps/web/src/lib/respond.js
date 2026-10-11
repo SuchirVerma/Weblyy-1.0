@@ -63,6 +63,7 @@ function logRefund(agent, from, message) {
     platform: "-",
     bestTime: "As soon as possible",
     note: message.slice(0, 400),
+    ownerEmail: agent.alertEmail || "",
   };
   const send = () => enqueueRefundRequest(request).catch((e) => console.error("[refund] could not queue", e instanceof Error ? e.message : e));
   try {

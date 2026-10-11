@@ -101,7 +101,7 @@ async function send(item, ch, d) {
   }
   d.attempts += 1;
   try {
-    d.result = ch === "sms" ? await sendSms(SMS_TO(), smsText(item.request)) : await appendRow(sheetRow(item));
+    d.result = ch === "sms" ? await sendSms(SMS_TO(), smsText(item.request)) : await appendRow(sheetRow(item), item.request.ownerEmail);
     d.status = "sent";
     d.sentAt = Date.now();
     d.lastError = "";

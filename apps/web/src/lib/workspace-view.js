@@ -72,6 +72,7 @@ export function workspaceView(agent) {
     },
     integrations: { twilio: twilioReady(), n8n: n8nReady() },
     setupRequest: agent.setupRequest ?? null,
+    alertEmail: agent.alertEmail ?? "",
     published: agent.published ?? null,
     design: pickScene(agent.knowledge),
     profile: { key: profile.key, label: profile.label, goal: profile.goal, quick: profile.quick, agentMode: profile.agent.mode },

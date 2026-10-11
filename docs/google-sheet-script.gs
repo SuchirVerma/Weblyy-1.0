@@ -52,6 +52,13 @@ function doPost(e) {
     } catch (mailErr) {
       console.error("Email failed: " + mailErr);
     }
+    if (body.ownerEmail) {
+      try {
+        notifyOwner(row, String(body.ownerEmail));
+      } catch (mailErr) {
+        console.error("Owner email failed: " + mailErr);
+      }
+    }
     return reply({ ok: true, row: rowNum });
   } catch (err) {
     return reply({ ok: false, error: String(err) });
@@ -76,6 +83,23 @@ function notify(row, rowNum) {
       "\n\nCall: " + (row["Mobile"] || "-") +
       "\nSheet row: " + rowNum +
       "\nOpen the sheet: " + SpreadsheetApp.getActiveSpreadsheet().getUrl(),
+  });
+}
+
+/** A refund request also goes to the business owner, when they added their email in their Weblyy dashboard. */
+function notifyOwner(row, ownerEmail) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(ownerEmail)) return;
+  MailApp.sendEmail({
+    to: ownerEmail,
+    subject: "Refund request from a customer of " + (row["Business"] || "your business"),
+    body:
+      "A customer asked your Weblyy assistant for their money back.\n\n" +
+      "The assistant did not agree to anything. It only said that you will contact them.\n\n" +
+      "Customer: " + (row["Name"] || "-") +
+      "\nMobile: " + (row["Mobile"] || "-") +
+      "\nWhen: " + (row["Date & time (IST)"] || "-") +
+      "\nTheir message: " + (row["Note"] || "-") +
+      "\n\nYou can read the whole chat and reply from your Weblyy dashboard, under Chats.",
   });
 }
 
