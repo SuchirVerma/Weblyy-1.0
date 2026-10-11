@@ -300,7 +300,7 @@ docs/                overview, screens, architecture, demo script, setup guides
 
 ## Status
 
-Weblyy is a working prototype. The assistant runs on its own rules engine unless AI keys are added. The AI provider chain has been tested against stand-in providers, not yet with real keys. WhatsApp and n8n need your own accounts and have not been tested end to end.
+Weblyy is a working prototype. The assistant runs on its own rules engine unless AI keys are added. The AI provider chain has been tested on the live site with Groq, Gemini and OpenRouter keys. WhatsApp and n8n need your own accounts and have not been tested end to end.
 
 ## Team
 
