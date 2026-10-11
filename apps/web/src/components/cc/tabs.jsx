@@ -1014,7 +1014,7 @@ function FirstRunEmail({ data, act }) {
     <AlertEmail
       data={data}
       act={act}
-      title="One last step: where should refund requests go?"
+      title="One last step: where should we email you?"
       onSaved={() => setSavedHere(true)}
       onSkip={() => {
         try {
@@ -1027,7 +1027,7 @@ function FirstRunEmail({ data, act }) {
     />
   );
 }
-function AlertEmail({ data, act, title = "Refund alerts by email", onSaved, onSkip }) {
+function AlertEmail({ data, act, title = "Email alerts", onSaved, onSkip }) {
   const [email, setEmail] = useState(data.alertEmail ?? "");
   const [state, setState] = useState("");
   const save = async (e) => {
@@ -1045,8 +1045,8 @@ function AlertEmail({ data, act, title = "Refund alerts by email", onSaved, onSk
     <section className={styles.panel}>
       <h2>{title}</h2>
       <p style={{ margin: "0 0 12px" }}>
-        When a customer asks for their money back, the assistant only tells them you will contact them. Add your email and the request is sent to you
-        straight away, with their message and their number if they gave one. Customers never see this email.
+        Your assistant answers customers by itself. We only email you when something needs your own decision, like a customer asking for money back.
+        You get their message, and their number if they gave one. Customers never see this email.
       </p>
       <form onSubmit={save} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
@@ -1059,7 +1059,7 @@ function AlertEmail({ data, act, title = "Refund alerts by email", onSaved, onSk
           placeholder="you@yourbusiness.com"
           maxLength={120}
           autoComplete="email"
-          aria-label="Email for refund alerts"
+          aria-label="Your email for alerts"
           style={{ flex: "1 1 220px", minHeight: 40, padding: "0 12px", border: "1px solid var(--line, #d1d5db)", borderRadius: 10, font: "inherit" }}
         />
         <button className="btn btn-primary btn-sm" type="submit" disabled={state === "saving"}>
@@ -1074,13 +1074,13 @@ function AlertEmail({ data, act, title = "Refund alerts by email", onSaved, onSk
       <small role="status" style={{ display: "block", marginTop: 8 }}>
         {state === "saved"
           ? email
-            ? `Saved. Refund requests will be emailed to ${email}.`
+            ? `Saved. We will email ${email} only when a customer needs you.`
             : "Saved. Email alerts are off."
           : state && state !== "saving"
             ? state
             : data.alertEmail
               ? `Alerts go to ${data.alertEmail}. Clear the box and save to turn them off.`
-              : "No email added yet. Refund requests still show in your inbox as Needs you."}
+              : "No email added yet. Anything that needs you still shows in your inbox as Needs you."}
       </small>
     </section>
   );
