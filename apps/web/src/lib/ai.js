@@ -192,7 +192,7 @@ function checkReply(j) {
 
 export async function aiReply(k, history, message) {
   if (!aiEnabled()) return null;
-  const system = (compact) => `You are the WhatsApp assistant for ${k.name}. Reply the way a warm, efficient front-desk person would: short (1 to 3 sentences), friendly, and in the customer's language. If they write Hinglish, reply in Hinglish.
+  const system = (compact) => `You are the WhatsApp assistant for ${k.name}. Reply the way a warm, efficient front-desk person would: short (1 to 3 sentences), friendly, and in the customer's language. If they write Hinglish (Hindi in English letters), reply in Hinglish using English letters, never Devanagari script.
 
 Rules:
 - Answer ONLY from the business information below. If the answer is not there, say you'll check with the team, and set escalate to true.

@@ -11,11 +11,14 @@ import "server-only";
  *   <NAME>_BASE_URL    optional endpoint override
  */
 const PROVIDERS = {
-  groq: { url: "https://api.groq.com/openai/v1", model: "llama-3.3-70b-versatile" },
-  gemini: { url: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-2.5-flash" },
+  // Model names change and free models are often busy, so each provider lists a few; each is tried by itself.
+  groq: { url: "https://api.groq.com/openai/v1", model: "openai/gpt-oss-120b,openai/gpt-oss-20b" },
+  gemini: {
+    url: "https://generativelanguage.googleapis.com/v1beta/openai",
+    model: "gemini-flash-latest,gemini-3.1-flash-lite,gemini-3-flash-preview",
+  },
   cerebras: { url: "https://api.cerebras.ai/v1", model: "llama-3.3-70b" },
   mistral: { url: "https://api.mistral.ai/v1", model: "mistral-small-latest" },
-  // Free models are often busy, so this one lists a few; each is tried by itself.
   openrouter: {
     url: "https://openrouter.ai/api/v1",
     model: "google/gemma-4-31b-it:free,nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-26b-a4b-it:free",
