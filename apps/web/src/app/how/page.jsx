@@ -138,7 +138,7 @@ export default function HowPage() {
         </section>
       </main>
       <footer className={`wrap ${styles.footer}`}>
-        <span>Weblyy · a B.Tech project</span>
+        <span>Weblyy</span>
         <span className="muted">The demo salon is a fictional business.</span>
       </footer>
     </>

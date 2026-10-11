@@ -150,7 +150,7 @@ export default async function RegionPage({ params }) {
         </section>
       </main>
       <footer className={`wrap ${landing.footer}`}>
-        <span>Weblyy · a B.Tech project</span>
+        <span>Weblyy</span>
       </footer>
     </>
   );
