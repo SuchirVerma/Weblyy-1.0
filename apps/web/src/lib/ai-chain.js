@@ -7,7 +7,7 @@ import "server-only";
  *
  *   AI_PROVIDERS       optional order, e.g. "gemini,groq,openrouter"
  *   <NAME>_API_KEY     switches a provider on
- *   <NAME>_MODEL       optional model override
+ *   <NAME>_MODEL       optional model override; a comma-separated list is tried in order
  *   <NAME>_BASE_URL    optional endpoint override
  */
 const PROVIDERS = {
@@ -15,7 +15,11 @@ const PROVIDERS = {
   gemini: { url: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-2.5-flash" },
   cerebras: { url: "https://api.cerebras.ai/v1", model: "llama-3.3-70b" },
   mistral: { url: "https://api.mistral.ai/v1", model: "mistral-small-latest" },
-  openrouter: { url: "https://openrouter.ai/api/v1", model: "meta-llama/llama-3.3-70b-instruct:free" },
+  // Free models are often busy, so this one lists a few; each is tried by itself.
+  openrouter: {
+    url: "https://openrouter.ai/api/v1",
+    model: "google/gemma-4-31b-it:free,nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-26b-a4b-it:free",
+  },
 };
 const DEFAULT_ORDER = ["groq", "gemini", "cerebras", "mistral", "openrouter"];
 const COOLDOWN_MS = 5 * 60_000; // after a rate limit with no Retry-After
@@ -35,12 +39,16 @@ export function aiProviders() {
   const order = [...new Set([...wanted, ...DEFAULT_ORDER])];
   return order
     .filter((name) => env(name, "API_KEY"))
-    .map((name) => ({
-      name,
-      key: env(name, "API_KEY"),
-      url: (env(name, "BASE_URL") || PROVIDERS[name].url).replace(/\/+$/, ""),
-      model: env(name, "MODEL") || PROVIDERS[name].model,
-    }));
+    .flatMap((name) => {
+      const models = (env(name, "MODEL") || PROVIDERS[name].model).split(",").map((m) => m.trim()).filter(Boolean);
+      return models.map((model, i) => ({
+        // Each model rests by itself, so one busy model doesn't bench the whole provider.
+        name: i === 0 ? name : `${name}:${model}`,
+        key: env(name, "API_KEY"),
+        url: (env(name, "BASE_URL") || PROVIDERS[name].url).replace(/\/+$/, ""),
+        model,
+      }));
+    });
 }
 export const aiChainEnabled = () => aiProviders().length > 0;
 
