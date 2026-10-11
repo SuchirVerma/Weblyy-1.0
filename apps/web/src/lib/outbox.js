@@ -177,6 +177,27 @@ export async function enqueueSetupRequest(request) {
   await save();
   return { sms: item.sms.status, sheet: item.sheet.status };
 }
+/**
+ * A customer asked a business for their money back. It goes to the same Google Sheet as setup requests
+ * (the sheet's script emails each new row), so a person follows up. No SMS for these.
+ */
+export async function enqueueRefundRequest(request) {
+  await load();
+  startTimer();
+  const item = {
+    id: request.id,
+    kind: "refund",
+    createdAt: request.at,
+    request,
+    sms: { ...fresh(), status: "sent", result: "not sent for refund requests" },
+    sheet: fresh(),
+  };
+  state.items.push(item);
+  await save();
+  await attempt(item, "sheet");
+  await save();
+  return { sheet: item.sheet.status };
+}
 export async function outboxItems() {
   await load();
   startTimer();

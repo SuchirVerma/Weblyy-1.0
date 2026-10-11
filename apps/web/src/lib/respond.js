@@ -1,8 +1,9 @@
 import "server-only";
 import { aiReply } from "./ai";
-import { rulesReply } from "./rules-agent";
-import { leadStep } from "./leads";
-import { historyFor, recordCustomerOnly, recordMessage } from "./store";
+import { ownerWillContact, REFUND, rulesReply } from "./rules-agent";
+import { extractContact, leadStep } from "./leads";
+import { enqueueRefundRequest } from "./outbox";
+import { conversationFor, historyFor, newId, recordCustomerOnly, recordMessage } from "./store";
 import { claimRefresh, isStale, refreshAgentKnowledge } from "./site-library";
 import { after } from "next/server";
 /**
@@ -21,6 +22,13 @@ export async function respond(agent, from, message, source = "Chat link") {
     console.error("[agent] AI failed, using rules:", e instanceof Error ? e.message : e);
   }
   reply ??= rulesReply(agent.knowledge, message);
+  // Money back is the owner's decision. Whoever wrote the reply, the customer hears the same safe line
+  // and the request is logged for a person to follow up.
+  const refund = reply.intent === "refund" || REFUND.test(message);
+  if (refund) {
+    reply = { ...reply, reply: ownerWillContact(message), intent: "refund", escalate: true, source: "Refund rule" };
+    logRefund(agent, from, message);
+  }
   try {
     const extra = await leadStep(agent, from, message, reply, source);
     if (extra.text)
@@ -31,6 +39,37 @@ export async function respond(agent, from, message, source = "Chat link") {
   recordMessage(agent, { at: Date.now(), from, text: message, ...reply });
   keepFresh(agent);
   return reply;
+}
+/** One sheet row (and email) per customer per day, however many times they repeat the request. */
+function logRefund(agent, from, message) {
+  const c = conversationFor(agent, from);
+  if (c.refundLoggedAt && Date.now() - c.refundLoggedAt < 24 * 60 * 60_000) return;
+  c.refundLoggedAt = Date.now();
+  const said = historyFor(agent, from)
+    .filter((t) => t.role === "customer")
+    .map((t) => t.text)
+    .concat(message)
+    .join("\n");
+  const who = extractContact(said);
+  const request = {
+    id: newId(),
+    at: Date.now(),
+    agentId: agent.id,
+    business: agent.knowledge.name,
+    website: agent.knowledge.url,
+    name: who.name || "Customer (name not given)",
+    phone: who.phone || (/\d{10}/.test(from) ? from : "Not given"),
+    goal: "REFUND request from a customer",
+    platform: "-",
+    bestTime: "As soon as possible",
+    note: message.slice(0, 400),
+  };
+  const send = () => enqueueRefundRequest(request).catch((e) => console.error("[refund] could not queue", e instanceof Error ? e.message : e));
+  try {
+    after(send);
+  } catch {
+    send(); // not inside a request (scripts, tests)
+  }
 }
 /** Once a day at most, re-read the business's website after replying, so the next answers use today's prices and hours. */
 function keepFresh(agent) {

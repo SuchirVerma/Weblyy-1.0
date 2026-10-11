@@ -119,8 +119,9 @@ Nothing of the owner's is restyled or removed. A before and after view compares 
 - Keeps its own copy of the whole site (up to 30 pages) and refreshes it once a day, so answers stay current.
 - Understands English and Hinglish.
 - Never guesses. A complaint, a refund, a medical question or anything not on the site is passed to the owner.
+- Refund requests always get the same answer, that the owner will contact the customer, and are logged to the team's Google Sheet with an email, so a person follows up.
 - Works without any external AI service. Replies come from a built-in rules engine, so there is no cost per message.
-- AI replies are optional. Add a free API key from Groq, Google Gemini, Cerebras, Mistral or OpenRouter and the assistant answers with an AI model instead. Add several keys and they form a chain: when one runs out of free quota, is slow or fails, the next one takes over, and if all of them fail the rules engine answers.
+- AI replies are optional. Add a free API key from Groq, OpenRouter, Google Gemini, Cerebras or Mistral (tried in that order) and the assistant answers with an AI model instead. Add several keys and they form a chain: when one runs out of free quota, is slow or fails, the next one takes over, and if all of them fail the rules engine answers.
 - Reaches customers four ways: a chat link, a QR code for the counter, a one-line chat bubble for any website, and WhatsApp through Twilio.
 
 ```html

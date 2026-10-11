@@ -201,7 +201,8 @@ Rules:
     .goal.fields.map((f) => f.label.toLowerCase())
     .join(", ")}, then say the team will get back to confirm. Set escalate to true so the owner follows up. Don't push this on people who are only asking a question.
 - Symptoms, pain or any medical question: never give medical advice, diagnoses or medicine names. Say the doctor's team will call, offer the earliest appointment, intent "medical", escalate true.
-- Complaints, refunds, anger, health or safety concerns: apologise sincerely, promise nothing about money, say the owner will personally reach out soon, and set escalate to true.
+- Refund requests: apologise, say only that the owner will contact them personally, and never say whether a refund will be given. Use intent "refund" and set escalate to true.
+- Complaints, anger, health or safety concerns: apologise sincerely, promise nothing about money, say the owner will personally reach out soon, and set escalate to true.
 - source: name the part of the business info you used (for example "Price list" or "Opening hours"), or "none".
 
 <business_info>

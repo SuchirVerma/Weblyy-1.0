@@ -1,8 +1,15 @@
 import { profileOf } from "./profiles";
 const HINGLISH =
   /\b(kya|hai|hain|kitna|kitne|kitni|kab|kaha|kahan|mujhe|chahiye|aap|kar|karna|karwana|milega|hoga|kal|aaj|bhai|ji|acha|accha|nahi|haan|batao|bata|wala|wali)\b/i;
+/** What a customer hears when they ask for money back: only the owner decides that, so nothing is promised. */
+export function ownerWillContact(message) {
+  return HINGLISH.test(message)
+    ? "Iske liye bahut sorry. Owner khud aapse jaldi contact karenge."
+    : "I'm really sorry about this. The owner will contact you personally very soon.";
+}
+export const REFUND = /refund|money back|paise? wapas|paisa wapas|return my/i;
 const PATTERNS = [
-  ["refund", /refund|money back|paise? wapas|paisa wapas|return my/i],
+  ["refund", REFUND],
   [
     "services",
     /what (all )?(services|treatments|courses|facilities|classes|programs|products|dishes)|which (services|treatments|courses|classes|programs)|(services|treatments|courses|facilities|classes) (do|you|offer|provide|available)|kya kya|kaun kaun|kaunsi services|list of (services|treatments|courses)|\b(your|the) menu\b/i,
@@ -158,6 +165,7 @@ export function rulesReply(site, message) {
         source: "Medical safety rule",
       };
     case "refund":
+      return { ...base, reply: ownerWillContact(message), escalate: true, source: "Refund rule" };
     case "complaint":
       return {
         ...base,

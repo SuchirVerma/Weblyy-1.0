@@ -24,7 +24,7 @@ const PROVIDERS = {
     model: "google/gemma-4-31b-it:free,nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-26b-a4b-it:free",
   },
 };
-const DEFAULT_ORDER = ["groq", "gemini", "cerebras", "mistral", "openrouter"];
+const DEFAULT_ORDER = ["groq", "openrouter", "gemini", "cerebras", "mistral"];
 const COOLDOWN_MS = 5 * 60_000; // after a rate limit with no Retry-After
 const BROKEN_MS = 60_000; // after a server error or timeout
 const g = globalThis;

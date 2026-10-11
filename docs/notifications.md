@@ -10,6 +10,10 @@ If the SMS service or Google is down, each one is retried by itself (1 min, 5 mi
 
 Status for every request, with the error if something failed, is on **/team** (localhost, or `/team?key=ADMIN_KEY`). **Retry now** tries everything immediately.
 
+## Refund requests from customers
+
+When a customer asks a business's assistant for their money back, the assistant never says yes or no. It replies only that the owner will contact them, and the request is added to the same Google Sheet as a row with **Help needed** set to "REFUND request from a customer", the business name, the customer's name and number if they gave one, and their message in **Note**. The sheet's script emails that row like any other. One row is added per customer per day, and no SMS is sent for these.
+
 ## 1. Google Sheet (free, ~2 minutes)
 
 The sheet already exists in Google Drive: *Weblyy – Free setup call requests*.
