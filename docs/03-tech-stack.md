@@ -13,16 +13,16 @@
 | Storage | In-memory, agents persisted to `.data/agents.json` | Zero setup to run locally |
 | Automation | Generated n8n workflow JSON; auto-created if `N8N_URL` + `N8N_API_KEY` are set | Real, importable output |
 | WhatsApp | Twilio sandbox webhook at `/api/whatsapp` | Works in minutes without Meta verification |
-| Audience demo | QR code → `/chat/[id]` mobile chat, live counters on the console | Lets the room talk to the agent |
+| Phone demo | QR code → `/chat/[id]` mobile chat, live counters on the console | Lets anyone chat with the assistant from a phone |
 
 ## Architecture
 ```
- Browser ──NDJSON──► /api/scan ──► crawl.ts (fetch + Cheerio) ──► detect.ts (touchpoints, gaps)
-         ──JSON────► /api/analyze ──► score.ts (rules) ──► ai.js (optional refine)
-         ──JSON────► /api/deploy ──► store.ts (agent) + n8n.ts (workflow JSON) ──► n8n API (optional)
- Customer phones ──► /chat/[id] ──► /api/agent ──► respond.ts ──► ai.js (optional) or rules-agent.ts
+ Browser ──NDJSON──► /api/scan ──► crawl.js (fetch + Cheerio) ──► detect.js (touchpoints, gaps)
+         ──JSON────► /api/analyze ──► score.js (rules) ──► ai.js (optional refine)
+         ──JSON────► /api/deploy ──► store.js (agent) + n8n.js (workflow JSON) ──► n8n API (optional)
+ Customer phones ──► /chat/[id] ──► /api/agent ──► respond.js ──► ai.js (optional) or rules-agent.js
  WhatsApp (Twilio) ─► /api/whatsapp ─┘
- Console polls /api/agents/[id] every 2s for live counters and the audience feed
+ Console polls /api/agents/[id] every 2s for live counters and the message feed
 ```
 
 ## Scoring formula

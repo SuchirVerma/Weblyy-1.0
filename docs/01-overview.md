@@ -1,4 +1,4 @@
-# Overview & pitch
+# Overview
 
 ## One-liner
 Paste your business URL. We find the customer conversations your team handles by hand and turn the top ones into working AI agents in minutes.
@@ -21,7 +21,7 @@ Small businesses spend hours every week answering the same WhatsApp messages, em
 ## What we deliberately don't claim
 We don't say we find every internal process from a website. We start with what's visible and use the owner's input for the rest.
 
-## Pitch summary
+## Summary
 Small businesses spend hours answering the same WhatsApp messages, emails and form submissions by hand, and they don't know what's safe to automate. Our platform takes a business website URL and maps every customer touchpoint: WhatsApp links, forms, emails, booking widgets and FAQs. It then asks a few quick follow-up questions to find the manual work behind them. Each workflow gets an automation score and an estimate of hours saved. Anything sensitive, like complaints or refunds, is flagged as human-only. The top workflows become ready-to-import n8n blueprints, and one AI agent goes live right away, trained on the business's own website content.
 
 ## Taglines

@@ -1,6 +1,6 @@
 # Weblyy web app
 
-One Next.js app: the landing page, the scan → ask → score → deploy flow, the live agent console, the audience chat page, and every API route.
+One Next.js app: the landing page, the scan → ask → score → deploy flow, the live agent console, the customer chat page, and every API route.
 
 ## Run it
 
@@ -75,13 +75,13 @@ Every conversation is saved. When the agent flags one (complaint, refund, medica
 
 | Path | What it does |
 |---|---|
-| `src/lib/crawl.ts` | Safe crawler: blocks private addresses, follows redirects by hand, reads up to 6 pages, extracts WhatsApp links, forms, embeds, prices, FAQs, hours, address |
-| `src/lib/detect.ts` | Turns what was crawled into touchpoints and gaps |
-| `src/lib/score.ts` | Workflow templates, the scoring formula, readiness sub-scores, roast lines |
+| `src/lib/crawl.js` | Safe crawler: blocks private addresses, follows redirects by hand, reads up to 6 pages, extracts WhatsApp links, forms, embeds, prices, FAQs, hours, address |
+| `src/lib/detect.js` | Turns what was crawled into touchpoints and gaps |
+| `src/lib/score.js` | Workflow templates, the scoring formula, readiness sub-scores, roast lines |
 | `src/lib/ai.js`, `src/lib/ai-chain.js` | Optional AI layer. Tries each free provider that has a key, moves to the next when one hits its limit or fails, and hands over to the rules engine when none can answer |
-| `src/lib/rules-agent.ts` | Keyword agent with Hinglish support, answers every customer message |
-| `src/lib/n8n.ts` | Generates an importable n8n workflow (WhatsApp in → agent → reply, owner alert branch) |
-| `src/lib/store.ts` | In-memory scans and deployed agents (agents persist to `.data/agents.json`) |
+| `src/lib/rules-agent.js` | Keyword agent with Hinglish support, answers every customer message |
+| `src/lib/n8n.js` | Generates an importable n8n workflow (WhatsApp in → agent → reply, owner alert branch) |
+| `src/lib/store.js` | In-memory scans and deployed agents (agents persist to `.data/agents.json`) |
 | `src/app/api/*` | `scan` (NDJSON stream), `analyze`, `deploy`, `agent`, `agents/[id]`, `whatsapp` (Twilio webhook), `status` |
 | `src/app/chat/[id]` | Full-screen customer chat opened from the QR code |
 

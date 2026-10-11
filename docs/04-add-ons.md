@@ -1,7 +1,7 @@
 # Add-ons: making it interactive and fun
 
 ## High impact (build these)
-1. **🎤 Audience texts the bot live.** A big QR code: "Scan to message the salon's new AI assistant." A live counter climbs on the projector as the room texts it.
+1. **Chat from any phone.** A big QR code: "Scan to message the salon's new AI assistant." A live counter climbs as people text it.
 2. **🔥 "Roast My Website" mode.** Toggle for a savage, funny audit: *"Your contact form collects phone numbers and then… does nothing with them. Bold strategy."*
 3. **⏱️ Before/after time-lapse.** Split screen replays "a Saturday at the salon": messages pile up for the owner on the left, the agent answers each in seconds on the right, with a ₹ counter ticking up.
 4. **🗣️ Hinglish support.** The agent understands and replies in Hinglish ("Hair spa kitne ka hai?").

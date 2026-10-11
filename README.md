@@ -26,6 +26,7 @@ Website, name or @instagram
 - [Deploying](#deploying)
 - [Project layout](#project-layout)
 - [Docs](#docs)
+- [License](#license)
 - [Team](#team)
 
 ## Try it in two minutes
@@ -292,10 +293,10 @@ docs/                overview, screens, architecture, demo script, setup guides
 
 | Doc | Contents |
 |---|---|
-| [Overview and pitch](docs/01-overview.md) | Problem, solution and pitch summary |
+| [Overview](docs/01-overview.md) | Problem, solution and summary |
 | [UI screens](docs/02-ui-screens.md) | Every screen in detail |
 | [Tech stack and architecture](docs/03-tech-stack.md) | Stack, scoring formula and detector rules |
-| [Add-ons](docs/04-add-ons.md) | Extras that make the demo interactive |
+| [Add-ons](docs/04-add-ons.md) | Extras such as the QR chat and Roast mode |
 | [Notifications](docs/notifications.md) | Setting up the SMS and the Google Sheet |
 | [Progress log](docs/progress.md) | What has been built |
 | [App guide](apps/web/README.md) | Running the app and the demo flow |
@@ -303,6 +304,10 @@ docs/                overview, screens, architecture, demo script, setup guides
 ## Status
 
 Weblyy is a working prototype. The assistant runs on its own rules engine unless AI keys are added. The AI provider chain has been tested on the live site with Groq, Gemini and OpenRouter keys. WhatsApp and n8n need your own accounts and have not been tested end to end.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
 
 ## Team
 

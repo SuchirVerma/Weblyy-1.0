@@ -49,7 +49,7 @@ Optional: upload a WhatsApp chat export (`.txt`) to mine real repeat questions (
 - **Left:** phone mockup showing the WhatsApp conversation live.
 - **Right:** agent "thinking" panel: intent, knowledge source used, confidence, escalation.
 - **Top:** counters for Messages handled · Escalated to human · Time saved.
-- QR code for the audience to chat with the bot.
+- QR code so customers can chat with the bot from a phone.
 
 ## 8. Shareable report
 One-page report card (PDF/image): score, top 3 automations, hours and ₹ saved, "Deploy all" CTA.
