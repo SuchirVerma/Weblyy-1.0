@@ -1,4 +1,5 @@
 import "server-only";
+import { aiEnabled, aiJSON } from "./ai";
 
 /** Places the guide can send a visitor. The model and the rules both pick from this list, so links never break. */
 export const ACTIONS = {
@@ -166,7 +167,44 @@ export function rulesAnswer(message) {
   return { reply: hi ? t.hi : t.en, actions: withUrl(message, toActions(t.actions)), engine: "rules" };
 }
 
-/** Optional AI answer. Not connected in this build, so the guide answers from the rules above. */
-export async function aiAnswer() {
-  return null;
+// ----------------------------------------------------------------------- AI
+
+const SHAPE = `{
+  "reply": "1 to 3 short sentences, in the visitor's language (Hinglish if they write Hinglish)",
+  "actions": ["up to 2 of: ${Object.keys(ACTIONS).join(", ")}"]
+}`;
+function check(j) {
+  const reply = typeof j.reply === "string" ? j.reply.trim().slice(0, 800) : "";
+  if (!reply) return null;
+  return { reply, actions: Array.isArray(j.actions) ? j.actions.filter((a) => ACTIONS[a]).slice(0, 2) : [] };
+}
+
+export async function aiAnswer(history, message) {
+  if (!aiEnabled()) return null;
+  const messages = [];
+  for (const m of history.slice(-8)) {
+    const role = m.role === "user" ? "user" : "assistant";
+    const last = messages[messages.length - 1];
+    if (last?.role === role) last.content += `\n${m.text}`;
+    else messages.push({ role, content: m.text });
+  }
+  if (messages[0]?.role === "assistant") messages.shift();
+  if (messages[messages.length - 1]?.role === "user") messages[messages.length - 1].content += `\n${message}`;
+  else messages.push({ role: "user", content: message });
+
+  const got = await aiJSON({
+    system: () => `You are the guide on Weblyy's own website. Help business owners understand Weblyy and get started. Be warm, brief and plain-spoken, no jargon.
+Answer only from these facts. If something isn't covered, say so and suggest the free setup call. Never invent prices, features, integrations or guarantees.
+
+<facts>
+${FACTS}
+</facts>`,
+    messages,
+    shape: SHAPE,
+    check,
+    maxTokens: 2000,
+    live: true,
+  });
+  if (!got) return null;
+  return { reply: got.data.reply, actions: withUrl(message, toActions(got.data.actions)), engine: "ai" };
 }

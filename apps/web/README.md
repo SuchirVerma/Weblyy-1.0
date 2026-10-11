@@ -19,7 +19,7 @@ npm run build && npm start
 
 The results page includes a **site report**: every contact detail, hours, published prices, FAQs, tools and forms found, what's missing, and the pages read. Download it as Markdown or print it to PDF.
 
-No API keys are needed. The app uses its own rules engine for scoring and replies. Add keys in `.env.local` (see `/.env.example` at the repo root).
+No API keys are needed. The app uses its own rules engine for scoring and replies, and switches to AI replies when a provider key is added. Add keys in `.env.local` (see `/.env.example` at the repo root).
 
 ## The demo flow
 
@@ -78,7 +78,7 @@ Every conversation is saved. When the agent flags one (complaint, refund, medica
 | `src/lib/crawl.ts` | Safe crawler: blocks private addresses, follows redirects by hand, reads up to 6 pages, extracts WhatsApp links, forms, embeds, prices, FAQs, hours, address |
 | `src/lib/detect.ts` | Turns what was crawled into touchpoints and gaps |
 | `src/lib/score.ts` | Workflow templates, the scoring formula, readiness sub-scores, roast lines |
-| `src/lib/ai.js` | Hook for an optional AI layer. Not connected in this build, so it hands every call to the rules engine |
+| `src/lib/ai.js`, `src/lib/ai-chain.js` | Optional AI layer. Tries each free provider that has a key, moves to the next when one hits its limit or fails, and hands over to the rules engine when none can answer |
 | `src/lib/rules-agent.ts` | Keyword agent with Hinglish support, answers every customer message |
 | `src/lib/n8n.ts` | Generates an importable n8n workflow (WhatsApp in → agent → reply, owner alert branch) |
 | `src/lib/store.ts` | In-memory scans and deployed agents (agents persist to `.data/agents.json`) |

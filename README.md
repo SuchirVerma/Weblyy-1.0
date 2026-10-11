@@ -120,6 +120,7 @@ Nothing of the owner's is restyled or removed. A before and after view compares 
 - Understands English and Hinglish.
 - Never guesses. A complaint, a refund, a medical question or anything not on the site is passed to the owner.
 - Works without any external AI service. Replies come from a built-in rules engine, so there is no cost per message.
+- AI replies are optional. Add a free API key from Groq, Google Gemini, Cerebras, Mistral or OpenRouter and the assistant answers with an AI model instead. Add several keys and they form a chain: when one runs out of free quota, is slow or fails, the next one takes over, and if all of them fail the rules engine answers.
 - Reaches customers four ways: a chat link, a QR code for the counter, a one-line chat bubble for any website, and WhatsApp through Twilio.
 
 ```html
@@ -211,7 +212,7 @@ Browser ──► /api/scan ─────► crawl.js + capture.js (Cheerio, h
                                └► detect.js, audit.js, presence.js
         ──► /api/analyze ──► score.js, profiles.js
         ──► /api/workspace ► creates the business: website, assistant, search pack, automations
-Customer ─► /chat, widget.js, WhatsApp ──► /api/agent ──► respond.js ──► rules-agent.js
+Customer ─► /chat, widget.js, WhatsApp ──► /api/agent ──► respond.js ──► ai.js (optional) ──► rules-agent.js
                                                               └► leads.js, automations.js
 Owner ────► /dashboard, /owner ──► /api/agents/<id>/inbox
 Setup call ► /api/setup-request ──► outbox.js ──► SMS + Google Sheet
@@ -229,6 +230,8 @@ Everything is optional. Copy `.env.example` to `apps/web/.env.local` and fill in
 | Setting | What it turns on |
 |---|---|
 | `APP_URL` | The public address used in QR codes and webhook links |
+| `GROQ_API_KEY`, `GEMINI_API_KEY`, `CEREBRAS_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY` | AI replies. Any one is enough; several make a fallback chain |
+| `AI_PROVIDERS`, `GROQ_MODEL` and similar | The order providers are tried in, and the model each one uses |
 | `SERPER_API_KEY` or `BRAVE_SEARCH_API_KEY` | Search by business name when deployed (free search engines block cloud servers) |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Upstash Redis storage instead of local files |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` | WhatsApp replies |
@@ -272,6 +275,7 @@ docs/                overview, screens, architecture, demo script, setup guides
 | `lib/profiles.js` | What each type of business needs |
 | `lib/score.js` | Workflow templates and the automation score |
 | `lib/rules-agent.js`, `lib/respond.js` | The assistant and the reply flow |
+| `lib/ai.js`, `lib/ai-chain.js` | Optional AI replies and the provider fallback chain |
 | `lib/site-library.js` | The assistant's copy of the whole site |
 | `lib/leads.js`, `lib/automations.js` | Lead capture, qualification and follow-ups |
 | `lib/aisearch.js` | Search readiness and the generated files |
@@ -296,7 +300,7 @@ docs/                overview, screens, architecture, demo script, setup guides
 
 ## Status
 
-Weblyy is a working prototype. The assistant runs on its own rules engine. WhatsApp and n8n need your own accounts and have not been tested end to end.
+Weblyy is a working prototype. The assistant runs on its own rules engine unless AI keys are added. The AI provider chain has been tested against stand-in providers, not yet with real keys. WhatsApp and n8n need your own accounts and have not been tested end to end.
 
 ## Team
 
