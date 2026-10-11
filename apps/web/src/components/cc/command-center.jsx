@@ -121,7 +121,7 @@ export function CommandCenter({ id, ownerKey, initial }) {
         {!data && !error && <div className={styles.loading}>Loading your Command Center…</div>}
         {data && (
           <div key={tab} className={styles.tabIn}>
-            {tab === "overview" && <OverviewTab data={data} go={go} />}
+            {tab === "overview" && <OverviewTab data={data} go={go} act={act} />}
             {tab === "golive" && <GoLive data={data} ownerKey={ownerKey} />}
             {tab === "website" && <WebsiteTab data={data} act={act} />}
             {tab === "agent" && <AgentTab data={data} ownerKey={ownerKey} />}

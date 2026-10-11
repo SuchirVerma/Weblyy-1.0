@@ -87,7 +87,7 @@ function catOf(a, key) {
   return a?.categories.find((c) => c.key === key);
 }
 /* ---------------------------------------------------------------- overview */
-export function OverviewTab({ data, go }) {
+export function OverviewTab({ data, go, act }) {
   const ws = data.workspace;
   const before = ws?.auditBefore;
   const after = ws?.auditAfter;
@@ -112,6 +112,7 @@ export function OverviewTab({ data, go }) {
   ];
   return (
     <div className={styles.stack}>
+      <FirstRunEmail data={data} act={act} />
       <Head
         kicker="Your dashboard"
         title={
@@ -990,7 +991,39 @@ export function AnalyticsTab({ data }) {
   );
 }
 /* ---------------------------------------------------------------- Settings */
-function AlertEmail({ data, act }) {
+/** Asked once, on the owner's first visit: where refund requests should be emailed. They can skip it. */
+function FirstRunEmail({ data, act }) {
+  const skipKey = `weblyy:alert-email-skip:${data.id}`;
+  const [show, setShow] = useState(false);
+  const [savedHere, setSavedHere] = useState(false);
+  useEffect(() => {
+    let skipped = false;
+    try {
+      skipped = localStorage.getItem(skipKey) === "1";
+    } catch {
+      /* storage blocked: just ask */
+    }
+    setShow(!skipped);
+  }, [skipKey]);
+  if (!show || (data.alertEmail && !savedHere)) return null;
+  return (
+    <AlertEmail
+      data={data}
+      act={act}
+      title="One last step: where should refund requests go?"
+      onSaved={() => setSavedHere(true)}
+      onSkip={() => {
+        try {
+          localStorage.setItem(skipKey, "1");
+        } catch {
+          /* fine */
+        }
+        setShow(false);
+      }}
+    />
+  );
+}
+function AlertEmail({ data, act, title = "Refund alerts by email", onSaved, onSkip }) {
   const [email, setEmail] = useState(data.alertEmail ?? "");
   const [state, setState] = useState("");
   const save = async (e) => {
@@ -999,16 +1032,17 @@ function AlertEmail({ data, act }) {
     try {
       await act({ action: "alertEmail", email });
       setState("saved");
+      onSaved?.();
     } catch (err) {
       setState(err instanceof Error ? err.message : "That didn't work.");
     }
   };
   return (
     <section className={styles.panel}>
-      <h2>Refund alerts by email</h2>
+      <h2>{title}</h2>
       <p style={{ margin: "0 0 12px" }}>
         When a customer asks for their money back, the assistant only tells them you will contact them. Add your email and the request is sent to you
-        straight away, with their message and their number if they gave one.
+        straight away, with their message and their number if they gave one. Customers never see this email.
       </p>
       <form onSubmit={save} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
@@ -1024,9 +1058,14 @@ function AlertEmail({ data, act }) {
           aria-label="Email for refund alerts"
           style={{ flex: "1 1 220px", minHeight: 40, padding: "0 12px", border: "1px solid var(--line, #d1d5db)", borderRadius: 10, font: "inherit" }}
         />
-        <button className="btn btn-sm" type="submit" disabled={state === "saving"}>
+        <button className="btn btn-primary btn-sm" type="submit" disabled={state === "saving"}>
           {state === "saving" ? "Saving…" : "Save"}
         </button>
+        {onSkip && state !== "saved" && (
+          <button className="btn btn-ghost btn-sm" type="button" onClick={onSkip}>
+            Not now
+          </button>
+        )}
       </form>
       <small role="status" style={{ display: "block", marginTop: 8 }}>
         {state === "saved"
