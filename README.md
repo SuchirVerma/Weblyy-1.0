@@ -131,6 +131,7 @@ Nothing of the owner's is restyled or removed. A before and after view compares 
 ### 8. Owner inbox
 
 - Every conversation is saved.
+- What customers write is private. Chats can only be read with the owner's private link.
 - Chats that need a person show up as **Needs you**, on the dashboard and on a private page made for the owner's phone.
 - The owner's reply appears in the customer's chat within seconds, labelled as the owner. WhatsApp customers get it on WhatsApp.
 - The assistant stays quiet for that customer until the owner taps **Hand back to agent**.

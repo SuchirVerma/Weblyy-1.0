@@ -1,11 +1,17 @@
+import { ownerKeyOk } from "@/lib/owner-auth";
 import { getAgent } from "@/lib/store";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export async function GET(_req, ctx) {
+/**
+ * Public facts about an assistant (name, counts, suggested questions).
+ * What customers wrote is private: the message log is only included for the owner's key.
+ */
+export async function GET(req, ctx) {
   const { id } = await ctx.params;
   const agent = await getAgent(id);
   if (!agent) return Response.json({ error: "Not found" }, { status: 404 });
   const k = agent.knowledge;
+  const owner = ownerKeyOk(agent, new URL(req.url).searchParams.get("key"));
   return Response.json({
     id: agent.id,
     name: k.name,
@@ -18,7 +24,7 @@ export async function GET(_req, ctx) {
       "Kab tak khule ho?",
       "Where are you located?",
     ],
-    log: agent.log
+    log: (owner ? agent.log : [])
       .slice(-25)
       .map((l) => ({
         at: l.at,

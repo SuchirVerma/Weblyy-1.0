@@ -1,6 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { CodeBlock } from "../code-block";
 import { Fold, Tip } from "../ui";
 import { OwnerInbox } from "../owner-inbox";
@@ -994,17 +994,21 @@ export function AnalyticsTab({ data }) {
 /** Asked once, on the owner's first visit: where refund requests should be emailed. They can skip it. */
 function FirstRunEmail({ data, act }) {
   const skipKey = `weblyy:alert-email-skip:${data.id}`;
-  const [show, setShow] = useState(false);
+  // Read from this browser only; on the server (and before hydration) the card stays hidden.
+  const skippedBefore = useSyncExternalStore(
+    () => () => {},
+    () => {
+      try {
+        return localStorage.getItem(skipKey) === "1";
+      } catch {
+        return false; // storage blocked: just ask
+      }
+    },
+    () => true,
+  );
+  const [skippedNow, setSkippedNow] = useState(false);
   const [savedHere, setSavedHere] = useState(false);
-  useEffect(() => {
-    let skipped = false;
-    try {
-      skipped = localStorage.getItem(skipKey) === "1";
-    } catch {
-      /* storage blocked: just ask */
-    }
-    setShow(!skipped);
-  }, [skipKey]);
+  const show = !skippedBefore && !skippedNow;
   if (!show || (data.alertEmail && !savedHere)) return null;
   return (
     <AlertEmail
@@ -1018,7 +1022,7 @@ function FirstRunEmail({ data, act }) {
         } catch {
           /* fine */
         }
-        setShow(false);
+        setSkippedNow(true);
       }}
     />
   );

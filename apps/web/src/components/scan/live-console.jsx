@@ -67,7 +67,7 @@ export function LiveConsole({ scan, deployment, onBack }) {
     let timer;
     const poll = async () => {
       try {
-        const res = await fetch(`/api/agents/${deployment.agentId}`, { cache: "no-store" });
+        const res = await fetch(`/api/agents/${deployment.agentId}?key=${encodeURIComponent(deployment.ownerKey)}`, { cache: "no-store" });
         if (res.ok) {
           const d = await res.json();
           if (!alive) return;
@@ -88,7 +88,7 @@ export function LiveConsole({ scan, deployment, onBack }) {
       alive = false;
       clearTimeout(timer);
     };
-  }, [deployment.agentId]);
+  }, [deployment.agentId, deployment.ownerKey]);
   useEffect(() => {
     if (!alert) return;
     const t = setTimeout(() => setAlert(null), 6000);
